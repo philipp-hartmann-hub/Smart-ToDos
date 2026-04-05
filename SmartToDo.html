@@ -94,6 +94,10 @@
         flex: 1;
         min-width: 0;
       }
+      .form__input--date {
+        max-width: 100%;
+        min-height: 2.5rem;
+      }
       .form__input:focus {
         outline: 2px solid var(--accent);
         outline-offset: 1px;
@@ -177,14 +181,23 @@
         gap: 0.45rem;
       }
       .task {
-        display: grid;
-        grid-template-columns: 1fr auto auto;
-        align-items: center;
-        gap: 0.5rem 0.65rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
         padding: 0.65rem 0.75rem;
         border-radius: 10px;
         border: 1px solid var(--border);
         background: var(--surface);
+      }
+      .task--overdue:not(.task--done) {
+        border-color: rgba(220, 38, 38, 0.45);
+        box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.15);
+      }
+      .task__top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
       }
       .task--done {
         opacity: 0.72;
@@ -198,8 +211,7 @@
         gap: 0.5rem;
         cursor: pointer;
         min-width: 0;
-        grid-column: 1;
-        grid-row: 1;
+        flex: 1;
       }
       .task__check input {
         margin-top: 0.2rem;
@@ -211,13 +223,43 @@
         line-height: 1.35;
       }
       .task__actions {
-        grid-column: 2 / -1;
-        grid-row: 1;
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         gap: 0.35rem;
         justify-content: flex-end;
+        flex-shrink: 0;
+      }
+      .task__due {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem 0.65rem;
+      }
+      .task__due-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-h);
+        white-space: nowrap;
+      }
+      .task__due .form__input--date {
+        flex: 1 1 10rem;
+        min-width: 0;
+        font-size: 0.88rem;
+        padding: 0.4rem 0.55rem;
+      }
+      .task__due-hint {
+        font-size: 0.72rem;
+        opacity: 0.85;
+      }
+      .task--overdue:not(.task--done) .task__due-hint {
+        color: #dc2626;
+        font-weight: 600;
+      }
+      @media (prefers-color-scheme: dark) {
+        .task--overdue:not(.task--done) .task__due-hint {
+          color: #f87171;
+        }
       }
       .task__badge {
         font-size: 0.65rem;
@@ -288,12 +330,11 @@
         padding: 0.28rem 0.5rem;
       }
       @media (max-width: 520px) {
-        .task {
-          grid-template-columns: 1fr;
+        .task__top {
+          flex-direction: column;
+          align-items: stretch;
         }
         .task__actions {
-          grid-column: 1;
-          grid-row: auto;
           justify-content: flex-start;
         }
       }
@@ -304,7 +345,7 @@
       <header>
         <h1>Smart ToDo</h1>
         <p class="subtitle">
-          Aufgaben mit Priorität und beliebig tiefen Unteraufgaben — lokal gespeichert
+          Priorität, Frist (Kalender) und beliebig tiefe Unteraufgaben — lokal gespeichert
         </p>
       </header>
 
@@ -319,6 +360,10 @@
             maxlength="500"
             autocomplete="off"
           />
+        </div>
+        <div>
+          <label for="task-due" class="form__legend">Frist</label>
+          <input id="task-due" class="form__input form__input--date" type="date" required />
         </div>
         <div class="form__row--split">
           <fieldset style="margin: 0; padding: 0; border: none; flex: 1 1 auto; min-width: 0">
@@ -351,11 +396,43 @@
         var PRIORITY_ORDER = { high: 0, medium: 1, low: 2 }
         var LABELS = { low: 'Niedrig', medium: 'Mittel', high: 'Hoch' }
 
+        function pad2(n) {
+          return n < 10 ? '0' + n : '' + n
+        }
+        function todayYmd() {
+          var d = new Date()
+          return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate())
+        }
+        function isValidYmd(s) {
+          return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s)
+        }
+        function isOverdue(dueDate, done) {
+          if (done || !isValidYmd(dueDate)) return false
+          return dueDate < todayYmd()
+        }
+        function formatDueDe(ymd) {
+          if (!isValidYmd(ymd)) return ''
+          try {
+            var d = new Date(ymd + 'T12:00:00')
+            return new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' }).format(d)
+          } catch (e) {
+            return ymd
+          }
+        }
+
         function sortSiblings(nodes) {
           nodes.sort(function (a, b) {
             var pa = PRIORITY_ORDER[a.priority]
             var pb = PRIORITY_ORDER[b.priority]
             if (pa !== pb) return pa - pb
+            var ad = isValidYmd(a.dueDate) ? a.dueDate : null
+            var bd = isValidYmd(b.dueDate) ? b.dueDate : null
+            if (ad !== bd) {
+              if (!ad) return 1
+              if (!bd) return -1
+              if (ad < bd) return -1
+              if (ad > bd) return 1
+            }
             return a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0
           })
           for (var i = 0; i < nodes.length; i++) {
@@ -376,12 +453,14 @@
               if (c) children.push(c)
             }
           }
+          var dueDate = isValidYmd(raw.dueDate) ? raw.dueDate : null
           return {
             id: raw.id,
             title: raw.title,
             priority: raw.priority,
             done: raw.done,
             createdAt: raw.createdAt,
+            dueDate: dueDate,
             children: children,
           }
         }
@@ -392,12 +471,14 @@
           if (typeof raw.id !== 'string' || typeof raw.title !== 'string') return null
           if (raw.priority !== 'low' && raw.priority !== 'medium' && raw.priority !== 'high') return null
           if (typeof raw.done !== 'boolean' || typeof raw.createdAt !== 'string') return null
+          var dueL = isValidYmd(raw.dueDate) ? raw.dueDate : null
           return {
             id: raw.id,
             title: raw.title,
             priority: raw.priority,
             done: raw.done,
             createdAt: raw.createdAt,
+            dueDate: dueL,
             children: [],
           }
         }
@@ -452,6 +533,17 @@
           return false
         }
 
+        function setDueById(nodes, id, dueDate) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === id) {
+              nodes[i].dueDate = dueDate
+              return true
+            }
+            if (setDueById(nodes[i].children, id, dueDate)) return true
+          }
+          return false
+        }
+
         function addChildToParent(nodes, parentId, newNode) {
           for (var i = 0; i < nodes.length; i++) {
             if (nodes[i].id === parentId) {
@@ -466,6 +558,8 @@
 
         var form = document.getElementById('task-form')
         var titleInput = document.getElementById('task-title')
+        var taskDue = document.getElementById('task-due')
+        taskDue.value = todayYmd()
         var submitBtn = document.getElementById('submit-btn')
         var emptyMsg = document.getElementById('empty-msg')
         var taskList = document.getElementById('task-list')
@@ -495,7 +589,15 @@
           block.className = 'task-block'
 
           var row = document.createElement('div')
-          row.className = 'task task--' + node.priority + (node.done ? ' task--done' : '')
+          var od = isOverdue(node.dueDate, node.done)
+          row.className =
+            'task task--' +
+            node.priority +
+            (node.done ? ' task--done' : '') +
+            (od ? ' task--overdue' : '')
+
+          var top = document.createElement('div')
+          top.className = 'task__top'
 
           var label = document.createElement('label')
           label.className = 'task__check'
@@ -542,8 +644,40 @@
           actions.appendChild(btnSub)
           actions.appendChild(del)
 
-          row.appendChild(label)
-          row.appendChild(actions)
+          top.appendChild(label)
+          top.appendChild(actions)
+          row.appendChild(top)
+
+          var dueWrap = document.createElement('div')
+          dueWrap.className = 'task__due'
+          var dueLbl = document.createElement('span')
+          dueLbl.className = 'task__due-label'
+          dueLbl.textContent = 'Frist'
+          var dueInput = document.createElement('input')
+          dueInput.type = 'date'
+          dueInput.className = 'form__input form__input--date'
+          dueInput.value = isValidYmd(node.dueDate) ? node.dueDate : ''
+          dueInput.setAttribute('aria-label', 'Frist für: ' + node.title)
+          dueInput.addEventListener('click', function (e) {
+            e.stopPropagation()
+          })
+          dueInput.addEventListener('change', function () {
+            var v = dueInput.value
+            setDueById(tasks, node.id, v ? v : null)
+            render()
+          })
+          var dueHint = document.createElement('span')
+          dueHint.className = 'task__due-hint'
+          if (isValidYmd(node.dueDate)) {
+            dueHint.textContent = formatDueDe(node.dueDate)
+            if (od) dueHint.textContent += ' · überfällig'
+          } else {
+            dueHint.textContent = 'Kein Datum — bitte wählen'
+          }
+          dueWrap.appendChild(dueLbl)
+          dueWrap.appendChild(dueInput)
+          dueWrap.appendChild(dueHint)
+          row.appendChild(dueWrap)
 
           var addRow = document.createElement('div')
           addRow.className = 'task-add-sub'
@@ -556,6 +690,21 @@
           subInput.placeholder = 'Unteraufgabe …'
           subInput.maxLength = 500
           subInput.setAttribute('aria-label', 'Titel der Unteraufgabe für: ' + node.title)
+
+          var subDueRow = document.createElement('div')
+          var subDueLbl = document.createElement('label')
+          subDueLbl.className = 'form__legend'
+          subDueLbl.setAttribute('for', 'sub-due-' + node.id)
+          subDueLbl.textContent = 'Frist'
+          var subDue = document.createElement('input')
+          subDue.type = 'date'
+          subDue.id = 'sub-due-' + node.id
+          subDue.className = 'form__input form__input--date'
+          subDue.required = true
+          subDue.value = todayYmd()
+          subDueRow.appendChild(subDueLbl)
+          subDueRow.appendChild(subDue)
+
           var subBtn = document.createElement('button')
           subBtn.type = 'button'
           subBtn.className = 'form__submit form__submit--small'
@@ -594,6 +743,7 @@
 
           function resetSubForm() {
             subInput.value = ''
+            subDue.value = todayYmd()
             subBtn.disabled = true
             var mids = addRow.querySelectorAll('input[name="' + subPriorityName + '"]')
             for (var r = 0; r < mids.length; r++) {
@@ -609,12 +759,14 @@
           function tryAddSub() {
             var t = subInput.value.trim()
             if (!t) return
+            if (!isValidYmd(subDue.value)) return
             var child = {
               id: crypto.randomUUID(),
               title: t,
               priority: readSubPriority(),
               done: false,
               createdAt: new Date().toISOString(),
+              dueDate: subDue.value,
               children: [],
             }
             addChildToParent(tasks, node.id, child)
@@ -648,6 +800,7 @@
           rowSplit.appendChild(subBtn)
 
           addRow.appendChild(subInput)
+          addRow.appendChild(subDueRow)
           addRow.appendChild(rowSplit)
 
           block.appendChild(row)
@@ -681,9 +834,11 @@
             priority: priority,
             done: false,
             createdAt: new Date().toISOString(),
+            dueDate: isValidYmd(taskDue.value) ? taskDue.value : null,
             children: [],
           })
           titleInput.value = ''
+          taskDue.value = todayYmd()
           submitBtn.disabled = true
           render()
         })

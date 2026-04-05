@@ -1,6 +1,6 @@
 # Smart ToDo
 
-Aufgaben im Browser: **erstellen**, **drei Prioritäten**, **beliebig tiefe Unteraufgaben**, **erledigt markieren**, **löschen** — Speicherung in **localStorage** (überlebt Browser-Neustart).
+Aufgaben im Browser: **erstellen**, **drei Prioritäten**, **Frist (Kalender)**, **beliebig tiefe Unteraufgaben**, **erledigt markieren**, **löschen** — Speicherung in **localStorage** (überlebt Browser-Neustart).
 
 **Kein Node.js, kein npm, kein Terminal nötig** — die App ist **eine einzige HTML-Datei**.
 
@@ -24,7 +24,8 @@ Diese Datei im Ordner dieses Projekts:
 | Aufgaben erstellen / erledigen / löschen | Formular, Checkbox, Löschen (inkl. aller Unteraufgaben) |
 | 3 Prioritäten | Hoch, Mittel, Niedrig (Hauptaufgaben und Unteraufgaben) |
 | Unteraufgaben | Beliebig viele Ebenen; pro Eintrag „Unteraufgabe“ → Eingabe einblenden |
-| Daten bleiben | `localStorage`-Schlüssel `smart-todo-tasks` (alte flache Listen werden beim Laden übernommen) |
+| Fristen | Native Datumsauswahl (`type="date"`) für Haupt- und Unteraufgaben; Anzeige/Änderung pro Zeile; überfällige offene Aufgaben hervorgehoben |
+| Daten bleiben | `localStorage`-Schlüssel `smart-todo-tasks` (ältere Einträge ohne Frist: nachträglich Datum wählbar) |
 
 ## Repository
 
@@ -50,3 +51,4 @@ cd Smart-ToDos
 | 2026-04-05 | **Umstellung:** eine Datei `SmartToDo.html` (Vanilla JS), kein Build/Node; Vite/React-Stack entfernt. |
 | 2026-04-05 | Rekursive Unteraufgaben (beliebige Tiefe) in `SmartToDo.html`; Migration alter Listen. |
 | 2026-04-05 | Unteraufgaben: Priorität wählbar (wie Hauptaufgaben). |
+| 2026-04-05 | Fristen: Kalenderfeld für alle Ebenen; Sortierung nach Priorität → Frist → Erstellung. |
