@@ -1,4 +1,4 @@
-# Smart ToDo
+# Smartes Projektplanungstool
 
 Aufgaben im Browser: **erstellen**, **drei Prioritäten**, **Frist (Kalender)**, **Beschreibungstext**, **beliebig tiefe Unteraufgaben**, **erledigt markieren**, **löschen** — Speicherung in **localStorage** (überlebt Browser-Neustart).
 
@@ -54,3 +54,4 @@ cd Smart-ToDos
 | 2026-04-05 | Unteraufgaben: Priorität wählbar (wie Hauptaufgaben). |
 | 2026-04-05 | Fristen: Kalenderfeld für alle Ebenen; Sortierung nach Priorität → Frist → Erstellung. |
 | 2026-04-05 | Beschreibungstext pro Aufgabe/Unteraufgabe, fortlaufend editierbar. |
+| 2026-04-05 | Produktname: **Smartes Projektplanungstool** (UI, Titel, README); Einstiegsdatei weiter `SmartToDo.html`. |

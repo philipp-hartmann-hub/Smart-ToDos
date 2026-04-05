@@ -1,9 +1,9 @@
 ---
-description: README.md nach abgeschlossener Arbeit im Smart-ToDo-Projekt aktualisieren
+description: README.md nach abgeschlossener Arbeit im Projekt „Smartes Projektplanungstool“ aktualisieren
 alwaysApply: true
 ---
 
-# README-Pflege (Smart ToDo)
+# README-Pflege (Smartes Projektplanungstool)
 
 Nach **jeder abgeschlossenen** Nutzeranfrage in diesem Projekt, die Code, Konfiguration, Abhängigkeiten oder das Verhalten der Anwendung **wesentlich** ändert oder neue Informationen zur Nutzung liefert:
 
