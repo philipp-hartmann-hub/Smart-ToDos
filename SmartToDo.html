@@ -52,7 +52,7 @@
         -webkit-font-smoothing: antialiased;
       }
       .app {
-        max-width: 36rem;
+        max-width: 40rem;
         margin: 0 auto;
         padding: 2rem 1.25rem 3rem;
       }
@@ -87,6 +87,12 @@
         border: 1px solid var(--border);
         background: var(--bg);
         color: var(--text-h);
+      }
+      .form__input--sub {
+        font-size: 0.9rem;
+        padding: 0.45rem 0.65rem;
+        flex: 1;
+        min-width: 0;
       }
       .form__input:focus {
         outline: 2px solid var(--accent);
@@ -135,6 +141,10 @@
         color: #fff;
         flex-shrink: 0;
       }
+      .form__submit--small {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.85rem;
+      }
       .form__submit:disabled {
         opacity: 0.45;
         cursor: not-allowed;
@@ -147,20 +157,31 @@
         border: 1px dashed var(--border);
         opacity: 0.8;
       }
-      .list__items {
+      .task-tree {
         list-style: none;
         margin: 0;
         padding: 0;
         display: flex;
         flex-direction: column;
-        gap: 0.6rem;
+        gap: 0.5rem;
+      }
+      .task-tree--nested {
+        margin-top: 0.5rem;
+        margin-left: 0.5rem;
+        padding-left: 0.75rem;
+        border-left: 2px solid var(--border);
+      }
+      .task-block {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
       }
       .task {
         display: grid;
         grid-template-columns: 1fr auto auto;
         align-items: center;
-        gap: 0.65rem;
-        padding: 0.75rem 0.9rem;
+        gap: 0.5rem 0.65rem;
+        padding: 0.65rem 0.75rem;
         border-radius: 10px;
         border: 1px solid var(--border);
         background: var(--surface);
@@ -174,9 +195,11 @@
       .task__check {
         display: flex;
         align-items: flex-start;
-        gap: 0.6rem;
+        gap: 0.5rem;
         cursor: pointer;
         min-width: 0;
+        grid-column: 1;
+        grid-row: 1;
       }
       .task__check input {
         margin-top: 0.2rem;
@@ -187,12 +210,21 @@
         word-break: break-word;
         line-height: 1.35;
       }
+      .task__actions {
+        grid-column: 2 / -1;
+        grid-row: 1;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem;
+        justify-content: flex-end;
+      }
       .task__badge {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.04em;
-        padding: 0.2rem 0.45rem;
+        padding: 0.15rem 0.4rem;
         border-radius: 4px;
         white-space: nowrap;
       }
@@ -219,31 +251,43 @@
           color: #4ade80;
         }
       }
-      .task__delete {
+      .task__btn {
         font: inherit;
-        font-size: 0.8rem;
-        padding: 0.35rem 0.55rem;
+        font-size: 0.75rem;
+        padding: 0.3rem 0.5rem;
         border-radius: 6px;
         border: 1px solid var(--border);
         background: transparent;
         color: var(--text-h);
         cursor: pointer;
+        white-space: nowrap;
       }
-      .task__delete:hover {
+      .task__btn:hover {
         background: var(--bg);
+      }
+      .task__btn--danger {
+        border-color: rgba(220, 38, 38, 0.35);
+        color: #dc2626;
+      }
+      @media (prefers-color-scheme: dark) {
+        .task__btn--danger {
+          color: #f87171;
+        }
+      }
+      .task-add-sub {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+        flex-wrap: wrap;
       }
       @media (max-width: 520px) {
         .task {
-          grid-template-columns: 1fr auto;
+          grid-template-columns: 1fr;
         }
-        .task__check {
-          grid-column: 1 / -1;
-        }
-        .task__badge {
-          justify-self: start;
-        }
-        .task__delete {
-          justify-self: end;
+        .task__actions {
+          grid-column: 1;
+          grid-row: auto;
+          justify-content: flex-start;
         }
       }
     </style>
@@ -252,17 +296,19 @@
     <div class="app">
       <header>
         <h1>Smart ToDo</h1>
-        <p class="subtitle">Aufgaben mit Priorität — lokal im Browser gespeichert</p>
+        <p class="subtitle">
+          Aufgaben mit Priorität und beliebig tiefen Unteraufgaben — lokal gespeichert
+        </p>
       </header>
 
-      <form class="form" id="task-form" aria-label="Neue Aufgabe">
+      <form class="form" id="task-form" aria-label="Neue Hauptaufgabe">
         <div>
           <label for="task-title" class="visually-hidden">Aufgabentitel</label>
           <input
             id="task-title"
             class="form__input"
             type="text"
-            placeholder="Neue Aufgabe …"
+            placeholder="Neue Hauptaufgabe …"
             maxlength="500"
             autocomplete="off"
           />
@@ -288,7 +334,7 @@
 
       <section class="list" aria-label="Aufgabenliste">
         <p class="list__empty" id="empty-msg">Noch keine Aufgaben. Leg los oben.</p>
-        <ul class="list__items" id="task-list" hidden></ul>
+        <ul class="task-tree" id="task-list" hidden></ul>
       </section>
     </div>
 
@@ -297,16 +343,57 @@
         var STORAGE_KEY = 'smart-todo-tasks'
         var PRIORITY_ORDER = { high: 0, medium: 1, low: 2 }
         var LABELS = { low: 'Niedrig', medium: 'Mittel', high: 'Hoch' }
+        var DEFAULT_SUB_PRIORITY = 'medium'
 
-        function isTask(o) {
-          return (
-            o &&
-            typeof o.id === 'string' &&
-            typeof o.title === 'string' &&
-            (o.priority === 'low' || o.priority === 'medium' || o.priority === 'high') &&
-            typeof o.done === 'boolean' &&
-            typeof o.createdAt === 'string'
-          )
+        function sortSiblings(nodes) {
+          nodes.sort(function (a, b) {
+            var pa = PRIORITY_ORDER[a.priority]
+            var pb = PRIORITY_ORDER[b.priority]
+            if (pa !== pb) return pa - pb
+            return a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0
+          })
+          for (var i = 0; i < nodes.length; i++) {
+            sortSiblings(nodes[i].children)
+          }
+        }
+
+        function normalizeNode(raw) {
+          if (!raw || typeof raw !== 'object') return null
+          if (typeof raw.id !== 'string' || typeof raw.title !== 'string') return null
+          if (raw.priority !== 'low' && raw.priority !== 'medium' && raw.priority !== 'high') return null
+          if (typeof raw.done !== 'boolean' || typeof raw.createdAt !== 'string') return null
+          var childrenRaw = raw.children
+          var children = []
+          if (Array.isArray(childrenRaw)) {
+            for (var i = 0; i < childrenRaw.length; i++) {
+              var c = normalizeNode(childrenRaw[i])
+              if (c) children.push(c)
+            }
+          }
+          return {
+            id: raw.id,
+            title: raw.title,
+            priority: raw.priority,
+            done: raw.done,
+            createdAt: raw.createdAt,
+            children: children,
+          }
+        }
+
+        /** Altes Format: flache Liste ohne children */
+        function normalizeLegacyFlatItem(raw) {
+          if (!raw || typeof raw !== 'object') return null
+          if (typeof raw.id !== 'string' || typeof raw.title !== 'string') return null
+          if (raw.priority !== 'low' && raw.priority !== 'medium' && raw.priority !== 'high') return null
+          if (typeof raw.done !== 'boolean' || typeof raw.createdAt !== 'string') return null
+          return {
+            id: raw.id,
+            title: raw.title,
+            priority: raw.priority,
+            done: raw.done,
+            createdAt: raw.createdAt,
+            children: [],
+          }
         }
 
         function loadTasks() {
@@ -315,7 +402,19 @@
             if (!raw) return []
             var parsed = JSON.parse(raw)
             if (!Array.isArray(parsed)) return []
-            return parsed.filter(isTask)
+            var out = []
+            if (parsed.length && !('children' in parsed[0])) {
+              for (var j = 0; j < parsed.length; j++) {
+                var leg = normalizeLegacyFlatItem(parsed[j])
+                if (leg) out.push(leg)
+              }
+            } else {
+              for (var k = 0; k < parsed.length; k++) {
+                var n = normalizeNode(parsed[k])
+                if (n) out.push(n)
+              }
+            }
+            return out
           } catch (e) {
             return []
           }
@@ -325,11 +424,38 @@
           localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks))
         }
 
-        function sortTasks(a, b) {
-          var pa = PRIORITY_ORDER[a.priority]
-          var pb = PRIORITY_ORDER[b.priority]
-          if (pa !== pb) return pa - pb
-          return a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0
+        function removeById(nodes, id) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === id) {
+              nodes.splice(i, 1)
+              return true
+            }
+            if (removeById(nodes[i].children, id)) return true
+          }
+          return false
+        }
+
+        function setDoneById(nodes, id, done) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === id) {
+              nodes[i].done = done
+              return true
+            }
+            if (setDoneById(nodes[i].children, id, done)) return true
+          }
+          return false
+        }
+
+        function addChildToParent(nodes, parentId, newNode) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === parentId) {
+              nodes[i].children.push(newNode)
+              sortSiblings(nodes[i].children)
+              return true
+            }
+            if (addChildToParent(nodes[i].children, parentId, newNode)) return true
+          }
+          return false
         }
 
         var form = document.getElementById('task-form')
@@ -338,10 +464,11 @@
         var emptyMsg = document.getElementById('empty-msg')
         var taskList = document.getElementById('task-list')
 
-        var tasks = loadTasks().sort(sortTasks)
+        var tasks = loadTasks()
+        sortSiblings(tasks)
 
         function render() {
-          tasks.sort(sortTasks)
+          sortSiblings(tasks)
           saveTasks(tasks)
           if (tasks.length === 0) {
             emptyMsg.hidden = false
@@ -353,51 +480,132 @@
           taskList.hidden = false
           taskList.innerHTML = ''
           for (var i = 0; i < tasks.length; i++) {
-            taskList.appendChild(renderTask(tasks[i]))
+            taskList.appendChild(renderNode(tasks[i]))
           }
         }
 
-        function renderTask(task) {
-          var li = document.createElement('li')
-          li.className = 'task task--' + task.priority + (task.done ? ' task--done' : '')
+        function renderNode(node) {
+          var block = document.createElement('li')
+          block.className = 'task-block'
+
+          var row = document.createElement('div')
+          row.className = 'task task--' + node.priority + (node.done ? ' task--done' : '')
 
           var label = document.createElement('label')
           label.className = 'task__check'
           var cb = document.createElement('input')
           cb.type = 'checkbox'
-          cb.checked = task.done
-          cb.setAttribute('aria-label', 'Erledigt: ' + task.title)
+          cb.checked = node.done
+          cb.setAttribute('aria-label', 'Erledigt: ' + node.title)
           cb.addEventListener('change', function () {
-            task.done = cb.checked
+            setDoneById(tasks, node.id, cb.checked)
             render()
           })
           var span = document.createElement('span')
           span.className = 'task__title'
-          span.textContent = task.title
+          span.textContent = node.title
           label.appendChild(cb)
           label.appendChild(span)
 
+          var actions = document.createElement('div')
+          actions.className = 'task__actions'
+
           var badge = document.createElement('span')
           badge.className = 'task__badge'
-          badge.textContent = LABELS[task.priority]
+          badge.textContent = LABELS[node.priority]
           badge.title = 'Priorität'
+
+          var btnSub = document.createElement('button')
+          btnSub.type = 'button'
+          btnSub.className = 'task__btn'
+          btnSub.textContent = 'Unteraufgabe'
+          btnSub.setAttribute('aria-label', 'Unteraufgabe zu: ' + node.title)
+          btnSub.title = 'Beliebig tiefe Unteraufgaben'
 
           var del = document.createElement('button')
           del.type = 'button'
-          del.className = 'task__delete'
+          del.className = 'task__btn task__btn--danger'
           del.textContent = 'Löschen'
-          del.setAttribute('aria-label', 'Aufgabe löschen: ' + task.title)
+          del.setAttribute('aria-label', 'Löschen inkl. aller Unteraufgaben: ' + node.title)
           del.addEventListener('click', function () {
-            tasks = tasks.filter(function (t) {
-              return t.id !== task.id
-            })
+            removeById(tasks, node.id)
             render()
           })
 
-          li.appendChild(label)
-          li.appendChild(badge)
-          li.appendChild(del)
-          return li
+          actions.appendChild(badge)
+          actions.appendChild(btnSub)
+          actions.appendChild(del)
+
+          row.appendChild(label)
+          row.appendChild(actions)
+
+          var addRow = document.createElement('div')
+          addRow.className = 'task-add-sub'
+          addRow.hidden = true
+          var subInput = document.createElement('input')
+          subInput.type = 'text'
+          subInput.className = 'form__input form__input--sub'
+          subInput.placeholder = 'Unteraufgabe …'
+          subInput.maxLength = 500
+          subInput.setAttribute('aria-label', 'Titel der Unteraufgabe für: ' + node.title)
+          var subBtn = document.createElement('button')
+          subBtn.type = 'button'
+          subBtn.className = 'form__submit form__submit--small'
+          subBtn.textContent = 'Hinzufügen'
+          subBtn.disabled = true
+
+          function tryAddSub() {
+            var t = subInput.value.trim()
+            if (!t) return
+            var child = {
+              id: crypto.randomUUID(),
+              title: t,
+              priority: DEFAULT_SUB_PRIORITY,
+              done: false,
+              createdAt: new Date().toISOString(),
+              children: [],
+            }
+            addChildToParent(tasks, node.id, child)
+            subInput.value = ''
+            subBtn.disabled = true
+            addRow.hidden = true
+            render()
+          }
+
+          subInput.addEventListener('input', function () {
+            subBtn.disabled = !subInput.value.trim()
+          })
+          subInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              if (!subBtn.disabled) tryAddSub()
+            }
+          })
+          subBtn.addEventListener('click', tryAddSub)
+
+          btnSub.addEventListener('click', function () {
+            addRow.hidden = !addRow.hidden
+            if (!addRow.hidden) {
+              subInput.focus()
+            }
+          })
+
+          addRow.appendChild(subInput)
+          addRow.appendChild(subBtn)
+
+          block.appendChild(row)
+          block.appendChild(addRow)
+
+          if (node.children.length) {
+            var ul = document.createElement('ul')
+            ul.className = 'task-tree task-tree--nested'
+            for (var c = 0; c < node.children.length; c++) {
+              ul.appendChild(renderNode(node.children[c]))
+            }
+            block.appendChild(ul)
+          }
+
+          return block
         }
 
         titleInput.addEventListener('input', function () {
@@ -416,6 +624,7 @@
             priority: priority,
             done: false,
             createdAt: new Date().toISOString(),
+            children: [],
           })
           titleInput.value = ''
           submitBtn.disabled = true

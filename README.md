@@ -1,6 +1,6 @@
 # Smart ToDo
 
-Aufgaben im Browser: **erstellen**, **drei Prioritäten**, **erledigt markieren**, **löschen** — Speicherung in **localStorage** (überlebt Browser-Neustart).
+Aufgaben im Browser: **erstellen**, **drei Prioritäten**, **beliebig tiefe Unteraufgaben**, **erledigt markieren**, **löschen** — Speicherung in **localStorage** (überlebt Browser-Neustart).
 
 **Kein Node.js, kein npm, kein Terminal nötig** — die App ist **eine einzige HTML-Datei**.
 
@@ -21,9 +21,10 @@ Diese Datei im Ordner dieses Projekts:
 
 | Feature | Umsetzung |
 |---------|-----------|
-| Aufgaben erstellen / erledigen / löschen | Formular, Checkbox, Löschen-Button |
-| 3 Prioritäten | Hoch, Mittel, Niedrig |
-| Daten bleiben | `localStorage`-Schlüssel `smart-todo-tasks` (kompatibel mit älteren Versionen derselben App) |
+| Aufgaben erstellen / erledigen / löschen | Formular, Checkbox, Löschen (inkl. aller Unteraufgaben) |
+| 3 Prioritäten | Hoch, Mittel, Niedrig (bei Hauptaufgaben; Unteraufgaben standardmäßig „Mittel“) |
+| Unteraufgaben | Beliebig viele Ebenen; pro Eintrag „Unteraufgabe“ → Eingabe einblenden |
+| Daten bleiben | `localStorage`-Schlüssel `smart-todo-tasks` (alte flache Listen werden beim Laden übernommen) |
 
 ## Repository
 
@@ -47,3 +48,4 @@ cd Smart-ToDos
 | 2026-04-05 | Vite `base: './'`; README: Hinweis `dist/index.html` / file:// für lokales Öffnen. |
 | 2026-04-05 | Root-`index.html`: Hinweistext bei direktem Öffnen; README: Root-`index.html` nicht per file:// nutzen. |
 | 2026-04-05 | **Umstellung:** eine Datei `SmartToDo.html` (Vanilla JS), kein Build/Node; Vite/React-Stack entfernt. |
+| 2026-04-05 | Rekursive Unteraufgaben (beliebige Tiefe) in `SmartToDo.html`; Migration alter Listen. |
