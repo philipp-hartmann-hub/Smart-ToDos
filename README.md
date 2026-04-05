@@ -10,7 +10,7 @@ Aufgabenverwaltung im Browser: **erstellen**, **Priorität wählen**, **als erle
 | 3 Prioritäten beim Erstellen | Niedrig, Mittel, Hoch (Radio-Buttons) |
 | Nach Browser-Reload erhalten | `localStorage`-Schlüssel `smart-todo-tasks` |
 | `npm run build` ohne TypeScript-Fehler | `tsc -b && vite build` |
-| GitHub + README | Diese Datei; Repo lokal mit Git initialisieren und remote pushen (siehe unten) |
+| GitHub + README | [philipp-hartmann-hub/Smart-ToDos](https://github.com/philipp-hartmann-hub/Smart-ToDos) |
 
 ## Voraussetzungen
 
@@ -61,23 +61,21 @@ index.html
 vite.config.ts
 ```
 
-## Auf GitHub bringen
+## Repository
 
-Lokal ist noch kein Remote vorgegeben. Nach `git init` und erstem Commit:
-
-1. Auf GitHub ein **neues Repository** anlegen (ohne README, wenn du hier schon eine hast).
-2. Im Projektordner:
+Quellcode und Issues: **[github.com/philipp-hartmann-hub/Smart-ToDos](https://github.com/philipp-hartmann-hub/Smart-ToDos)**
 
 ```bash
-git init
-git add .
-git commit -m "Initial commit: Smart ToDo App"
-git branch -M main
-git remote add origin https://github.com/<DEIN_USER>/<REPO_NAME>.git
-git push -u origin main
+git clone https://github.com/philipp-hartmann-hub/Smart-ToDos.git
+cd Smart-ToDos
+npm install
 ```
 
-SSH-URL geht analog (`git@github.com:...`).
+Änderungen pushen (nach einmaligem `git remote add origin …`, falls noch nicht gesetzt):
+
+```bash
+git push -u origin main
+```
 
 ---
 
@@ -87,3 +85,4 @@ SSH-URL geht analog (`git@github.com:...`).
 |-------|------------------|
 | 2026-04-05 | Initiale README und Cursor-Regel zur README-Pflege angelegt; Repository noch ohne App-Code. |
 | 2026-04-05 | Vite + React + TS: ToDo mit Prioritäten, localStorage, Build/Lint grün; README und Git-Anleitung. |
+| 2026-04-05 | README: offizielles GitHub-Repo [Smart-ToDos](https://github.com/philipp-hartmann-hub/Smart-ToDos) verlinkt. |
