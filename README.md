@@ -22,6 +22,7 @@ Diese Datei im Ordner dieses Projekts:
 | Feature | Umsetzung |
 |---------|-----------|
 | Projekte | Anlegen mit Name, optionaler Beschreibung und Bild (Datei → verkleinert, als Data-URL gespeichert); Liste mit Öffnen/Löschen |
+| Teilnehmende | Pro Projekt: Vorname, Nachname, Funktion (QS, Projektleitung, stellvertretende Projektleitung, Projektmitarbeit); Zuordnung zu Aufgaben/Unteraufgaben (mehrere möglich) |
 | Aufgaben (im Projekt) | Erstellen / erledigen / löschen; Formular, Checkbox, Löschen (inkl. aller Unteraufgaben) |
 | 3 Prioritäten | Hoch, Mittel, Niedrig (Hauptaufgaben und Unteraufgaben) |
 | Unteraufgaben | Beliebig viele Ebenen; pro Eintrag „Unteraufgabe“ → Eingabe einblenden |
@@ -57,3 +58,4 @@ cd Smart-ToDos
 | 2026-04-05 | Beschreibungstext pro Aufgabe/Unteraufgabe, fortlaufend editierbar. |
 | 2026-04-05 | Produktname: **Smartes Projektplanungstool** (UI, Titel, README); Einstiegsdatei weiter `SmartToDo.html`. |
 | 2026-04-05 | Übergeordnete **Projekte** (Beschreibung, Bild), Aufgaben pro Projekt; Migration alter Listen. |
+| 2026-04-05 | **Teilnehmende** pro Projekt (Name, Funktion); **Zuständige** pro Aufgabe/Unteraufgabe (mehrfach). |

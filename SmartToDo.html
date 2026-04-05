@@ -462,6 +462,55 @@
         font-size: 0.82rem;
         padding: 0.28rem 0.5rem;
       }
+      .participants-panel__title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--text-h);
+        margin: 0 0 0.75rem;
+      }
+      .participant-form__form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .participant-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .participant-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.45rem 0.6rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        font-size: 0.9rem;
+        background: var(--bg);
+      }
+      .task__assign-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+      .task__assign-checks {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+      }
+      .task__assign-checks .form__radioLabel {
+        font-size: 0.82rem;
+      }
+      .task__assign-hint {
+        margin: 0;
+        font-size: 0.82rem;
+        opacity: 0.85;
+      }
       @media (max-width: 520px) {
         .task__top {
           flex-direction: column;
@@ -534,6 +583,33 @@
       </header>
       <div id="project-header-detail" class="project-header-detail" hidden></div>
 
+      <section class="form participants-panel" id="participants-panel" aria-label="Teilnehmende">
+        <h3 class="participants-panel__title">Teilnehmende</h3>
+        <form id="participant-form" class="participant-form__form">
+          <div class="form__row--split">
+            <div style="flex: 1; min-width: 8rem">
+              <label for="pf-first" class="form__legend">Vorname</label>
+              <input id="pf-first" class="form__input" type="text" maxlength="120" autocomplete="given-name" />
+            </div>
+            <div style="flex: 1; min-width: 8rem">
+              <label for="pf-last" class="form__legend">Nachname</label>
+              <input id="pf-last" class="form__input" type="text" maxlength="120" autocomplete="family-name" />
+            </div>
+          </div>
+          <div>
+            <label for="pf-role" class="form__legend">Funktion</label>
+            <select id="pf-role" class="form__input">
+              <option value="qs">QS</option>
+              <option value="projektleitung">Projektleitung</option>
+              <option value="stellvertretende_projektleitung">Stellvertretende Projektleitung</option>
+              <option value="projektmitarbeit" selected>Projektmitarbeit</option>
+            </select>
+          </div>
+          <button type="submit" class="form__submit">Teilnehmenden hinzufügen</button>
+        </form>
+        <ul id="participant-list" class="participant-list"></ul>
+      </section>
+
       <form class="form" id="task-form" aria-label="Neue Hauptaufgabe">
         <div>
           <label for="task-title" class="visually-hidden">Aufgabentitel</label>
@@ -559,6 +635,10 @@
         <div>
           <label for="task-due" class="form__legend">Frist</label>
           <input id="task-due" class="form__input form__input--date" type="date" required />
+        </div>
+        <div class="task__assign-wrap" id="new-task-assignees-wrap">
+          <span class="form__legend">Zuständig</span>
+          <div id="new-task-assignees" class="task__assign-checks" aria-label="Zuständige für neue Aufgabe"></div>
         </div>
         <div class="form__row--split">
           <fieldset style="margin: 0; padding: 0; border: none; flex: 1 1 auto; min-width: 0">
@@ -593,6 +673,13 @@
         var MAX_DESC = 5000
         var MAX_PROJECT_TITLE = 200
         var MAX_IMAGE_DATA_URL = 480000
+        var MAX_NAME = 120
+        var ROLE_LABELS = {
+          qs: 'QS',
+          projektleitung: 'Projektleitung',
+          stellvertretende_projektleitung: 'Stellvertretende Projektleitung',
+          projektmitarbeit: 'Projektmitarbeit',
+        }
 
         var state = { v: 2, projects: [], openProjectId: null }
         var taskRootRef = null
@@ -601,6 +688,79 @@
           if (typeof s !== 'string') return ''
           if (s.length > MAX_DESC) return s.slice(0, MAX_DESC)
           return s
+        }
+
+        function parseAssigneeIdsRaw(raw) {
+          var assigneeIds = []
+          if (Array.isArray(raw.assigneeIds)) {
+            for (var ai = 0; ai < raw.assigneeIds.length; ai++) {
+              if (typeof raw.assigneeIds[ai] === 'string') assigneeIds.push(raw.assigneeIds[ai])
+            }
+          }
+          return assigneeIds
+        }
+
+        function normalizeParticipant(raw) {
+          if (!raw || typeof raw !== 'object') return null
+          if (typeof raw.id !== 'string') return null
+          var fn = typeof raw.firstName === 'string' ? raw.firstName.trim().slice(0, MAX_NAME) : ''
+          var ln = typeof raw.lastName === 'string' ? raw.lastName.trim().slice(0, MAX_NAME) : ''
+          if (!fn && !ln) return null
+          var role = raw.role
+          if (typeof role !== 'string' || ROLE_LABELS[role] === undefined) role = 'projektmitarbeit'
+          return { id: raw.id, firstName: fn, lastName: ln, role: role }
+        }
+
+        function participantLabel(part) {
+          var n = (part.firstName + ' ' + part.lastName).trim()
+          return n + ' · ' + ROLE_LABELS[part.role]
+        }
+
+        function filterAssigneesTree(node, validSet) {
+          var a = node.assigneeIds || []
+          node.assigneeIds = a.filter(function (id) {
+            return validSet[id]
+          })
+          for (var i = 0; i < node.children.length; i++) {
+            filterAssigneesTree(node.children[i], validSet)
+          }
+        }
+
+        function filterAssigneesForest(nodes, validSet) {
+          for (var i = 0; i < nodes.length; i++) {
+            filterAssigneesTree(nodes[i], validSet)
+          }
+        }
+
+        function stripParticipantFromTasks(nodes, pid) {
+          for (var i = 0; i < nodes.length; i++) {
+            var a = nodes[i].assigneeIds || []
+            nodes[i].assigneeIds = a.filter(function (id) {
+              return id !== pid
+            })
+            stripParticipantFromTasks(nodes[i].children, pid)
+          }
+        }
+
+        function setAssigneesOnNode(nodes, nodeId, ids) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === nodeId) {
+              nodes[i].assigneeIds = ids.slice()
+              return true
+            }
+            if (setAssigneesOnNode(nodes[i].children, nodeId, ids)) return true
+          }
+          return false
+        }
+
+        function collectAssigneeIdsFrom(container) {
+          if (!container) return []
+          var boxes = container.querySelectorAll('input[type="checkbox"][data-participant-id]')
+          var ids = []
+          for (var i = 0; i < boxes.length; i++) {
+            if (boxes[i].checked) ids.push(boxes[i].getAttribute('data-participant-id'))
+          }
+          return ids
         }
 
         function pad2(n) {
@@ -662,6 +822,7 @@
           }
           var dueDate = isValidYmd(raw.dueDate) ? raw.dueDate : null
           var description = sanitizeDescription(typeof raw.description === 'string' ? raw.description : '')
+          var assigneeIds = parseAssigneeIdsRaw(raw)
           return {
             id: raw.id,
             title: raw.title,
@@ -670,6 +831,7 @@
             createdAt: raw.createdAt,
             dueDate: dueDate,
             description: description,
+            assigneeIds: assigneeIds,
             children: children,
           }
         }
@@ -689,6 +851,7 @@
             createdAt: raw.createdAt,
             dueDate: dueL,
             description: descL,
+            assigneeIds: parseAssigneeIdsRaw(raw),
             children: [],
           }
         }
@@ -714,6 +877,17 @@
           if (!raw || typeof raw !== 'object') return null
           if (typeof raw.id !== 'string') return null
           if (typeof raw.title !== 'string' || !raw.title.trim()) return null
+          var participants = []
+          if (Array.isArray(raw.participants)) {
+            for (var pi = 0; pi < raw.participants.length; pi++) {
+              var part = normalizeParticipant(raw.participants[pi])
+              if (part) participants.push(part)
+            }
+          }
+          var validSet = {}
+          for (var vi = 0; vi < participants.length; vi++) {
+            validSet[participants[vi].id] = true
+          }
           var tasks = []
           if (Array.isArray(raw.tasks)) {
             for (var i = 0; i < raw.tasks.length; i++) {
@@ -721,6 +895,7 @@
               if (n) tasks.push(n)
             }
           }
+          filterAssigneesForest(tasks, validSet)
           var img = raw.image
           if (img !== null && typeof img !== 'string') img = null
           if (typeof img === 'string' && img.length > MAX_IMAGE_DATA_URL) img = null
@@ -729,6 +904,7 @@
             title: raw.title.trim().slice(0, MAX_PROJECT_TITLE),
             description: sanitizeDescription(typeof raw.description === 'string' ? raw.description : ''),
             image: img,
+            participants: participants,
             tasks: tasks,
           }
         }
@@ -765,6 +941,7 @@
                     title: 'Mein Projekt',
                     description: '',
                     image: null,
+                    participants: [],
                     tasks: legacyTasks,
                   },
                 ],
@@ -925,6 +1102,94 @@
         var submitBtn = document.getElementById('submit-btn')
         var emptyMsg = document.getElementById('empty-msg')
         var taskList = document.getElementById('task-list')
+        var newTaskAssigneesEl = document.getElementById('new-task-assignees')
+        var participantFormEl = document.getElementById('participant-form')
+
+        function bindAssigneeContainer(container, taskNodeId) {
+          container.addEventListener('change', function (e) {
+            if (e.target.type !== 'checkbox' || !e.target.getAttribute('data-participant-id')) return
+            var ids = collectAssigneeIdsFrom(container)
+            setAssigneesOnNode(taskRootRef, taskNodeId, ids)
+            saveState()
+          })
+        }
+
+        function renderAssigneeCheckboxes(container, taskNode, idPrefix) {
+          container.innerHTML = ''
+          var proj = getCurrentProject()
+          if (!proj || !proj.participants || proj.participants.length === 0) {
+            var hint = document.createElement('p')
+            hint.className = 'task__assign-hint'
+            hint.textContent = 'Noch keine Teilnehmenden — oben anlegen.'
+            container.appendChild(hint)
+            return
+          }
+          var selected = {}
+          if (taskNode && Array.isArray(taskNode.assigneeIds)) {
+            for (var si = 0; si < taskNode.assigneeIds.length; si++) {
+              selected[taskNode.assigneeIds[si]] = true
+            }
+          }
+          for (var i = 0; i < proj.participants.length; i++) {
+            var part = proj.participants[i]
+            var lab = document.createElement('label')
+            lab.className = 'form__radioLabel'
+            var inp = document.createElement('input')
+            inp.type = 'checkbox'
+            inp.setAttribute('data-participant-id', part.id)
+            inp.id = idPrefix + '-a-' + part.id
+            if (selected[part.id]) inp.checked = true
+            lab.appendChild(inp)
+            lab.appendChild(document.createTextNode(' ' + participantLabel(part)))
+            container.appendChild(lab)
+          }
+        }
+
+        function renderNewTaskAssignees() {
+          renderAssigneeCheckboxes(newTaskAssigneesEl, null, 'new-main')
+        }
+
+        function renderParticipantList() {
+          var ul = document.getElementById('participant-list')
+          var p = getCurrentProject()
+          ul.innerHTML = ''
+          if (!p || !p.participants) return
+          for (var i = 0; i < p.participants.length; i++) {
+            var part = p.participants[i]
+            var li = document.createElement('li')
+            li.className = 'participant-row'
+            var span = document.createElement('span')
+            span.textContent = participantLabel(part)
+            var btn = document.createElement('button')
+            btn.type = 'button'
+            btn.className = 'task__btn task__btn--danger'
+            btn.textContent = 'Entfernen'
+            ;(function (pid) {
+              btn.addEventListener('click', function () {
+                removeParticipantById(pid)
+              })
+            })(part.id)
+            li.appendChild(span)
+            li.appendChild(btn)
+            ul.appendChild(li)
+          }
+        }
+
+        function removeParticipantById(pid) {
+          var p = getCurrentProject()
+          if (!p) return
+          if (!confirm('Teilnehmenden entfernen? Zuordnungen in Aufgaben werden gelöscht.')) return
+          var next = []
+          for (var j = 0; j < p.participants.length; j++) {
+            if (p.participants[j].id !== pid) next.push(p.participants[j])
+          }
+          p.participants = next
+          stripParticipantFromTasks(p.tasks, pid)
+          saveState()
+          renderParticipantList()
+          renderNewTaskAssignees()
+          render()
+        }
 
         function syncTaskDueDefault() {
           taskDue.value = todayYmd()
@@ -969,6 +1234,8 @@
           titleInput.value = ''
           taskDesc.value = ''
           submitBtn.disabled = true
+          renderParticipantList()
+          renderNewTaskAssignees()
           render()
         }
 
@@ -1066,6 +1333,7 @@
             emptyMsg.hidden = false
             taskList.hidden = true
             taskList.innerHTML = ''
+            renderNewTaskAssignees()
             return
           }
           emptyMsg.hidden = true
@@ -1074,6 +1342,7 @@
           for (var i = 0; i < taskRootRef.length; i++) {
             taskList.appendChild(renderNode(taskRootRef[i]))
           }
+          renderNewTaskAssignees()
         }
 
         function renderNode(node) {
@@ -1195,6 +1464,20 @@
           descWrap.appendChild(descTa)
           row.appendChild(descWrap)
 
+          var assignWrap = document.createElement('div')
+          assignWrap.className = 'task__assign-wrap'
+          var assignLegend = document.createElement('span')
+          assignLegend.className = 'task__desc-label'
+          assignLegend.textContent = 'Zuständig'
+          var assignChecks = document.createElement('div')
+          assignChecks.className = 'task__assign-checks'
+          assignChecks.setAttribute('aria-label', 'Zuständige für: ' + node.title)
+          renderAssigneeCheckboxes(assignChecks, node, 'task-' + node.id)
+          bindAssigneeContainer(assignChecks, node.id)
+          assignWrap.appendChild(assignLegend)
+          assignWrap.appendChild(assignChecks)
+          row.appendChild(assignWrap)
+
           var addRow = document.createElement('div')
           addRow.className = 'task-add-sub'
           addRow.hidden = true
@@ -1234,6 +1517,17 @@
           subDue.value = todayYmd()
           subDueRow.appendChild(subDueLbl)
           subDueRow.appendChild(subDue)
+
+          var subAssignWrap = document.createElement('div')
+          subAssignWrap.className = 'task__assign-wrap'
+          var subAssignLeg = document.createElement('span')
+          subAssignLeg.className = 'form__legend'
+          subAssignLeg.textContent = 'Zuständig'
+          var subAssignChecks = document.createElement('div')
+          subAssignChecks.className = 'task__assign-checks'
+          renderAssigneeCheckboxes(subAssignChecks, null, 'sub-' + node.id)
+          subAssignWrap.appendChild(subAssignLeg)
+          subAssignWrap.appendChild(subAssignChecks)
 
           var subBtn = document.createElement('button')
           subBtn.type = 'button'
@@ -1280,6 +1574,7 @@
             for (var r = 0; r < mids.length; r++) {
               mids[r].checked = mids[r].value === 'medium'
             }
+            renderAssigneeCheckboxes(subAssignChecks, null, 'sub-' + node.id)
           }
 
           function readSubPriority() {
@@ -1299,6 +1594,7 @@
               createdAt: new Date().toISOString(),
               dueDate: subDue.value,
               description: sanitizeDescription(subDesc.value),
+              assigneeIds: collectAssigneeIdsFrom(subAssignChecks),
               children: [],
             }
             addChildToParent(taskRootRef, node.id, child)
@@ -1334,6 +1630,7 @@
           addRow.appendChild(subInput)
           addRow.appendChild(subDescRow)
           addRow.appendChild(subDueRow)
+          addRow.appendChild(subAssignWrap)
           addRow.appendChild(rowSplit)
 
           block.appendChild(row)
@@ -1363,6 +1660,7 @@
               title: title.slice(0, MAX_PROJECT_TITLE),
               description: sanitizeDescription(projectDesc.value),
               image: img,
+              participants: [],
               tasks: [],
             }
             state.projects.push(proj)
@@ -1387,6 +1685,32 @@
           showProjectsView()
         })
 
+        participantFormEl.addEventListener('submit', function (e) {
+          e.preventDefault()
+          var p = getCurrentProject()
+          if (!p) return
+          var fn = document.getElementById('pf-first').value.trim()
+          var ln = document.getElementById('pf-last').value.trim()
+          if (!fn || !ln) {
+            alert('Bitte Vor- und Nachnamen angeben.')
+            return
+          }
+          if (!p.participants) p.participants = []
+          p.participants.push({
+            id: crypto.randomUUID(),
+            firstName: fn.slice(0, MAX_NAME),
+            lastName: ln.slice(0, MAX_NAME),
+            role: document.getElementById('pf-role').value,
+          })
+          saveState()
+          document.getElementById('pf-first').value = ''
+          document.getElementById('pf-last').value = ''
+          document.getElementById('pf-role').value = 'projektmitarbeit'
+          renderParticipantList()
+          renderNewTaskAssignees()
+          render()
+        })
+
         titleInput.addEventListener('input', function () {
           submitBtn.disabled = !titleInput.value.trim()
         })
@@ -1406,6 +1730,7 @@
             createdAt: new Date().toISOString(),
             dueDate: isValidYmd(taskDue.value) ? taskDue.value : null,
             description: sanitizeDescription(taskDesc.value),
+            assigneeIds: collectAssigneeIdsFrom(newTaskAssigneesEl),
             children: [],
           })
           titleInput.value = ''
