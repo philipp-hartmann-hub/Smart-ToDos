@@ -1,0 +1,16 @@
+---
+description: README.md nach abgeschlossener Arbeit im Smart-ToDo-Projekt aktualisieren
+alwaysApply: true
+---
+
+# README-Pflege (Smart ToDo)
+
+Nach **jeder abgeschlossenen** Nutzeranfrage in diesem Projekt, die Code, Konfiguration, Abhängigkeiten oder das Verhalten der Anwendung **wesentlich** ändert oder neue Informationen zur Nutzung liefert:
+
+1. **`README.md` anpassen** — mindestens einen der Bereiche: Status, Features, Voraussetzungen, Installation & Start, Projektstruktur (was zutrifft).
+2. **Changelog-Tabelle** am Ende der README um eine Zeile ergänzen: Datum (ISO: YYYY-MM-DD), eine prägnante deutsche Kurzbeschreibung der Änderung.
+3. Keine leeren Marketing-Floskeln; nur faktische, für Entwickler:innen nützliche Infos.
+
+Wenn die Anfrage nur reine Fragen ohne Repo-Änderungen war, ist **keine** README-Aktualisierung nötig.
+
+Bei reinen README- oder Regel-Only-Tasks: Changelog-Eintrag trotzdem setzen (z. B. „README: …“).
