@@ -1,80 +1,38 @@
 # Smart ToDo
 
-Aufgabenverwaltung im Browser: **erstellen**, **Priorität wählen**, **als erledigt markieren**, **löschen** — mit **localStorage** (überlebt Seiten-Reload). Gebaut mit **React 19**, **TypeScript** und **Vite**.
+Aufgaben im Browser: **erstellen**, **drei Prioritäten**, **erledigt markieren**, **löschen** — Speicherung in **localStorage** (überlebt Browser-Neustart).
 
-## Akzeptanzkriterien
+**Kein Node.js, kein npm, kein Terminal nötig** — die App ist **eine einzige HTML-Datei**.
 
-| Kriterium | Umsetzung |
-|-----------|-----------|
-| Tasks erstellen, erledigen, löschen | Formular + Checkbox + Löschen-Button; Zustand über `useTasks` |
-| 3 Prioritäten beim Erstellen | Niedrig, Mittel, Hoch (Radio-Buttons) |
-| Nach Browser-Reload erhalten | `localStorage`-Schlüssel `smart-todo-tasks` |
-| `npm run build` ohne TypeScript-Fehler | `tsc -b && vite build` |
-| GitHub + README | [philipp-hartmann-hub/Smart-ToDos](https://github.com/philipp-hartmann-hub/Smart-ToDos) |
+## App öffnen (direkter Link)
 
-## Voraussetzungen
+Diese Datei im Ordner dieses Projekts:
 
-- [Node.js](https://nodejs.org/) (LTS empfohlen, z. B. v20+)
-- npm (mit Node mitgeliefert)
+**`SmartToDo.html`**
 
-## Installation
+- **Finder:** Ordner öffnen → **`SmartToDo.html`** **doppelklicken**
+- **Browser-Adresszeile** (gleicher Inhalt wie Doppelklick):
 
-```bash
-npm install
-```
+[`file:///Users/philipphartmann/Cursor%20Trainig/Smart%20ToDo/SmartToDo.html`](file:///Users/philipphartmann/Cursor%20Trainig/Smart%20ToDo/SmartToDo.html)
 
-## Entwicklung
+*(Wenn du das Repo woanders ablegst, den Pfad vor `SmartToDo.html` anpassen.)*
 
-```bash
-npm run dev
-```
+## Funktionen
 
-Öffne die angezeigte lokale URL (typisch `http://localhost:5173`).
-
-## Produktions-Build
-
-```bash
-npm run build
-```
-
-Statische Ausgabe liegt in `dist/`. Vorschau:
-
-```bash
-npm run preview
-```
-
-## Lint
-
-```bash
-npm run lint
-```
-
-## Projektstruktur (Auszug)
-
-```
-src/
-  App.tsx          # UI
-  App.css
-  hooks/useTasks.ts # State + localStorage
-  types/task.ts    # Task, Priorität, Labels
-index.html
-vite.config.ts
-```
+| Feature | Umsetzung |
+|---------|-----------|
+| Aufgaben erstellen / erledigen / löschen | Formular, Checkbox, Löschen-Button |
+| 3 Prioritäten | Hoch, Mittel, Niedrig |
+| Daten bleiben | `localStorage`-Schlüssel `smart-todo-tasks` (kompatibel mit älteren Versionen derselben App) |
 
 ## Repository
 
-Quellcode und Issues: **[github.com/philipp-hartmann-hub/Smart-ToDos](https://github.com/philipp-hartmann-hub/Smart-ToDos)**
+[github.com/philipp-hartmann-hub/Smart-ToDos](https://github.com/philipp-hartmann-hub/Smart-ToDos)
 
 ```bash
 git clone https://github.com/philipp-hartmann-hub/Smart-ToDos.git
 cd Smart-ToDos
-npm install
-```
-
-Änderungen pushen:
-
-```bash
-git push -u origin main
+# Nur SmartToDo.html im Browser öffnen — fertig.
 ```
 
 ---
@@ -86,3 +44,6 @@ git push -u origin main
 | 2026-04-05 | Initiale README und Cursor-Regel zur README-Pflege angelegt; Repository noch ohne App-Code. |
 | 2026-04-05 | Vite + React + TS: ToDo mit Prioritäten, localStorage, Build/Lint grün; README und Git-Anleitung. |
 | 2026-04-05 | README: offizielles GitHub-Repo [Smart-ToDos](https://github.com/philipp-hartmann-hub/Smart-ToDos) verlinkt; Merge mit GitHub-`main`. |
+| 2026-04-05 | Vite `base: './'`; README: Hinweis `dist/index.html` / file:// für lokales Öffnen. |
+| 2026-04-05 | Root-`index.html`: Hinweistext bei direktem Öffnen; README: Root-`index.html` nicht per file:// nutzen. |
+| 2026-04-05 | **Umstellung:** eine Datei `SmartToDo.html` (Vanilla JS), kein Build/Node; Vite/React-Stack entfernt. |

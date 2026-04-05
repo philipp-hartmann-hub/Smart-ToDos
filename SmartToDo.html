@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart ToDo</title>
+    <style>
+      :root {
+        --text: #4b5563;
+        --text-h: #111827;
+        --bg: #f9fafb;
+        --surface: #ffffff;
+        --border: #e5e7eb;
+        --accent: #6366f1;
+        --accent-bg: rgba(99, 102, 241, 0.12);
+        --accent-border: rgba(99, 102, 241, 0.45);
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.08);
+        --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --text: #9ca3af;
+          --text-h: #f3f4f6;
+          --bg: #0f1117;
+          --surface: #181b24;
+          --border: #2d3341;
+          --accent: #818cf8;
+          --accent-bg: rgba(129, 140, 248, 0.15);
+          --accent-border: rgba(129, 140, 248, 0.45);
+          --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.45);
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      body {
+        margin: 0;
+        font: 16px/1.5 var(--sans);
+        color: var(--text);
+        background: var(--bg);
+        -webkit-font-smoothing: antialiased;
+      }
+      .app {
+        max-width: 36rem;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 3rem;
+      }
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        color: var(--text-h);
+        margin: 0 0 0.35rem;
+      }
+      .subtitle {
+        margin: 0 0 1.75rem;
+        font-size: 0.95rem;
+        opacity: 0.85;
+      }
+      .form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1.25rem;
+        border-radius: 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+      }
+      .form__input {
+        width: 100%;
+        padding: 0.65rem 0.85rem;
+        font: inherit;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text-h);
+      }
+      .form__input:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+      }
+      .form__row--split {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+      .form__legend {
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-h);
+      }
+      .form__radioGroup {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .form__radioLabel {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        padding: 0.35rem 0.6rem;
+        border-radius: 6px;
+        border: 1px solid transparent;
+      }
+      .form__radioLabel:has(input:checked) {
+        background: var(--accent-bg);
+        border-color: var(--accent-border);
+      }
+      .form__submit {
+        font: inherit;
+        font-weight: 600;
+        padding: 0.55rem 1.1rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        background: var(--accent);
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .form__submit:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .list__empty {
+        margin: 0;
+        padding: 1.5rem;
+        text-align: center;
+        border-radius: 12px;
+        border: 1px dashed var(--border);
+        opacity: 0.8;
+      }
+      .list__items {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+      .task {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.75rem 0.9rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .task--done {
+        opacity: 0.72;
+      }
+      .task--done .task__title {
+        text-decoration: line-through;
+      }
+      .task__check {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        cursor: pointer;
+        min-width: 0;
+      }
+      .task__check input {
+        margin-top: 0.2rem;
+        flex-shrink: 0;
+        accent-color: var(--accent);
+      }
+      .task__title {
+        word-break: break-word;
+        line-height: 1.35;
+      }
+      .task__badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 0.2rem 0.45rem;
+        border-radius: 4px;
+        white-space: nowrap;
+      }
+      .task--high .task__badge {
+        background: rgba(220, 38, 38, 0.15);
+        color: #dc2626;
+      }
+      .task--medium .task__badge {
+        background: rgba(234, 179, 8, 0.2);
+        color: #ca8a04;
+      }
+      .task--low .task__badge {
+        background: rgba(34, 197, 94, 0.15);
+        color: #16a34a;
+      }
+      @media (prefers-color-scheme: dark) {
+        .task--high .task__badge {
+          color: #f87171;
+        }
+        .task--medium .task__badge {
+          color: #facc15;
+        }
+        .task--low .task__badge {
+          color: #4ade80;
+        }
+      }
+      .task__delete {
+        font: inherit;
+        font-size: 0.8rem;
+        padding: 0.35rem 0.55rem;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-h);
+        cursor: pointer;
+      }
+      .task__delete:hover {
+        background: var(--bg);
+      }
+      @media (max-width: 520px) {
+        .task {
+          grid-template-columns: 1fr auto;
+        }
+        .task__check {
+          grid-column: 1 / -1;
+        }
+        .task__badge {
+          justify-self: start;
+        }
+        .task__delete {
+          justify-self: end;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <h1>Smart ToDo</h1>
+        <p class="subtitle">Aufgaben mit Priorität — lokal im Browser gespeichert</p>
+      </header>
+
+      <form class="form" id="task-form" aria-label="Neue Aufgabe">
+        <div>
+          <label for="task-title" class="visually-hidden">Aufgabentitel</label>
+          <input
+            id="task-title"
+            class="form__input"
+            type="text"
+            placeholder="Neue Aufgabe …"
+            maxlength="500"
+            autocomplete="off"
+          />
+        </div>
+        <div class="form__row--split">
+          <fieldset style="margin: 0; padding: 0; border: none; flex: 1 1 auto; min-width: 0">
+            <div class="form__legend">Priorität</div>
+            <div class="form__radioGroup" role="radiogroup" aria-label="Priorität wählen">
+              <label class="form__radioLabel"
+                ><input type="radio" name="priority" value="high" /> Hoch</label
+              >
+              <label class="form__radioLabel"
+                ><input type="radio" name="priority" value="medium" checked /> Mittel</label
+              >
+              <label class="form__radioLabel"
+                ><input type="radio" name="priority" value="low" /> Niedrig</label
+              >
+            </div>
+          </fieldset>
+          <button type="submit" class="form__submit" id="submit-btn" disabled>Hinzufügen</button>
+        </div>
+      </form>
+
+      <section class="list" aria-label="Aufgabenliste">
+        <p class="list__empty" id="empty-msg">Noch keine Aufgaben. Leg los oben.</p>
+        <ul class="list__items" id="task-list" hidden></ul>
+      </section>
+    </div>
+
+    <script>
+      ;(function () {
+        var STORAGE_KEY = 'smart-todo-tasks'
+        var PRIORITY_ORDER = { high: 0, medium: 1, low: 2 }
+        var LABELS = { low: 'Niedrig', medium: 'Mittel', high: 'Hoch' }
+
+        function isTask(o) {
+          return (
+            o &&
+            typeof o.id === 'string' &&
+            typeof o.title === 'string' &&
+            (o.priority === 'low' || o.priority === 'medium' || o.priority === 'high') &&
+            typeof o.done === 'boolean' &&
+            typeof o.createdAt === 'string'
+          )
+        }
+
+        function loadTasks() {
+          try {
+            var raw = localStorage.getItem(STORAGE_KEY)
+            if (!raw) return []
+            var parsed = JSON.parse(raw)
+            if (!Array.isArray(parsed)) return []
+            return parsed.filter(isTask)
+          } catch (e) {
+            return []
+          }
+        }
+
+        function saveTasks(tasks) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks))
+        }
+
+        function sortTasks(a, b) {
+          var pa = PRIORITY_ORDER[a.priority]
+          var pb = PRIORITY_ORDER[b.priority]
+          if (pa !== pb) return pa - pb
+          return a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0
+        }
+
+        var form = document.getElementById('task-form')
+        var titleInput = document.getElementById('task-title')
+        var submitBtn = document.getElementById('submit-btn')
+        var emptyMsg = document.getElementById('empty-msg')
+        var taskList = document.getElementById('task-list')
+
+        var tasks = loadTasks().sort(sortTasks)
+
+        function render() {
+          tasks.sort(sortTasks)
+          saveTasks(tasks)
+          if (tasks.length === 0) {
+            emptyMsg.hidden = false
+            taskList.hidden = true
+            taskList.innerHTML = ''
+            return
+          }
+          emptyMsg.hidden = true
+          taskList.hidden = false
+          taskList.innerHTML = ''
+          for (var i = 0; i < tasks.length; i++) {
+            taskList.appendChild(renderTask(tasks[i]))
+          }
+        }
+
+        function renderTask(task) {
+          var li = document.createElement('li')
+          li.className = 'task task--' + task.priority + (task.done ? ' task--done' : '')
+
+          var label = document.createElement('label')
+          label.className = 'task__check'
+          var cb = document.createElement('input')
+          cb.type = 'checkbox'
+          cb.checked = task.done
+          cb.setAttribute('aria-label', 'Erledigt: ' + task.title)
+          cb.addEventListener('change', function () {
+            task.done = cb.checked
+            render()
+          })
+          var span = document.createElement('span')
+          span.className = 'task__title'
+          span.textContent = task.title
+          label.appendChild(cb)
+          label.appendChild(span)
+
+          var badge = document.createElement('span')
+          badge.className = 'task__badge'
+          badge.textContent = LABELS[task.priority]
+          badge.title = 'Priorität'
+
+          var del = document.createElement('button')
+          del.type = 'button'
+          del.className = 'task__delete'
+          del.textContent = 'Löschen'
+          del.setAttribute('aria-label', 'Aufgabe löschen: ' + task.title)
+          del.addEventListener('click', function () {
+            tasks = tasks.filter(function (t) {
+              return t.id !== task.id
+            })
+            render()
+          })
+
+          li.appendChild(label)
+          li.appendChild(badge)
+          li.appendChild(del)
+          return li
+        }
+
+        titleInput.addEventListener('input', function () {
+          submitBtn.disabled = !titleInput.value.trim()
+        })
+
+        form.addEventListener('submit', function (e) {
+          e.preventDefault()
+          var title = titleInput.value.trim()
+          if (!title) return
+          var pr = form.querySelector('input[name="priority"]:checked')
+          var priority = pr ? pr.value : 'medium'
+          tasks.push({
+            id: crypto.randomUUID(),
+            title: title,
+            priority: priority,
+            done: false,
+            createdAt: new Date().toISOString(),
+          })
+          titleInput.value = ''
+          submitBtn.disabled = true
+          render()
+        })
+
+        render()
+      })()
+    </script>
+  </body>
+</html>
