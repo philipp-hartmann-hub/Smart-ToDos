@@ -63,10 +63,103 @@
         color: var(--text-h);
         margin: 0 0 0.35rem;
       }
+      h2 {
+        font-size: 1.35rem;
+        font-weight: 600;
+        color: var(--text-h);
+        margin: 0 0 0.5rem;
+      }
       .subtitle {
         margin: 0 0 1.75rem;
         font-size: 0.95rem;
         opacity: 0.85;
+      }
+      .btn-back {
+        font: inherit;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        padding: 0.45rem 0.75rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--accent);
+        cursor: pointer;
+      }
+      .btn-back:hover {
+        background: var(--accent-bg);
+      }
+      .project-header-detail {
+        margin-bottom: 1.25rem;
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .project-header-detail__img {
+        max-width: 100%;
+        max-height: 200px;
+        width: auto;
+        height: auto;
+        border-radius: 8px;
+        display: block;
+        margin-bottom: 0.75rem;
+        object-fit: contain;
+      }
+      .project-header-detail__desc {
+        margin: 0;
+        font-size: 0.95rem;
+        line-height: 1.45;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .project-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .project-card {
+        display: flex;
+        gap: 0.85rem;
+        padding: 0.9rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        align-items: flex-start;
+      }
+      .project-card__thumb {
+        width: 72px;
+        height: 72px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        object-fit: cover;
+        background: var(--bg);
+        border: 1px solid var(--border);
+      }
+      .project-card__body {
+        flex: 1;
+        min-width: 0;
+      }
+      .project-card__title {
+        font-weight: 600;
+        color: var(--text-h);
+        margin: 0 0 0.25rem;
+        font-size: 1.05rem;
+      }
+      .project-card__excerpt {
+        margin: 0;
+        font-size: 0.85rem;
+        opacity: 0.88;
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .project-card__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
       }
       .form {
         display: flex;
@@ -160,6 +253,10 @@
       .form__submit:disabled {
         opacity: 0.45;
         cursor: not-allowed;
+      }
+      .form__file {
+        font: inherit;
+        font-size: 0.88rem;
       }
       .list__empty {
         margin: 0;
@@ -373,17 +470,69 @@
         .task__actions {
           justify-content: flex-start;
         }
+        .project-card {
+          flex-direction: column;
+        }
+        .project-card__thumb {
+          width: 100%;
+          height: 140px;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="app">
+    <div class="app" id="view-projects">
       <header>
         <h1>Smartes Projektplanungstool</h1>
-        <p class="subtitle">
-          Priorität, Frist, Beschreibung und beliebig tiefe Unteraufgaben — lokal gespeichert
-        </p>
+        <p class="subtitle">Projekte anlegen, öffnen und Aufgaben mit Priorität, Frist und Unteraufgaben verwalten — lokal gespeichert.</p>
       </header>
+
+      <form class="form" id="project-form" aria-label="Neues Projekt">
+        <div>
+          <label for="project-title" class="form__legend">Projektname</label>
+          <input
+            id="project-title"
+            class="form__input"
+            type="text"
+            placeholder="z. B. Website Relaunch"
+            maxlength="200"
+            required
+            autocomplete="off"
+          />
+        </div>
+        <div>
+          <label for="project-desc" class="form__legend">Beschreibung (optional)</label>
+          <textarea
+            id="project-desc"
+            class="form__input form__textarea"
+            rows="3"
+            maxlength="5000"
+            placeholder="Kurzbeschreibung des Projekts …"
+          ></textarea>
+        </div>
+        <div>
+          <label for="project-image" class="form__legend">Projektbild (optional)</label>
+          <input id="project-image" class="form__file" type="file" accept="image/*" />
+          <p id="project-image-hint" class="subtitle" style="margin: 0.35rem 0 0; font-size: 0.8rem">
+            Wird verkleinert und lokal im Browser gespeichert (kein Server).
+          </p>
+        </div>
+        <button type="submit" class="form__submit" id="project-submit">Projekt anlegen</button>
+      </form>
+
+      <section aria-label="Projektliste">
+        <p class="list__empty" id="projects-empty">Noch keine Projekte — oben anlegen.</p>
+        <div class="project-list" id="project-list" hidden></div>
+      </section>
+    </div>
+
+    <div class="app" id="view-tasks" hidden>
+      <button type="button" class="btn-back" id="btn-back-projects">← Zu den Projekten</button>
+      <header>
+        <h2 id="task-view-title">Projekt</h2>
+        <p class="subtitle" id="task-view-sub">Aufgaben</p>
+      </header>
+      <div id="project-header-detail" class="project-header-detail" hidden></div>
 
       <form class="form" id="task-form" aria-label="Neue Hauptaufgabe">
         <div>
@@ -442,6 +591,11 @@
         var PRIORITY_ORDER = { high: 0, medium: 1, low: 2 }
         var LABELS = { low: 'Niedrig', medium: 'Mittel', high: 'Hoch' }
         var MAX_DESC = 5000
+        var MAX_PROJECT_TITLE = 200
+        var MAX_IMAGE_DATA_URL = 480000
+
+        var state = { v: 2, projects: [], openProjectId: null }
+        var taskRootRef = null
 
         function sanitizeDescription(s) {
           if (typeof s !== 'string') return ''
@@ -520,7 +674,6 @@
           }
         }
 
-        /** Altes Format: flache Liste ohne children */
         function normalizeLegacyFlatItem(raw) {
           if (!raw || typeof raw !== 'object') return null
           if (typeof raw.id !== 'string' || typeof raw.title !== 'string') return null
@@ -540,32 +693,107 @@
           }
         }
 
-        function loadTasks() {
-          try {
-            var raw = localStorage.getItem(STORAGE_KEY)
-            if (!raw) return []
-            var parsed = JSON.parse(raw)
-            if (!Array.isArray(parsed)) return []
-            var out = []
-            if (parsed.length && !('children' in parsed[0])) {
-              for (var j = 0; j < parsed.length; j++) {
-                var leg = normalizeLegacyFlatItem(parsed[j])
-                if (leg) out.push(leg)
-              }
-            } else {
-              for (var k = 0; k < parsed.length; k++) {
-                var n = normalizeNode(parsed[k])
-                if (n) out.push(n)
-              }
+        function loadLegacyTaskArray(parsed) {
+          if (!Array.isArray(parsed)) return []
+          var out = []
+          if (parsed.length && !('children' in parsed[0])) {
+            for (var j = 0; j < parsed.length; j++) {
+              var leg = normalizeLegacyFlatItem(parsed[j])
+              if (leg) out.push(leg)
             }
-            return out
-          } catch (e) {
-            return []
+          } else {
+            for (var k = 0; k < parsed.length; k++) {
+              var n = normalizeNode(parsed[k])
+              if (n) out.push(n)
+            }
+          }
+          return out
+        }
+
+        function normalizeProject(raw) {
+          if (!raw || typeof raw !== 'object') return null
+          if (typeof raw.id !== 'string') return null
+          if (typeof raw.title !== 'string' || !raw.title.trim()) return null
+          var tasks = []
+          if (Array.isArray(raw.tasks)) {
+            for (var i = 0; i < raw.tasks.length; i++) {
+              var n = normalizeNode(raw.tasks[i])
+              if (n) tasks.push(n)
+            }
+          }
+          var img = raw.image
+          if (img !== null && typeof img !== 'string') img = null
+          if (typeof img === 'string' && img.length > MAX_IMAGE_DATA_URL) img = null
+          return {
+            id: raw.id,
+            title: raw.title.trim().slice(0, MAX_PROJECT_TITLE),
+            description: sanitizeDescription(typeof raw.description === 'string' ? raw.description : ''),
+            image: img,
+            tasks: tasks,
           }
         }
 
-        function saveTasks(tasks) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks))
+        function loadState() {
+          try {
+            var raw = localStorage.getItem(STORAGE_KEY)
+            if (!raw) {
+              state = { v: 2, projects: [], openProjectId: null }
+              return
+            }
+            var parsed = JSON.parse(raw)
+            if (parsed && parsed.v === 2 && Array.isArray(parsed.projects)) {
+              var projects = []
+              for (var i = 0; i < parsed.projects.length; i++) {
+                var p = normalizeProject(parsed.projects[i])
+                if (p) projects.push(p)
+              }
+              state = {
+                v: 2,
+                projects: projects,
+                openProjectId:
+                  typeof parsed.openProjectId === 'string' ? parsed.openProjectId : null,
+              }
+              return
+            }
+            if (Array.isArray(parsed)) {
+              var legacyTasks = loadLegacyTaskArray(parsed)
+              state = {
+                v: 2,
+                projects: [
+                  {
+                    id: crypto.randomUUID(),
+                    title: 'Mein Projekt',
+                    description: '',
+                    image: null,
+                    tasks: legacyTasks,
+                  },
+                ],
+                openProjectId: null,
+              }
+              saveState()
+              return
+            }
+          } catch (e) {}
+          state = { v: 2, projects: [], openProjectId: null }
+        }
+
+        function saveState() {
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({
+              v: 2,
+              projects: state.projects,
+              openProjectId: state.openProjectId,
+            }),
+          )
+        }
+
+        function getCurrentProject() {
+          if (!state.openProjectId) return null
+          for (var i = 0; i < state.projects.length; i++) {
+            if (state.projects[i].id === state.openProjectId) return state.projects[i]
+          }
+          return null
         }
 
         function removeById(nodes, id) {
@@ -625,22 +853,216 @@
           return false
         }
 
+        function compressImageFile(file, callback) {
+          if (!file || !file.type.match(/^image\//)) {
+            callback(null)
+            return
+          }
+          var reader = new FileReader()
+          reader.onload = function (ev) {
+            var img = new Image()
+            img.onload = function () {
+              var maxW = 480
+              var w = img.width
+              var h = img.height
+              if (w > maxW) {
+                h = (h * maxW) / w
+                w = maxW
+              }
+              var canvas = document.createElement('canvas')
+              canvas.width = w
+              canvas.height = h
+              var ctx = canvas.getContext('2d')
+              if (!ctx) {
+                callback(null)
+                return
+              }
+              ctx.drawImage(img, 0, 0, w, h)
+              var q = 0.82
+              var dataUrl = canvas.toDataURL('image/jpeg', q)
+              var tries = 0
+              while (dataUrl.length > MAX_IMAGE_DATA_URL && tries < 6) {
+                q -= 0.1
+                if (q < 0.35) break
+                dataUrl = canvas.toDataURL('image/jpeg', q)
+                tries++
+              }
+              if (dataUrl.length > MAX_IMAGE_DATA_URL) {
+                alert('Bild ist nach Verkleinerung noch zu groß — bitte kleinere Datei wählen.')
+                callback(null)
+                return
+              }
+              callback(dataUrl)
+            }
+            img.onerror = function () {
+              callback(null)
+            }
+            img.src = ev.target.result
+          }
+          reader.onerror = function () {
+            callback(null)
+          }
+          reader.readAsDataURL(file)
+        }
+
+        var viewProjects = document.getElementById('view-projects')
+        var viewTasks = document.getElementById('view-tasks')
+        var projectForm = document.getElementById('project-form')
+        var projectTitle = document.getElementById('project-title')
+        var projectDesc = document.getElementById('project-desc')
+        var projectImage = document.getElementById('project-image')
+        var projectListEl = document.getElementById('project-list')
+        var projectsEmpty = document.getElementById('projects-empty')
+        var btnBack = document.getElementById('btn-back-projects')
+        var taskViewTitle = document.getElementById('task-view-title')
+        var taskViewSub = document.getElementById('task-view-sub')
+        var projectHeaderDetail = document.getElementById('project-header-detail')
+
         var form = document.getElementById('task-form')
         var titleInput = document.getElementById('task-title')
         var taskDesc = document.getElementById('task-desc')
         var taskDue = document.getElementById('task-due')
-        taskDue.value = todayYmd()
         var submitBtn = document.getElementById('submit-btn')
         var emptyMsg = document.getElementById('empty-msg')
         var taskList = document.getElementById('task-list')
 
-        var tasks = loadTasks()
-        sortSiblings(tasks)
+        function syncTaskDueDefault() {
+          taskDue.value = todayYmd()
+        }
+
+        function renderProjectHeader() {
+          var p = getCurrentProject()
+          projectHeaderDetail.innerHTML = ''
+          if (!p) {
+            projectHeaderDetail.hidden = true
+            return
+          }
+          if (p.image) {
+            var im = document.createElement('img')
+            im.className = 'project-header-detail__img'
+            im.src = p.image
+            im.alt = ''
+            projectHeaderDetail.appendChild(im)
+          }
+          if (p.description && p.description.trim()) {
+            var pr = document.createElement('p')
+            pr.className = 'project-header-detail__desc'
+            pr.textContent = p.description
+            projectHeaderDetail.appendChild(pr)
+          }
+          projectHeaderDetail.hidden =
+            projectHeaderDetail.children.length === 0
+        }
+
+        function showTasksView() {
+          var p = getCurrentProject()
+          if (!p) return
+          state.openProjectId = p.id
+          saveState()
+          viewProjects.hidden = true
+          viewTasks.hidden = false
+          taskViewTitle.textContent = p.title
+          taskViewSub.textContent = 'Aufgaben in diesem Projekt'
+          renderProjectHeader()
+          taskRootRef = p.tasks
+          syncTaskDueDefault()
+          titleInput.value = ''
+          taskDesc.value = ''
+          submitBtn.disabled = true
+          render()
+        }
+
+        function showProjectsView() {
+          state.openProjectId = null
+          taskRootRef = null
+          saveState()
+          viewTasks.hidden = true
+          viewProjects.hidden = false
+          renderProjectList()
+        }
+
+        function renderProjectList() {
+          var list = state.projects
+          if (list.length === 0) {
+            projectsEmpty.hidden = false
+            projectListEl.hidden = true
+            projectListEl.innerHTML = ''
+            return
+          }
+          projectsEmpty.hidden = true
+          projectListEl.hidden = false
+          projectListEl.innerHTML = ''
+          for (var i = 0; i < list.length; i++) {
+            projectListEl.appendChild(renderProjectCard(list[i]))
+          }
+        }
+
+        function renderProjectCard(p) {
+          var card = document.createElement('article')
+          card.className = 'project-card'
+
+          if (p.image) {
+            var th = document.createElement('img')
+            th.className = 'project-card__thumb'
+            th.src = p.image
+            th.alt = ''
+            card.appendChild(th)
+          } else {
+            var ph = document.createElement('div')
+            ph.className = 'project-card__thumb'
+            ph.setAttribute('aria-hidden', 'true')
+            card.appendChild(ph)
+          }
+
+          var body = document.createElement('div')
+          body.className = 'project-card__body'
+          var h = document.createElement('p')
+          h.className = 'project-card__title'
+          h.textContent = p.title
+          body.appendChild(h)
+          if (p.description && p.description.trim()) {
+            var ex = document.createElement('p')
+            ex.className = 'project-card__excerpt'
+            ex.textContent = p.description
+            body.appendChild(ex)
+          }
+          var actions = document.createElement('div')
+          actions.className = 'project-card__actions'
+          var openBtn = document.createElement('button')
+          openBtn.type = 'button'
+          openBtn.className = 'form__submit form__submit--small'
+          openBtn.textContent = 'Öffnen'
+          openBtn.addEventListener('click', function () {
+            state.openProjectId = p.id
+            showTasksView()
+          })
+          var delBtn = document.createElement('button')
+          delBtn.type = 'button'
+          delBtn.className = 'task__btn task__btn--danger'
+          delBtn.textContent = 'Löschen'
+          delBtn.addEventListener('click', function () {
+            if (!confirm('Projekt „' + p.title + '“ inkl. aller Aufgaben wirklich löschen?')) return
+            var next = []
+            for (var j = 0; j < state.projects.length; j++) {
+              if (state.projects[j].id !== p.id) next.push(state.projects[j])
+            }
+            state.projects = next
+            if (state.openProjectId === p.id) state.openProjectId = null
+            saveState()
+            renderProjectList()
+          })
+          actions.appendChild(openBtn)
+          actions.appendChild(delBtn)
+          body.appendChild(actions)
+          card.appendChild(body)
+          return card
+        }
 
         function render() {
-          sortSiblings(tasks)
-          saveTasks(tasks)
-          if (tasks.length === 0) {
+          if (!taskRootRef) return
+          sortSiblings(taskRootRef)
+          saveState()
+          if (taskRootRef.length === 0) {
             emptyMsg.hidden = false
             taskList.hidden = true
             taskList.innerHTML = ''
@@ -649,8 +1071,8 @@
           emptyMsg.hidden = true
           taskList.hidden = false
           taskList.innerHTML = ''
-          for (var i = 0; i < tasks.length; i++) {
-            taskList.appendChild(renderNode(tasks[i]))
+          for (var i = 0; i < taskRootRef.length; i++) {
+            taskList.appendChild(renderNode(taskRootRef[i]))
           }
         }
 
@@ -676,7 +1098,7 @@
           cb.checked = node.done
           cb.setAttribute('aria-label', 'Erledigt: ' + node.title)
           cb.addEventListener('change', function () {
-            setDoneById(tasks, node.id, cb.checked)
+            setDoneById(taskRootRef, node.id, cb.checked)
             render()
           })
           var span = document.createElement('span')
@@ -698,7 +1120,6 @@
           btnSub.className = 'task__btn'
           btnSub.textContent = 'Unteraufgabe'
           btnSub.setAttribute('aria-label', 'Unteraufgabe zu: ' + node.title)
-          btnSub.title = 'Beliebig tiefe Unteraufgaben'
 
           var del = document.createElement('button')
           del.type = 'button'
@@ -706,7 +1127,7 @@
           del.textContent = 'Löschen'
           del.setAttribute('aria-label', 'Löschen inkl. aller Unteraufgaben: ' + node.title)
           del.addEventListener('click', function () {
-            removeById(tasks, node.id)
+            removeById(taskRootRef, node.id)
             render()
           })
 
@@ -733,7 +1154,7 @@
           })
           dueInput.addEventListener('change', function () {
             var v = dueInput.value
-            setDueById(tasks, node.id, v ? v : null)
+            setDueById(taskRootRef, node.id, v ? v : null)
             render()
           })
           var dueHint = document.createElement('span')
@@ -764,8 +1185,8 @@
           descTa.setAttribute('aria-label', 'Beschreibung: ' + node.title)
           descTa.value = typeof node.description === 'string' ? node.description : ''
           descTa.addEventListener('input', function () {
-            setDescriptionById(tasks, node.id, descTa.value)
-            saveTasks(tasks)
+            setDescriptionById(taskRootRef, node.id, descTa.value)
+            saveState()
           })
           descTa.addEventListener('click', function (e) {
             e.stopPropagation()
@@ -880,7 +1301,7 @@
               description: sanitizeDescription(subDesc.value),
               children: [],
             }
-            addChildToParent(tasks, node.id, child)
+            addChildToParent(taskRootRef, node.id, child)
             resetSubForm()
             addRow.hidden = true
             render()
@@ -930,17 +1351,54 @@
           return block
         }
 
+        projectForm.addEventListener('submit', function (e) {
+          e.preventDefault()
+          var title = projectTitle.value.trim()
+          if (!title) return
+          var pendingImage = null
+          var file = projectImage.files && projectImage.files[0]
+          function finish(img) {
+            var proj = {
+              id: crypto.randomUUID(),
+              title: title.slice(0, MAX_PROJECT_TITLE),
+              description: sanitizeDescription(projectDesc.value),
+              image: img,
+              tasks: [],
+            }
+            state.projects.push(proj)
+            state.openProjectId = proj.id
+            saveState()
+            projectTitle.value = ''
+            projectDesc.value = ''
+            projectImage.value = ''
+            showTasksView()
+            renderProjectList()
+          }
+          if (file) {
+            compressImageFile(file, function (dataUrl) {
+              finish(dataUrl)
+            })
+          } else {
+            finish(null)
+          }
+        })
+
+        btnBack.addEventListener('click', function () {
+          showProjectsView()
+        })
+
         titleInput.addEventListener('input', function () {
           submitBtn.disabled = !titleInput.value.trim()
         })
 
         form.addEventListener('submit', function (e) {
           e.preventDefault()
+          if (!taskRootRef) return
           var title = titleInput.value.trim()
           if (!title) return
           var pr = form.querySelector('input[name="priority"]:checked')
           var priority = pr ? pr.value : 'medium'
-          tasks.push({
+          taskRootRef.push({
             id: crypto.randomUUID(),
             title: title,
             priority: priority,
@@ -952,12 +1410,18 @@
           })
           titleInput.value = ''
           taskDesc.value = ''
-          taskDue.value = todayYmd()
+          syncTaskDueDefault()
           submitBtn.disabled = true
           render()
         })
 
-        render()
+        loadState()
+        if (state.openProjectId && getCurrentProject()) {
+          showTasksView()
+        } else {
+          state.openProjectId = null
+          showProjectsView()
+        }
       })()
     </script>
   </body>

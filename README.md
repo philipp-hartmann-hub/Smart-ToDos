@@ -1,6 +1,6 @@
 # Smartes Projektplanungstool
 
-Aufgaben im Browser: **erstellen**, **drei Prioritäten**, **Frist (Kalender)**, **Beschreibungstext**, **beliebig tiefe Unteraufgaben**, **erledigt markieren**, **löschen** — Speicherung in **localStorage** (überlebt Browser-Neustart).
+**Projekte** mit optionalem Text und **Projektbild** (lokal); nach **Öffnen** eines Projekts: **Aufgaben** mit Priorität, Frist, Beschreibung und **beliebig tiefen Unteraufgaben** — alles in **localStorage** (überlebt Browser-Neustart).
 
 **Kein Node.js, kein npm, kein Terminal nötig** — die App ist **eine einzige HTML-Datei**.
 
@@ -21,12 +21,13 @@ Diese Datei im Ordner dieses Projekts:
 
 | Feature | Umsetzung |
 |---------|-----------|
-| Aufgaben erstellen / erledigen / löschen | Formular, Checkbox, Löschen (inkl. aller Unteraufgaben) |
+| Projekte | Anlegen mit Name, optionaler Beschreibung und Bild (Datei → verkleinert, als Data-URL gespeichert); Liste mit Öffnen/Löschen |
+| Aufgaben (im Projekt) | Erstellen / erledigen / löschen; Formular, Checkbox, Löschen (inkl. aller Unteraufgaben) |
 | 3 Prioritäten | Hoch, Mittel, Niedrig (Hauptaufgaben und Unteraufgaben) |
 | Unteraufgaben | Beliebig viele Ebenen; pro Eintrag „Unteraufgabe“ → Eingabe einblenden |
 | Fristen | Native Datumsauswahl (`type="date"`) für Haupt- und Unteraufgaben; Anzeige/Änderung pro Zeile; überfällige offene Aufgaben hervorgehoben |
 | Beschreibung | Pro Aufgabe/Unteraufgabe: mehrzeiliges Textfeld; jederzeit änderbar, Speicher bei Eingabe (max. 5000 Zeichen) |
-| Daten bleiben | `localStorage`-Schlüssel `smart-todo-tasks` (ältere Einträge ohne Frist: nachträglich Datum wählbar) |
+| Daten bleiben | `localStorage`-Schlüssel `smart-todo-tasks` — Format `v:2` mit `projects[]`; reine Aufgabenlisten (älter) werden in ein Projekt **„Mein Projekt“** migriert |
 
 ## Repository
 
@@ -55,3 +56,4 @@ cd Smart-ToDos
 | 2026-04-05 | Fristen: Kalenderfeld für alle Ebenen; Sortierung nach Priorität → Frist → Erstellung. |
 | 2026-04-05 | Beschreibungstext pro Aufgabe/Unteraufgabe, fortlaufend editierbar. |
 | 2026-04-05 | Produktname: **Smartes Projektplanungstool** (UI, Titel, README); Einstiegsdatei weiter `SmartToDo.html`. |
+| 2026-04-05 | Übergeordnete **Projekte** (Beschreibung, Bild), Aufgaben pro Projekt; Migration alter Listen. |
