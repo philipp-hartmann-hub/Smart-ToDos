@@ -71,7 +71,7 @@ cd Smart-ToDos
 npm install
 ```
 
-Änderungen pushen (nach einmaligem `git remote add origin …`, falls noch nicht gesetzt):
+Änderungen pushen:
 
 ```bash
 git push -u origin main
@@ -85,4 +85,4 @@ git push -u origin main
 |-------|------------------|
 | 2026-04-05 | Initiale README und Cursor-Regel zur README-Pflege angelegt; Repository noch ohne App-Code. |
 | 2026-04-05 | Vite + React + TS: ToDo mit Prioritäten, localStorage, Build/Lint grün; README und Git-Anleitung. |
-| 2026-04-05 | README: offizielles GitHub-Repo [Smart-ToDos](https://github.com/philipp-hartmann-hub/Smart-ToDos) verlinkt. |
+| 2026-04-05 | README: offizielles GitHub-Repo [Smart-ToDos](https://github.com/philipp-hartmann-hub/Smart-ToDos) verlinkt; Merge mit GitHub-`main`. |
