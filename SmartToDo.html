@@ -98,6 +98,14 @@
         max-width: 100%;
         min-height: 2.5rem;
       }
+      .form__textarea {
+        width: 100%;
+        min-height: 4.25rem;
+        resize: vertical;
+        font: inherit;
+        line-height: 1.45;
+        padding: 0.6rem 0.75rem;
+      }
       .form__input:focus {
         outline: 2px solid var(--accent);
         outline-offset: 1px;
@@ -261,6 +269,34 @@
           color: #f87171;
         }
       }
+      .task__desc-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+      .task__desc-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-h);
+      }
+      .task__desc {
+        width: 100%;
+        min-height: 3.75rem;
+        max-height: 16rem;
+        resize: vertical;
+        font: inherit;
+        font-size: 0.88rem;
+        line-height: 1.45;
+        padding: 0.45rem 0.55rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text-h);
+      }
+      .task__desc:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+      }
       .task__badge {
         font-size: 0.65rem;
         font-weight: 700;
@@ -345,7 +381,7 @@
       <header>
         <h1>Smart ToDo</h1>
         <p class="subtitle">
-          Priorität, Frist (Kalender) und beliebig tiefe Unteraufgaben — lokal gespeichert
+          Priorität, Frist, Beschreibung und beliebig tiefe Unteraufgaben — lokal gespeichert
         </p>
       </header>
 
@@ -360,6 +396,16 @@
             maxlength="500"
             autocomplete="off"
           />
+        </div>
+        <div>
+          <label for="task-desc" class="form__legend">Beschreibung</label>
+          <textarea
+            id="task-desc"
+            class="form__input form__textarea"
+            rows="3"
+            maxlength="5000"
+            placeholder="Details zur Aufgabe …"
+          ></textarea>
         </div>
         <div>
           <label for="task-due" class="form__legend">Frist</label>
@@ -395,6 +441,13 @@
         var STORAGE_KEY = 'smart-todo-tasks'
         var PRIORITY_ORDER = { high: 0, medium: 1, low: 2 }
         var LABELS = { low: 'Niedrig', medium: 'Mittel', high: 'Hoch' }
+        var MAX_DESC = 5000
+
+        function sanitizeDescription(s) {
+          if (typeof s !== 'string') return ''
+          if (s.length > MAX_DESC) return s.slice(0, MAX_DESC)
+          return s
+        }
 
         function pad2(n) {
           return n < 10 ? '0' + n : '' + n
@@ -454,6 +507,7 @@
             }
           }
           var dueDate = isValidYmd(raw.dueDate) ? raw.dueDate : null
+          var description = sanitizeDescription(typeof raw.description === 'string' ? raw.description : '')
           return {
             id: raw.id,
             title: raw.title,
@@ -461,6 +515,7 @@
             done: raw.done,
             createdAt: raw.createdAt,
             dueDate: dueDate,
+            description: description,
             children: children,
           }
         }
@@ -472,6 +527,7 @@
           if (raw.priority !== 'low' && raw.priority !== 'medium' && raw.priority !== 'high') return null
           if (typeof raw.done !== 'boolean' || typeof raw.createdAt !== 'string') return null
           var dueL = isValidYmd(raw.dueDate) ? raw.dueDate : null
+          var descL = sanitizeDescription(typeof raw.description === 'string' ? raw.description : '')
           return {
             id: raw.id,
             title: raw.title,
@@ -479,6 +535,7 @@
             done: raw.done,
             createdAt: raw.createdAt,
             dueDate: dueL,
+            description: descL,
             children: [],
           }
         }
@@ -544,6 +601,18 @@
           return false
         }
 
+        function setDescriptionById(nodes, id, text) {
+          var v = sanitizeDescription(text)
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === id) {
+              nodes[i].description = v
+              return true
+            }
+            if (setDescriptionById(nodes[i].children, id, text)) return true
+          }
+          return false
+        }
+
         function addChildToParent(nodes, parentId, newNode) {
           for (var i = 0; i < nodes.length; i++) {
             if (nodes[i].id === parentId) {
@@ -558,6 +627,7 @@
 
         var form = document.getElementById('task-form')
         var titleInput = document.getElementById('task-title')
+        var taskDesc = document.getElementById('task-desc')
         var taskDue = document.getElementById('task-due')
         taskDue.value = todayYmd()
         var submitBtn = document.getElementById('submit-btn')
@@ -679,6 +749,31 @@
           dueWrap.appendChild(dueHint)
           row.appendChild(dueWrap)
 
+          var descWrap = document.createElement('div')
+          descWrap.className = 'task__desc-wrap'
+          var descLbl = document.createElement('label')
+          descLbl.className = 'task__desc-label'
+          descLbl.setAttribute('for', 'task-desc-' + node.id)
+          descLbl.textContent = 'Beschreibung'
+          var descTa = document.createElement('textarea')
+          descTa.id = 'task-desc-' + node.id
+          descTa.className = 'task__desc'
+          descTa.rows = 3
+          descTa.maxLength = MAX_DESC
+          descTa.placeholder = 'Details zur Aufgabe …'
+          descTa.setAttribute('aria-label', 'Beschreibung: ' + node.title)
+          descTa.value = typeof node.description === 'string' ? node.description : ''
+          descTa.addEventListener('input', function () {
+            setDescriptionById(tasks, node.id, descTa.value)
+            saveTasks(tasks)
+          })
+          descTa.addEventListener('click', function (e) {
+            e.stopPropagation()
+          })
+          descWrap.appendChild(descLbl)
+          descWrap.appendChild(descTa)
+          row.appendChild(descWrap)
+
           var addRow = document.createElement('div')
           addRow.className = 'task-add-sub'
           addRow.hidden = true
@@ -690,6 +785,20 @@
           subInput.placeholder = 'Unteraufgabe …'
           subInput.maxLength = 500
           subInput.setAttribute('aria-label', 'Titel der Unteraufgabe für: ' + node.title)
+
+          var subDescRow = document.createElement('div')
+          var subDescLbl = document.createElement('label')
+          subDescLbl.className = 'form__legend'
+          subDescLbl.setAttribute('for', 'sub-desc-' + node.id)
+          subDescLbl.textContent = 'Beschreibung'
+          var subDesc = document.createElement('textarea')
+          subDesc.id = 'sub-desc-' + node.id
+          subDesc.className = 'form__input form__textarea'
+          subDesc.rows = 2
+          subDesc.maxLength = MAX_DESC
+          subDesc.placeholder = 'Details …'
+          subDescRow.appendChild(subDescLbl)
+          subDescRow.appendChild(subDesc)
 
           var subDueRow = document.createElement('div')
           var subDueLbl = document.createElement('label')
@@ -743,6 +852,7 @@
 
           function resetSubForm() {
             subInput.value = ''
+            subDesc.value = ''
             subDue.value = todayYmd()
             subBtn.disabled = true
             var mids = addRow.querySelectorAll('input[name="' + subPriorityName + '"]')
@@ -767,6 +877,7 @@
               done: false,
               createdAt: new Date().toISOString(),
               dueDate: subDue.value,
+              description: sanitizeDescription(subDesc.value),
               children: [],
             }
             addChildToParent(tasks, node.id, child)
@@ -800,6 +911,7 @@
           rowSplit.appendChild(subBtn)
 
           addRow.appendChild(subInput)
+          addRow.appendChild(subDescRow)
           addRow.appendChild(subDueRow)
           addRow.appendChild(rowSplit)
 
@@ -835,9 +947,11 @@
             done: false,
             createdAt: new Date().toISOString(),
             dueDate: isValidYmd(taskDue.value) ? taskDue.value : null,
+            description: sanitizeDescription(taskDesc.value),
             children: [],
           })
           titleInput.value = ''
+          taskDesc.value = ''
           taskDue.value = todayYmd()
           submitBtn.disabled = true
           render()

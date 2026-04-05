@@ -1,6 +1,6 @@
 # Smart ToDo
 
-Aufgaben im Browser: **erstellen**, **drei Prioritäten**, **Frist (Kalender)**, **beliebig tiefe Unteraufgaben**, **erledigt markieren**, **löschen** — Speicherung in **localStorage** (überlebt Browser-Neustart).
+Aufgaben im Browser: **erstellen**, **drei Prioritäten**, **Frist (Kalender)**, **Beschreibungstext**, **beliebig tiefe Unteraufgaben**, **erledigt markieren**, **löschen** — Speicherung in **localStorage** (überlebt Browser-Neustart).
 
 **Kein Node.js, kein npm, kein Terminal nötig** — die App ist **eine einzige HTML-Datei**.
 
@@ -25,6 +25,7 @@ Diese Datei im Ordner dieses Projekts:
 | 3 Prioritäten | Hoch, Mittel, Niedrig (Hauptaufgaben und Unteraufgaben) |
 | Unteraufgaben | Beliebig viele Ebenen; pro Eintrag „Unteraufgabe“ → Eingabe einblenden |
 | Fristen | Native Datumsauswahl (`type="date"`) für Haupt- und Unteraufgaben; Anzeige/Änderung pro Zeile; überfällige offene Aufgaben hervorgehoben |
+| Beschreibung | Pro Aufgabe/Unteraufgabe: mehrzeiliges Textfeld; jederzeit änderbar, Speicher bei Eingabe (max. 5000 Zeichen) |
 | Daten bleiben | `localStorage`-Schlüssel `smart-todo-tasks` (ältere Einträge ohne Frist: nachträglich Datum wählbar) |
 
 ## Repository
@@ -52,3 +53,4 @@ cd Smart-ToDos
 | 2026-04-05 | Rekursive Unteraufgaben (beliebige Tiefe) in `SmartToDo.html`; Migration alter Listen. |
 | 2026-04-05 | Unteraufgaben: Priorität wählbar (wie Hauptaufgaben). |
 | 2026-04-05 | Fristen: Kalenderfeld für alle Ebenen; Sortierung nach Priorität → Frist → Erstellung. |
+| 2026-04-05 | Beschreibungstext pro Aufgabe/Unteraufgabe, fortlaufend editierbar. |
