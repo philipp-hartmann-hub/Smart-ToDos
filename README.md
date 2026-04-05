@@ -22,7 +22,7 @@ Diese Datei im Ordner dieses Projekts:
 | Feature | Umsetzung |
 |---------|-----------|
 | Aufgaben erstellen / erledigen / löschen | Formular, Checkbox, Löschen (inkl. aller Unteraufgaben) |
-| 3 Prioritäten | Hoch, Mittel, Niedrig (bei Hauptaufgaben; Unteraufgaben standardmäßig „Mittel“) |
+| 3 Prioritäten | Hoch, Mittel, Niedrig (Hauptaufgaben und Unteraufgaben) |
 | Unteraufgaben | Beliebig viele Ebenen; pro Eintrag „Unteraufgabe“ → Eingabe einblenden |
 | Daten bleiben | `localStorage`-Schlüssel `smart-todo-tasks` (alte flache Listen werden beim Laden übernommen) |
 
@@ -49,3 +49,4 @@ cd Smart-ToDos
 | 2026-04-05 | Root-`index.html`: Hinweistext bei direktem Öffnen; README: Root-`index.html` nicht per file:// nutzen. |
 | 2026-04-05 | **Umstellung:** eine Datei `SmartToDo.html` (Vanilla JS), kein Build/Node; Vite/React-Stack entfernt. |
 | 2026-04-05 | Rekursive Unteraufgaben (beliebige Tiefe) in `SmartToDo.html`; Migration alter Listen. |
+| 2026-04-05 | Unteraufgaben: Priorität wählbar (wie Hauptaufgaben). |

@@ -276,9 +276,16 @@
       }
       .task-add-sub {
         display: flex;
-        gap: 0.4rem;
-        align-items: center;
-        flex-wrap: wrap;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-top: 0.25rem;
+      }
+      .task-add-sub .form__legend {
+        margin-bottom: 0.35rem;
+      }
+      .task-add-sub .form__radioLabel {
+        font-size: 0.82rem;
+        padding: 0.28rem 0.5rem;
       }
       @media (max-width: 520px) {
         .task {
@@ -343,7 +350,6 @@
         var STORAGE_KEY = 'smart-todo-tasks'
         var PRIORITY_ORDER = { high: 0, medium: 1, low: 2 }
         var LABELS = { low: 'Niedrig', medium: 'Mittel', high: 'Hoch' }
-        var DEFAULT_SUB_PRIORITY = 'medium'
 
         function sortSiblings(nodes) {
           nodes.sort(function (a, b) {
@@ -542,6 +548,8 @@
           var addRow = document.createElement('div')
           addRow.className = 'task-add-sub'
           addRow.hidden = true
+          var subPriorityName = 'sub-priority-' + node.id
+
           var subInput = document.createElement('input')
           subInput.type = 'text'
           subInput.className = 'form__input form__input--sub'
@@ -554,20 +562,63 @@
           subBtn.textContent = 'Hinzufügen'
           subBtn.disabled = true
 
+          var subFs = document.createElement('fieldset')
+          subFs.style.margin = '0'
+          subFs.style.padding = '0'
+          subFs.style.border = 'none'
+          var subLeg = document.createElement('div')
+          subLeg.className = 'form__legend'
+          subLeg.textContent = 'Priorität'
+          var subRadios = document.createElement('div')
+          subRadios.className = 'form__radioGroup'
+          subRadios.setAttribute('role', 'radiogroup')
+          subRadios.setAttribute('aria-label', 'Priorität der Unteraufgabe')
+
+          function makeSubRadio(value, checked) {
+            var lab = document.createElement('label')
+            lab.className = 'form__radioLabel'
+            var inp = document.createElement('input')
+            inp.type = 'radio'
+            inp.name = subPriorityName
+            inp.value = value
+            if (checked) inp.checked = true
+            lab.appendChild(inp)
+            lab.appendChild(document.createTextNode(' ' + LABELS[value]))
+            return lab
+          }
+          subRadios.appendChild(makeSubRadio('high', false))
+          subRadios.appendChild(makeSubRadio('medium', true))
+          subRadios.appendChild(makeSubRadio('low', false))
+          subFs.appendChild(subLeg)
+          subFs.appendChild(subRadios)
+
+          function resetSubForm() {
+            subInput.value = ''
+            subBtn.disabled = true
+            var mids = addRow.querySelectorAll('input[name="' + subPriorityName + '"]')
+            for (var r = 0; r < mids.length; r++) {
+              mids[r].checked = mids[r].value === 'medium'
+            }
+          }
+
+          function readSubPriority() {
+            var sel = addRow.querySelector('input[name="' + subPriorityName + '"]:checked')
+            return sel && sel.value ? sel.value : 'medium'
+          }
+
           function tryAddSub() {
             var t = subInput.value.trim()
             if (!t) return
             var child = {
               id: crypto.randomUUID(),
               title: t,
-              priority: DEFAULT_SUB_PRIORITY,
+              priority: readSubPriority(),
               done: false,
               createdAt: new Date().toISOString(),
               children: [],
             }
             addChildToParent(tasks, node.id, child)
-            subInput.value = ''
-            subBtn.disabled = true
+            resetSubForm()
             addRow.hidden = true
             render()
           }
@@ -586,12 +637,18 @@
           btnSub.addEventListener('click', function () {
             addRow.hidden = !addRow.hidden
             if (!addRow.hidden) {
+              resetSubForm()
               subInput.focus()
             }
           })
 
+          var rowSplit = document.createElement('div')
+          rowSplit.className = 'form__row--split'
+          rowSplit.appendChild(subFs)
+          rowSplit.appendChild(subBtn)
+
           addRow.appendChild(subInput)
-          addRow.appendChild(subBtn)
+          addRow.appendChild(rowSplit)
 
           block.appendChild(row)
           block.appendChild(addRow)
