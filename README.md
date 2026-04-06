@@ -38,8 +38,9 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 ## Protokolle (Startseite)
 
 - Eigener Bereich **„Protokolle“** in der Projekt-Startansicht
-- Einträge mit **Datum + Text** erfassen
-- Chronologisch anzeigen (neueste zuerst)
+- Einträge mit **Datum + Bereich + Text** erfassen
+- Bereiche als **Obergruppen** (z. B. `JF`, `Kundentermin`) auswählbar oder direkt neu anlegbar
+- Gruppierte Anzeige nach Bereich, innerhalb eines Bereichs neueste zuerst
 - Einträge bei Bedarf löschen
 
 ## Aufgabenansichten im Überblick
@@ -135,3 +136,4 @@ cd Smart-ToDos
 | 2026-04-06 | Kanban-Auswahl in den Detailbereich verlagert: in Aufgabenliste nur noch bei aufgeklappten Details, im Gantt nur im Popup (nicht in der Standardzeile). |
 | 2026-04-06 | Standardansichten bereinigt: Kanban-Status vollständig aus Standardzeilen entfernt; Umstellung ausschließlich in Detailbereich bzw. Gantt-Popup. |
 | 2026-04-06 | Startseite erweitert: neuer Bereich „Protokolle“ mit datierten Einträgen (anlegen, anzeigen, löschen), persistent in localStorage gespeichert. |
+| 2026-04-06 | Protokolle erweitert: Bereiche als Obergruppen eingeführt (auswählen/neu anlegen), Einträge werden gruppiert nach Bereich dargestellt. |

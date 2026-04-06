@@ -150,6 +150,15 @@
         font-size: 0.78rem;
         opacity: 0.85;
       }
+      .protocols-group {
+        margin-bottom: 0.85rem;
+      }
+      .protocols-group__title {
+        margin: 0 0 0.35rem;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--text-h);
+      }
       .project-card {
         display: flex;
         gap: 0.85rem;
@@ -1365,6 +1374,18 @@
               <label for="protocol-date" class="form__legend">Datum</label>
               <input id="protocol-date" class="form__input form__input--date" type="date" required />
             </div>
+            <div style="flex: 0 0 14rem; min-width: 12rem">
+              <label for="protocol-group" class="form__legend">Bereich</label>
+              <select id="protocol-group" class="form__input"></select>
+              <input
+                id="protocol-group-new"
+                class="form__input"
+                type="text"
+                maxlength="80"
+                placeholder="Neuen Bereich eingeben …"
+                hidden
+              />
+            </div>
             <div style="flex: 1 1 20rem; min-width: 0">
               <label for="protocol-text" class="form__legend">Eintrag</label>
               <textarea
@@ -1618,6 +1639,7 @@
         }
         var KANBAN_BACKLOG_ID = 'kanban-backlog'
         var KANBAN_DEFAULT_LANE_ID = 'kanban-lane-default'
+        var PROTOCOL_DEFAULT_GROUP_ID = 'protocol-group-general'
 
         function defaultKanbanColumns() {
           return [
@@ -1632,7 +1654,18 @@
           return [{ id: KANBAN_DEFAULT_LANE_ID, name: 'Standard' }]
         }
 
-        var state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {}, protocols: [] }
+        function defaultProtocolGroups() {
+          return [{ id: PROTOCOL_DEFAULT_GROUP_ID, name: 'Allgemein' }]
+        }
+
+        var state = {
+          v: 2,
+          projects: [],
+          openProjectId: null,
+          collapsedSubtasks: {},
+          protocols: [],
+          protocolGroups: defaultProtocolGroups(),
+        }
         var taskRootRef = null
 
         function sanitizeDescription(s) {
@@ -1761,13 +1794,50 @@
                 ? p.text.replace(/\r\n/g, '\n').trim().slice(0, MAX_PROTOCOL_TEXT)
                 : ''
             if (!text) continue
-            out.push({ id: p.id, createdAt: p.createdAt, entryDate: entryDate, text: text })
+            var groupId =
+              typeof p.groupId === 'string' && p.groupId
+                ? p.groupId
+                : typeof p.group === 'string' && p.group.trim()
+                  ? p.group.trim().slice(0, 80)
+                  : PROTOCOL_DEFAULT_GROUP_ID
+            out.push({ id: p.id, createdAt: p.createdAt, entryDate: entryDate, text: text, groupId: groupId })
           }
           out.sort(function (a, b) {
             if (a.entryDate !== b.entryDate) return a.entryDate > b.entryDate ? -1 : 1
             return a.createdAt > b.createdAt ? -1 : 1
           })
           return out
+        }
+
+        function parseProtocolGroupsRaw(rawList) {
+          var out = []
+          var seen = {}
+          if (Array.isArray(rawList)) {
+            for (var i = 0; i < rawList.length; i++) {
+              var g = rawList[i]
+              if (!g || typeof g !== 'object') continue
+              if (typeof g.id !== 'string' || !g.id || seen[g.id]) continue
+              var n = typeof g.name === 'string' ? g.name.trim().slice(0, 80) : ''
+              if (!n) continue
+              seen[g.id] = true
+              out.push({ id: g.id, name: n })
+            }
+          }
+          if (!out.length) return defaultProtocolGroups()
+          return out
+        }
+
+        function ensureProtocolDataConsistency() {
+          if (!Array.isArray(state.protocolGroups) || !state.protocolGroups.length) {
+            state.protocolGroups = defaultProtocolGroups()
+          }
+          if (!Array.isArray(state.protocols)) state.protocols = []
+          var valid = {}
+          for (var i = 0; i < state.protocolGroups.length; i++) valid[state.protocolGroups[i].id] = true
+          var fallback = state.protocolGroups[0].id
+          for (var j = 0; j < state.protocols.length; j++) {
+            if (!valid[state.protocols[j].groupId]) state.protocols[j].groupId = fallback
+          }
         }
 
         function normalizeParticipant(raw) {
@@ -2200,7 +2270,14 @@
           try {
             var raw = localStorage.getItem(STORAGE_KEY)
             if (!raw) {
-              state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {}, protocols: [] }
+              state = {
+                v: 2,
+                projects: [],
+                openProjectId: null,
+                collapsedSubtasks: {},
+                protocols: [],
+                protocolGroups: defaultProtocolGroups(),
+              }
               return
             }
             var parsed = JSON.parse(raw)
@@ -2223,7 +2300,9 @@
                   typeof parsed.openProjectId === 'string' ? parsed.openProjectId : null,
                 collapsedSubtasks: collapsed,
                 protocols: parseProtocolEntriesRaw(parsed.protocols),
+                protocolGroups: parseProtocolGroupsRaw(parsed.protocolGroups),
               }
+              ensureProtocolDataConsistency()
               return
             }
             if (Array.isArray(parsed)) {
@@ -2245,12 +2324,21 @@
                 openProjectId: null,
                 collapsedSubtasks: {},
                 protocols: [],
+                protocolGroups: defaultProtocolGroups(),
               }
+              ensureProtocolDataConsistency()
               saveState()
               return
             }
           } catch (e) {}
-          state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {}, protocols: [] }
+          state = {
+            v: 2,
+            projects: [],
+            openProjectId: null,
+            collapsedSubtasks: {},
+            protocols: [],
+            protocolGroups: defaultProtocolGroups(),
+          }
         }
 
         function saveState() {
@@ -2262,6 +2350,7 @@
               openProjectId: state.openProjectId,
               collapsedSubtasks: state.collapsedSubtasks || {},
               protocols: state.protocols || [],
+              protocolGroups: state.protocolGroups || defaultProtocolGroups(),
             }),
           )
         }
@@ -3260,6 +3349,8 @@
         var projectsEmpty = document.getElementById('projects-empty')
         var protocolForm = document.getElementById('protocol-form')
         var protocolDate = document.getElementById('protocol-date')
+        var protocolGroup = document.getElementById('protocol-group')
+        var protocolGroupNew = document.getElementById('protocol-group-new')
         var protocolText = document.getElementById('protocol-text')
         var protocolList = document.getElementById('protocol-list')
         var btnBack = document.getElementById('btn-back-projects')
@@ -4018,6 +4109,7 @@
           viewTasks.hidden = true
           viewProjects.hidden = false
           closeProjectForm()
+          renderProtocolGroupSelect()
           renderProjectList()
           renderProtocols()
         }
@@ -4040,6 +4132,7 @@
 
         function renderProtocols() {
           if (!protocolList) return
+          ensureProtocolDataConsistency()
           protocolList.innerHTML = ''
           var list = Array.isArray(state.protocols) ? state.protocols : []
           if (!list.length) {
@@ -4049,37 +4142,78 @@
             protocolList.appendChild(liEmpty)
             return
           }
+          var grouped = {}
           for (var i = 0; i < list.length; i++) {
-            var p = list[i]
-            var li = document.createElement('li')
-            li.className = 'protocols-item'
-            var left = document.createElement('div')
-            left.style.minWidth = '0'
-            var meta = document.createElement('div')
-            meta.className = 'protocols-item__meta'
-            meta.textContent = formatDueDe(p.entryDate)
-            var txt = document.createElement('p')
-            txt.className = 'protocols-item__text'
-            txt.textContent = p.text
-            left.appendChild(meta)
-            left.appendChild(txt)
-            var rm = document.createElement('button')
-            rm.type = 'button'
-            rm.className = 'task__btn task__btn--danger'
-            rm.textContent = 'Löschen'
-            ;(function (pid) {
-              rm.addEventListener('click', function () {
-                state.protocols = (state.protocols || []).filter(function (x) {
-                  return x.id !== pid
-                })
-                saveState()
-                renderProtocols()
-              })
-            })(p.id)
-            li.appendChild(left)
-            li.appendChild(rm)
-            protocolList.appendChild(li)
+            var gid = list[i].groupId
+            if (!grouped[gid]) grouped[gid] = []
+            grouped[gid].push(list[i])
           }
+          for (var g = 0; g < state.protocolGroups.length; g++) {
+            var group = state.protocolGroups[g]
+            var entries = grouped[group.id]
+            if (!entries || !entries.length) continue
+            var groupLi = document.createElement('li')
+            groupLi.className = 'protocols-group'
+            var title = document.createElement('h4')
+            title.className = 'protocols-group__title'
+            title.textContent = group.name
+            groupLi.appendChild(title)
+            var inner = document.createElement('ul')
+            inner.className = 'protocols-list'
+            for (var ei = 0; ei < entries.length; ei++) {
+              var p = entries[ei]
+              var li = document.createElement('li')
+              li.className = 'protocols-item'
+              var left = document.createElement('div')
+              left.style.minWidth = '0'
+              var meta = document.createElement('div')
+              meta.className = 'protocols-item__meta'
+              meta.textContent = formatDueDe(p.entryDate)
+              var txt = document.createElement('p')
+              txt.className = 'protocols-item__text'
+              txt.textContent = p.text
+              left.appendChild(meta)
+              left.appendChild(txt)
+              var rm = document.createElement('button')
+              rm.type = 'button'
+              rm.className = 'task__btn task__btn--danger'
+              rm.textContent = 'Löschen'
+              ;(function (pid) {
+                rm.addEventListener('click', function () {
+                  state.protocols = (state.protocols || []).filter(function (x) {
+                    return x.id !== pid
+                  })
+                  saveState()
+                  renderProtocols()
+                })
+              })(p.id)
+              li.appendChild(left)
+              li.appendChild(rm)
+              inner.appendChild(li)
+            }
+            groupLi.appendChild(inner)
+            protocolList.appendChild(groupLi)
+          }
+        }
+
+        function renderProtocolGroupSelect() {
+          if (!protocolGroup) return
+          ensureProtocolDataConsistency()
+          var prev = protocolGroup.value
+          protocolGroup.innerHTML = ''
+          for (var i = 0; i < state.protocolGroups.length; i++) {
+            var g = state.protocolGroups[i]
+            var opt = document.createElement('option')
+            opt.value = g.id
+            opt.textContent = g.name
+            protocolGroup.appendChild(opt)
+          }
+          var optNew = document.createElement('option')
+          optNew.value = '__new__'
+          optNew.textContent = '+ Neuer Bereich …'
+          protocolGroup.appendChild(optNew)
+          protocolGroup.value = prev && protocolGroup.querySelector('option[value="' + prev + '"]') ? prev : state.protocolGroups[0].id
+          if (protocolGroupNew) protocolGroupNew.hidden = protocolGroup.value !== '__new__'
         }
 
         function renderProjectCard(p) {
@@ -5619,6 +5753,13 @@
         })
 
         if (protocolDate) protocolDate.value = todayYmd()
+        if (protocolGroup) {
+          protocolGroup.addEventListener('change', function () {
+            if (!protocolGroupNew) return
+            protocolGroupNew.hidden = protocolGroup.value !== '__new__'
+            if (!protocolGroupNew.hidden) protocolGroupNew.focus()
+          })
+        }
         if (protocolForm) {
           protocolForm.addEventListener('submit', function (e) {
             e.preventDefault()
@@ -5631,16 +5772,45 @@
               alert('Bitte einen Protokolltext eingeben.')
               return
             }
+            ensureProtocolDataConsistency()
+            var selectedGroupId = protocolGroup ? protocolGroup.value : PROTOCOL_DEFAULT_GROUP_ID
+            if (selectedGroupId === '__new__') {
+              var newGroupName =
+                protocolGroupNew && typeof protocolGroupNew.value === 'string'
+                  ? protocolGroupNew.value.trim().slice(0, 80)
+                  : ''
+              if (!newGroupName) {
+                alert('Bitte einen Namen für den neuen Bereich eingeben.')
+                return
+              }
+              var existingGroup = null
+              for (var gi = 0; gi < state.protocolGroups.length; gi++) {
+                if (state.protocolGroups[gi].name.toLowerCase() === newGroupName.toLowerCase()) {
+                  existingGroup = state.protocolGroups[gi]
+                  break
+                }
+              }
+              if (existingGroup) {
+                selectedGroupId = existingGroup.id
+              } else {
+                selectedGroupId = crypto.randomUUID()
+                state.protocolGroups.push({ id: selectedGroupId, name: newGroupName })
+              }
+            }
+            if (!selectedGroupId) selectedGroupId = state.protocolGroups[0].id
             if (!Array.isArray(state.protocols)) state.protocols = []
             state.protocols.unshift({
               id: crypto.randomUUID(),
               createdAt: new Date().toISOString(),
               entryDate: protocolDate.value,
+              groupId: selectedGroupId,
               text: t,
             })
             saveState()
             protocolText.value = ''
             protocolDate.value = todayYmd()
+            if (protocolGroupNew) protocolGroupNew.value = ''
+            renderProtocolGroupSelect()
             renderProtocols()
           })
         }
