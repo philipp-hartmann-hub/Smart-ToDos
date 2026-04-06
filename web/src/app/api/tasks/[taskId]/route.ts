@@ -7,6 +7,13 @@ import { readSessionFromCookie } from "@/lib/auth";
 import { canAccessProject } from "@/lib/access";
 import { validateDependsOnUpdate } from "@/lib/task-deps";
 import { assigneesAreProjectMembers } from "@/lib/project-assignees";
+import {
+  columnBelongsToProject,
+  ensureKanbanConfig,
+  KANBAN_BACKLOG_ID,
+  KANBAN_DEFAULT_LANE_ID,
+  laneBelongsToProject,
+} from "@/lib/kanban-config";
 
 const patchSchema = z.object({
   title: z.string().min(1).max(500).optional(),
@@ -54,6 +61,18 @@ export async function PATCH(req: Request, context: { params: Promise<{ taskId: s
     if (!okMembers) return NextResponse.json({ error: "Zuständige müssen Projektmitglieder sein." }, { status: 400 });
   }
 
+  await ensureKanbanConfig(db, task.projectId);
+  let nextCol = data.kanbanColumnId ?? task.kanbanColumnId;
+  let nextLane = data.swimlaneId ?? task.swimlaneId;
+  if (data.kanbanColumnId !== undefined) {
+    const okCol = await columnBelongsToProject(db, task.projectId, data.kanbanColumnId);
+    nextCol = okCol ? data.kanbanColumnId : KANBAN_BACKLOG_ID;
+  }
+  if (data.swimlaneId !== undefined) {
+    const okLane = await laneBelongsToProject(db, task.projectId, data.swimlaneId);
+    nextLane = okLane ? data.swimlaneId : KANBAN_DEFAULT_LANE_ID;
+  }
+
   const updated = await db
     .update(tasks)
     .set({
@@ -64,8 +83,8 @@ export async function PATCH(req: Request, context: { params: Promise<{ taskId: s
       description: data.description !== undefined ? data.description : task.description,
       done: data.done ?? task.done,
       archived: data.archived ?? task.archived,
-      kanbanColumnId: data.kanbanColumnId ?? task.kanbanColumnId,
-      swimlaneId: data.swimlaneId ?? task.swimlaneId,
+      kanbanColumnId: nextCol,
+      swimlaneId: nextLane,
       dependsOnTaskIds:
         data.dependsOnTaskIds !== undefined ? data.dependsOnTaskIds : task.dependsOnTaskIds,
       assigneeIds: data.assigneeIds !== undefined ? data.assigneeIds : task.assigneeIds,

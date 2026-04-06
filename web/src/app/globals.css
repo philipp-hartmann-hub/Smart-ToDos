@@ -125,6 +125,70 @@ button.secondary {
   margin-bottom: 0.45rem;
 }
 
+/* Kanban 1:1 Grid (Spalten x Swimlanes) */
+.kanban-board {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.kanban-board__head,
+.kanban-board__lane {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 0.8rem;
+  align-items: start;
+}
+
+.kanban-board__corner {
+  height: 44px;
+}
+
+.kanban-board__colhead {
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 0.6rem;
+  background: #0b1220;
+}
+
+.kanban-board__lanehead {
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 0.6rem;
+  background: #0b1220;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.kanban-board__lane {
+  grid-template-columns: 220px repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.kanban-cell {
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 0.6rem;
+  background: #0b1220;
+  min-height: 220px;
+}
+
+.kanban-cell .kanban-column__add input {
+  width: 100%;
+}
+
+.kanban-cell .kanban-column__add {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.kanban-cell .kanban-cards {
+  max-height: 320px;
+  overflow: auto;
+}
+
 /* Gantt */
 .gantt-card h2 {
   margin-top: 0;

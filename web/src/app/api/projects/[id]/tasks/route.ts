@@ -6,6 +6,13 @@ import { projects, tasks } from "@/lib/schema";
 import { readSessionFromCookie } from "@/lib/auth";
 import { canAccessProject } from "@/lib/access";
 import { assigneesAreProjectMembers } from "@/lib/project-assignees";
+import {
+  columnBelongsToProject,
+  ensureKanbanConfig,
+  KANBAN_BACKLOG_ID,
+  KANBAN_DEFAULT_LANE_ID,
+  laneBelongsToProject,
+} from "@/lib/kanban-config";
 
 const createSchema = z.object({
   title: z.string().min(1).max(500),
@@ -61,6 +68,14 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     if (!okMembers) return NextResponse.json({ error: "Zuständige müssen Projektmitglieder sein." }, { status: 400 });
   }
 
+  await ensureKanbanConfig(db, projectId);
+  const rawCol = parsed.data.kanbanColumnId || KANBAN_BACKLOG_ID;
+  const rawLane = parsed.data.swimlaneId || KANBAN_DEFAULT_LANE_ID;
+  const colOk = await columnBelongsToProject(db, projectId, rawCol);
+  const laneOk = await laneBelongsToProject(db, projectId, rawLane);
+  const kanbanColumnId = colOk ? rawCol : KANBAN_BACKLOG_ID;
+  const swimlaneId = laneOk ? rawLane : KANBAN_DEFAULT_LANE_ID;
+
   const inserted = await db
     .insert(tasks)
     .values({
@@ -71,8 +86,8 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       startDate: parsed.data.startDate || null,
       dueDate: parsed.data.dueDate || null,
       description: parsed.data.description || null,
-      kanbanColumnId: parsed.data.kanbanColumnId || "kanban-backlog",
-      swimlaneId: parsed.data.swimlaneId || "kanban-lane-default",
+      kanbanColumnId,
+      swimlaneId,
       assigneeIds,
       done: false,
       archived: false,

@@ -119,6 +119,7 @@ Erster technischer Start liegt jetzt in `web/`:
 - Gantt-Basis in Cloud ergänzt: Umschaltung Liste/Projektplan/Kanban, Zeitskala Tag/Monat/Jahr, Balken aus Beginn/Frist, hierarchische Zeilen mit Auf-/Zuklappen, Abhängigkeitslinien und Bearbeiten-Modal inkl. Vorgänger-Auswahl (serverseitig validiert)
 - Aufgabenliste in Cloud ergänzt: Filter (Suche, Zuständiger, Priorität, Fristfenster, Kanban-Spalte), Zuständige pro Aufgabe als Mehrfachauswahl nur unter Projektmitgliedern; bei Admin-Entzug einer Projektzuordnung werden betroffene Zuweisungen bereinigt
 - Protokolle in Cloud ergänzt: Bereiche → Sitzungen (Datum) → Zeilen (Verantwortlicher, Erläuterung, Aufgaben, Ergebnis) inkl. Suche/Filter (Bereich, Verantwortlicher, Aufgabe, Monat/Jahr) und Aufgabensprung in den Gantt
+- Kanban in Cloud erweitert: konfigurierbare Spalten + Swimlanes pro Projekt, Drag-and-Drop zwischen Zellen, Löschen von Spalten/Lanes ordnet Aufgaben automatisch Backlog/Standard zu
 
 Lokaler Start:
 
@@ -216,3 +217,5 @@ Danach auf Vercel deployen und dieselben Env-Variablen im Vercel-Projekt hinterl
 | 2026-04-06 | Admin-Zugriff geschärft: Admin gilt in der Cloud global für alle Projekte und ist automatisch als zuständige Person auswählbar (ohne Projektmitgliedschaft). |
 | 2026-04-06 | Admin-Useranlage verbessert: generierte Benutzername/Passwort-Kombination bleibt sichtbar (lokal gespeicherte Zugangsdatenliste), kein sofortiger Reload mehr nach Anlage. |
 | 2026-04-06 | Welle 5 gestartet: Protokolle in der Cloud ergänzt (DB-Tabellen + API + Protokoll-Ansicht im Projekt inkl. Aufgaben-Zuordnung und Filter). |
+| 2026-04-06 | Protokoll-Sprung vervollständigt: „Aufgabe öffnen“ aus Protokollen wechselt jetzt direkt in den Gantt der Zielkarte; Protokollansicht lädt Daten beim Öffnen automatisch. |
+| 2026-04-06 | Kanban-Parität ausgebaut: Spalten/Swimlanes persistent pro Projekt, Drag-and-Drop, automatische Rückzuordnung beim Löschen. |

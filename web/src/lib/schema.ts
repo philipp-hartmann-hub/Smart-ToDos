@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, index, jsonb, pgTable, text, timestamp, uuid, primaryKey } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, pgTable, text, timestamp, uuid, primaryKey } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -56,6 +56,42 @@ export const tasks = pgTable("tasks", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const kanbanColumns = pgTable(
+  "kanban_columns",
+  {
+    /** IDs bleiben textuell kompatibel mit Task-Feld `kanbanColumnId` (z. B. `kanban-backlog`). */
+    id: text("id").primaryKey(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    projectIdx: index("kanban_columns_project_id_idx").on(t.projectId),
+  }),
+);
+
+export const kanbanSwimlanes = pgTable(
+  "kanban_swimlanes",
+  {
+    /** IDs bleiben textuell kompatibel mit Task-Feld `swimlaneId` (z. B. `kanban-lane-default`). */
+    id: text("id").primaryKey(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    projectIdx: index("kanban_swimlanes_project_id_idx").on(t.projectId),
+  }),
+);
 
 export const protocolGroups = pgTable(
   "protocol_groups",
