@@ -26,6 +26,10 @@ Diese Datei im Ordner dieses Projekts:
 | Aufgaben (im Projekt) | Erstellen / erledigen / löschen; Formular, Checkbox, Löschen (inkl. aller Unteraufgaben) |
 | 3 Prioritäten | Hoch, Mittel, Niedrig (Hauptaufgaben und Unteraufgaben) |
 | Unteraufgaben | Beliebig viele Ebenen; pro Eintrag „Unteraufgabe“ → Eingabe einblenden |
+| Aufgabenansichten | Umschaltbar zwischen **Aufgabenliste**, **Projektplan (Gantt)** und **Kanban (Dummy-Platzhalter)** |
+| Synchronität der Ansichten | Alle Ansichten arbeiten auf demselben Aufgaben-Datenmodell; Änderungen/Neuanlagen erscheinen nach jedem Rendern überall konsistent |
+| Projektplan (Gantt) | Zeitbalken aus Beginn/Frist, auf-/zuklappbare Hierarchie, Abhängigkeiten als Verbindungslinien, schnelles Anlegen von Haupt- und Unteraufgaben |
+| Gantt-Bedienung | Größere, besser lesbare Timeline; pro Zeile „Karte öffnen“ springt zur entsprechenden Aufgabenkarte in der Listenansicht |
 | Fristen | Native Datumsauswahl (`type="date"`) für Haupt- und Unteraufgaben; Anzeige/Änderung pro Zeile; überfällige offene Aufgaben hervorgehoben |
 | Beschreibung | Pro Aufgabe/Unteraufgabe: mehrzeiliges Textfeld; jederzeit änderbar, Speicher bei Eingabe (max. 5000 Zeichen) |
 | Daten bleiben | `localStorage`-Schlüssel `smart-todo-tasks` — Format `v:2` mit `projects[]`; reine Aufgabenlisten (älter) werden in ein Projekt **„Mein Projekt“** migriert |
@@ -59,3 +63,6 @@ cd Smart-ToDos
 | 2026-04-05 | Produktname: **Smartes Projektplanungstool** (UI, Titel, README); Einstiegsdatei weiter `SmartToDo.html`. |
 | 2026-04-05 | Übergeordnete **Projekte** (Beschreibung, Bild), Aufgaben pro Projekt; Migration alter Listen. |
 | 2026-04-05 | **Teilnehmende** pro Projekt (Name, Funktion); **Zuständige** pro Aufgabe/Unteraufgabe (mehrfach). |
+| 2026-04-06 | Aufgabenansichten erweitert: Umschalter für Aufgabenliste, Projektplan (Gantt mit Hierarchie + Abhängigkeitslinien) und Kanban-Dummy; Anlegen von Aufgaben auch in der Projektplan-Ansicht. |
+| 2026-04-06 | Ansichts-Synchronität geschärft: View-Wechsel triggert zentrales Re-Rendern, damit Listen-, Gantt- und Kanban-Panel denselben Aufgabenstand zeigen. |
+| 2026-04-06 | Gantt verbessert: größere, übersichtlichere Darstellung; pro Gantt-Zeile „Karte öffnen“ mit Sprung und Highlight zur Aufgabenkarte in der Listenansicht. |

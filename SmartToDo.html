@@ -151,6 +151,7 @@
         opacity: 0.88;
         line-height: 1.35;
         display: -webkit-box;
+        line-clamp: 2;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
@@ -171,6 +172,9 @@
         background: var(--surface);
         border: 1px solid var(--border);
         box-shadow: var(--shadow-sm);
+      }
+      .form[hidden] {
+        display: none !important;
       }
       .form__input {
         width: 100%;
@@ -250,6 +254,119 @@
         padding: 0.45rem 0.75rem;
         font-size: 0.85rem;
       }
+      .task-add-toolbar {
+        margin-bottom: 0.75rem;
+      }
+      .task-add-toolbar .form__submit--toolbar {
+        width: 100%;
+        max-width: 22rem;
+      }
+      .task-view-switch {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 0 0 0.9rem;
+      }
+      .task-view-switch__btn {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-h);
+        border-radius: 8px;
+        padding: 0.45rem 0.7rem;
+        font: inherit;
+        cursor: pointer;
+      }
+      .task-view-switch__btn.is-active {
+        background: var(--accent-bg);
+        border-color: var(--accent-border);
+      }
+      .task-view-panel[hidden] {
+        display: none !important;
+      }
+      .gantt {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+        overflow: hidden;
+      }
+      .gantt__toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.7rem 0.85rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .gantt__grid {
+        position: relative;
+        overflow-x: auto;
+        padding: 0.9rem 1rem 1.1rem;
+      }
+      .gantt__inner {
+        position: relative;
+        min-width: 1200px;
+      }
+      .gantt__row {
+        display: grid;
+        grid-template-columns: 440px 1fr;
+        align-items: center;
+        gap: 1rem;
+        min-height: 52px;
+        border-bottom: 1px dashed var(--border);
+      }
+      .gantt__row:last-child {
+        border-bottom: none;
+      }
+      .gantt__task {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 0;
+      }
+      .gantt__toggle {
+        width: 1.8rem;
+        height: 1.8rem;
+        border: 1px solid var(--border);
+        background: transparent;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .gantt__title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .gantt__lane {
+        position: relative;
+        height: 30px;
+      }
+      .gantt__bar {
+        position: absolute;
+        top: 4px;
+        height: 22px;
+        border-radius: 11px;
+        background: var(--accent);
+        opacity: 0.88;
+      }
+      .gantt__bar--done {
+        opacity: 0.45;
+      }
+      .gantt__deps {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .task--flash {
+        box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.55) !important;
+      }
+      .kanban-dummy {
+        border: 1px dashed var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        background: var(--surface);
+      }
       .form__submit:disabled {
         opacity: 0.45;
         cursor: not-allowed;
@@ -280,6 +397,9 @@
         padding-left: 0.75rem;
         border-left: 2px solid var(--border);
       }
+      .task-tree--nested.task-tree--subs-collapsed {
+        display: none !important;
+      }
       .task-block {
         display: flex;
         flex-direction: column;
@@ -303,6 +423,32 @@
         align-items: flex-start;
         justify-content: space-between;
         gap: 0.5rem;
+      }
+      .task__collapse-subs {
+        flex-shrink: 0;
+        margin: 0;
+        min-width: 2rem;
+        min-height: 2rem;
+        padding: 0.25rem 0.4rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        color: inherit;
+        font: inherit;
+        font-size: 0.85rem;
+        line-height: 1;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .task__collapse-subs:hover {
+        background: var(--bg-soft, rgba(0, 0, 0, 0.06));
+      }
+      @media (prefers-color-scheme: dark) {
+        .task__collapse-subs:hover {
+          background: rgba(255, 255, 255, 0.08);
+        }
       }
       .task--done {
         opacity: 0.72;
@@ -341,17 +487,36 @@
         align-items: center;
         gap: 0.4rem 0.65rem;
       }
+      .task__dates {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 0.65rem 1rem;
+        width: 100%;
+      }
+      .task__date-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        flex: 1 1 9rem;
+        min-width: 0;
+      }
       .task__due-label {
         font-size: 0.75rem;
         font-weight: 600;
         color: var(--text-h);
         white-space: nowrap;
       }
-      .task__due .form__input--date {
-        flex: 1 1 10rem;
+      .task__due .form__input--date,
+      .task__date-field .form__input--date {
+        width: 100%;
         min-width: 0;
         font-size: 0.88rem;
         padding: 0.4rem 0.55rem;
+      }
+      .task__due-hint--block {
+        flex: 1 0 100%;
+        margin-top: 0.1rem;
       }
       .task__due-hint {
         font-size: 0.72rem;
@@ -455,6 +620,183 @@
         gap: 0.5rem;
         padding-top: 0.25rem;
       }
+      .task-add-sub[hidden] {
+        display: none !important;
+      }
+      .task-add-sub--hidden {
+        display: none !important;
+      }
+      .task-attachments {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .task-attachments__hint {
+        margin: 0;
+        font-size: 0.78rem;
+        opacity: 0.85;
+        line-height: 1.35;
+      }
+      .task-attachments__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+      .task-attachments__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.4rem 0.55rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        font-size: 0.84rem;
+        background: var(--bg);
+      }
+      .task-attachments__name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+        min-width: 0;
+      }
+      .task-attachments__actions {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        flex-shrink: 0;
+      }
+      .task__quick-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        align-items: center;
+        padding: 0.45rem 0 0;
+        margin: 0.15rem 0 0.35rem;
+        border-top: 1px dashed var(--border);
+      }
+      .task__quick-strip:empty {
+        display: none;
+      }
+      .task__quick-chip {
+        display: inline-flex;
+        align-items: center;
+        max-width: 100%;
+        padding: 0.25rem 0.55rem;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: inherit;
+        text-decoration: none;
+        cursor: pointer;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .task__quick-chip:hover {
+        border-color: var(--accent);
+        color: inherit;
+      }
+      .task__quick-chip--ext {
+        border-style: solid;
+      }
+      .task-links-editor {
+        margin-bottom: 0.25rem;
+      }
+      .task-links-editor__row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: flex-end;
+      }
+      .task-links-editor__row .form__input {
+        flex: 1 1 8rem;
+        min-width: 0;
+      }
+      .task-history {
+        margin: 0.35rem 0 0.5rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.4rem 0.7rem;
+        background: var(--bg);
+      }
+      .task-history__summary {
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.88rem;
+        list-style: none;
+        user-select: none;
+      }
+      .task-history__summary::-webkit-details-marker {
+        display: none;
+      }
+      .task-history__inner {
+        margin-top: 0.65rem;
+        padding-top: 0.65rem;
+        border-top: 1px dashed var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .task-history__form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem 1rem;
+        align-items: end;
+      }
+      @media (max-width: 520px) {
+        .task-history__form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .task-history__label-block {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      .task-history__label-block--full {
+        grid-column: 1 / -1;
+      }
+      .task-history__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .task-history__item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        padding: 0.55rem 0.65rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+      .task-history__meta {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-h);
+        line-height: 1.35;
+      }
+      .task-history__foot {
+        font-size: 0.72rem;
+        opacity: 0.82;
+      }
+      .task-history__text {
+        white-space: pre-wrap;
+        font-size: 0.85rem;
+        line-height: 1.45;
+      }
+      .task-history__item-actions {
+        display: flex;
+        justify-content: flex-end;
+      }
       .task-add-sub .form__legend {
         margin-bottom: 0.35rem;
       }
@@ -473,6 +815,9 @@
         flex-direction: column;
         gap: 0.75rem;
         margin-bottom: 1rem;
+      }
+      .participant-form__form[hidden] {
+        display: none !important;
       }
       .participant-list {
         list-style: none;
@@ -498,18 +843,124 @@
         flex-direction: column;
         gap: 0.35rem;
       }
-      .task__assign-checks {
+      .assign-picker {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .assign-picker__chips {
         display: flex;
         flex-wrap: wrap;
         gap: 0.35rem;
+        align-items: center;
+        min-height: 1.5rem;
       }
-      .task__assign-checks .form__radioLabel {
+      .assign-picker__chips:empty {
+        display: none;
+      }
+      .assign-picker__chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.2rem 0.45rem 0.2rem 0.55rem;
+        border-radius: 999px;
         font-size: 0.82rem;
+        background: var(--bg-soft, rgba(0, 0, 0, 0.06));
+        border: 1px solid var(--border);
+        max-width: 100%;
       }
-      .task__assign-hint {
+      .assign-picker__chip > span:first-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .assign-picker__chip-remove {
+        flex-shrink: 0;
         margin: 0;
-        font-size: 0.82rem;
+        padding: 0 0.15rem;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font: inherit;
+        font-size: 1.1rem;
+        line-height: 1;
+        opacity: 0.65;
+        border-radius: 4px;
+      }
+      .assign-picker__chip-remove:hover {
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.08);
+      }
+      .assign-picker__add {
+        position: relative;
+        align-self: flex-start;
+      }
+      .assign-picker__toggle {
+        font: inherit;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.65rem;
+        border-radius: 8px;
+        border: 1px dashed var(--border);
+        background: var(--bg);
+        cursor: pointer;
+        color: inherit;
+      }
+      .assign-picker__toggle:hover:not(:disabled) {
+        border-style: solid;
+        background: var(--bg-soft, rgba(0, 0, 0, 0.04));
+      }
+      .assign-picker__toggle:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .assign-picker__dropdown {
+        position: absolute;
+        left: 0;
+        top: calc(100% + 4px);
+        z-index: 40;
+        min-width: min(100%, 18rem);
+        max-width: 22rem;
+        padding: 0.5rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+      .assign-picker__search {
+        width: 100%;
+        margin-bottom: 0.4rem;
+        font-size: 0.88rem;
+      }
+      .assign-picker__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        max-height: 11rem;
+        overflow-y: auto;
+      }
+      .assign-picker__option {
+        display: block;
+        width: 100%;
+        text-align: left;
+        font: inherit;
+        font-size: 0.86rem;
+        padding: 0.4rem 0.45rem;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        cursor: pointer;
+        color: inherit;
+      }
+      .assign-picker__option:hover,
+      .assign-picker__option:focus-visible {
+        background: var(--bg-soft, rgba(0, 0, 0, 0.06));
+        outline: none;
+      }
+      .assign-picker__empty-msg {
+        margin: 0.25rem 0 0;
+        font-size: 0.78rem;
         opacity: 0.85;
+        line-height: 1.35;
       }
       @media (max-width: 520px) {
         .task__top {
@@ -533,10 +984,22 @@
     <div class="app" id="view-projects">
       <header>
         <h1>Smartes Projektplanungstool</h1>
-        <p class="subtitle">Projekte anlegen, öffnen und Aufgaben mit Priorität, Frist und Unteraufgaben verwalten — lokal gespeichert.</p>
+        <p class="subtitle">Projekte anlegen, öffnen und Aufgaben mit Priorität, Beginn, Frist und Unteraufgaben verwalten — lokal gespeichert.</p>
       </header>
 
-      <form class="form" id="project-form" aria-label="Neues Projekt">
+      <div class="task-add-toolbar">
+        <button
+          type="button"
+          class="form__submit form__submit--toolbar"
+          id="btn-toggle-project-form"
+          aria-expanded="false"
+          aria-controls="project-form"
+        >
+          Neues Projekt
+        </button>
+      </div>
+
+      <form class="form" id="project-form" aria-label="Neues Projekt" hidden>
         <div>
           <label for="project-title" class="form__legend">Projektname</label>
           <input
@@ -570,7 +1033,7 @@
       </form>
 
       <section aria-label="Projektliste">
-        <p class="list__empty" id="projects-empty">Noch keine Projekte — oben anlegen.</p>
+        <p class="list__empty" id="projects-empty">Noch keine Projekte — „Neues Projekt“ nutzen.</p>
         <div class="project-list" id="project-list" hidden></div>
       </section>
     </div>
@@ -585,7 +1048,23 @@
 
       <section class="form participants-panel" id="participants-panel" aria-label="Teilnehmende">
         <h3 class="participants-panel__title">Teilnehmende</h3>
-        <form id="participant-form" class="participant-form__form">
+        <div class="task-add-toolbar">
+          <button
+            type="button"
+            class="form__submit form__submit--toolbar"
+            id="btn-toggle-participant-form"
+            aria-expanded="false"
+            aria-controls="participant-form"
+          >
+            Teilnehmenden hinzufügen
+          </button>
+        </div>
+        <form
+          id="participant-form"
+          class="participant-form__form"
+          hidden
+          aria-label="Neuen Teilnehmenden erfassen"
+        >
           <div class="form__row--split">
             <div style="flex: 1; min-width: 8rem">
               <label for="pf-first" class="form__legend">Vorname</label>
@@ -610,7 +1089,19 @@
         <ul id="participant-list" class="participant-list"></ul>
       </section>
 
-      <form class="form" id="task-form" aria-label="Neue Hauptaufgabe">
+      <div class="task-add-toolbar">
+        <button
+          type="button"
+          class="form__submit form__submit--toolbar"
+          id="btn-toggle-main-task"
+          aria-expanded="false"
+          aria-controls="task-form"
+        >
+          Aufgabe hinzufügen
+        </button>
+      </div>
+
+      <form class="form" id="task-form" aria-label="Neue Hauptaufgabe" hidden>
         <div>
           <label for="task-title" class="visually-hidden">Aufgabentitel</label>
           <input
@@ -632,14 +1123,36 @@
             placeholder="Details zur Aufgabe …"
           ></textarea>
         </div>
-        <div>
-          <label for="task-due" class="form__legend">Frist</label>
-          <input id="task-due" class="form__input form__input--date" type="date" required />
+        <div class="form__row--split" style="align-items: flex-end">
+          <div style="flex: 1 1 10rem; min-width: 0">
+            <label for="task-start" class="form__legend">Beginn</label>
+            <input id="task-start" class="form__input form__input--date" type="date" />
+          </div>
+          <div style="flex: 1 1 10rem; min-width: 0">
+            <label for="task-due" class="form__legend">Frist</label>
+            <input id="task-due" class="form__input form__input--date" type="date" required />
+          </div>
         </div>
         <div class="task__assign-wrap" id="new-task-assignees-wrap">
-          <span class="form__legend">Zuständig</span>
-          <div id="new-task-assignees" class="task__assign-checks" aria-label="Zuständige für neue Aufgabe"></div>
+          <span class="form__legend" id="new-task-assignees-legend">Zuständig</span>
+          <div
+            id="new-task-assignees"
+            class="assign-picker-mount"
+            role="group"
+            aria-labelledby="new-task-assignees-legend"
+          ></div>
         </div>
+        <div class="task__assign-wrap" id="new-task-deps-wrap">
+          <span class="form__legend" id="new-task-deps-legend">Zuerst erledigen</span>
+          <div
+            id="main-task-deps"
+            class="assign-picker-mount"
+            role="group"
+            aria-labelledby="new-task-deps-legend"
+          ></div>
+        </div>
+        <div class="task-attachments" id="main-task-attachments-wrap"></div>
+        <div id="main-task-links-wrap"></div>
         <div class="form__row--split">
           <fieldset style="margin: 0; padding: 0; border: none; flex: 1 1 auto; min-width: 0">
             <div class="form__legend">Priorität</div>
@@ -659,9 +1172,42 @@
         </div>
       </form>
 
+      <div class="task-view-switch" role="tablist" aria-label="Aufgabenansicht wählen">
+        <button type="button" class="task-view-switch__btn is-active" id="btn-view-list" role="tab" aria-selected="true">
+          Aufgabenliste
+        </button>
+        <button type="button" class="task-view-switch__btn" id="btn-view-gantt" role="tab" aria-selected="false">
+          Projektplan
+        </button>
+        <button type="button" class="task-view-switch__btn" id="btn-view-kanban" role="tab" aria-selected="false">
+          Kanban
+        </button>
+      </div>
+
       <section class="list" aria-label="Aufgabenliste">
-        <p class="list__empty" id="empty-msg">Noch keine Aufgaben. Leg los oben.</p>
-        <ul class="task-tree" id="task-list" hidden></ul>
+        <div id="task-panel-list" class="task-view-panel">
+          <p class="list__empty" id="empty-msg">Noch keine Aufgaben — „Aufgabe hinzufügen“ nutzen.</p>
+          <ul class="task-tree" id="task-list" hidden></ul>
+        </div>
+        <div id="task-panel-gantt" class="task-view-panel" hidden>
+          <div class="gantt">
+            <div class="gantt__toolbar">
+              <strong>Projektplan (Gantt)</strong>
+              <button type="button" class="form__submit form__submit--small" id="btn-gantt-add-main">
+                Hauptaufgabe anlegen
+              </button>
+            </div>
+            <div class="gantt__grid">
+              <div id="gantt-root" class="gantt__inner"></div>
+            </div>
+          </div>
+        </div>
+        <div id="task-panel-kanban" class="task-view-panel" hidden>
+          <div class="kanban-dummy">
+            <strong>Kanban (Dummy)</strong>
+            <p style="margin: 0.4rem 0 0">Diese Ansicht ist vorbereitet und wird im nächsten Schritt definiert.</p>
+          </div>
+        </div>
       </section>
     </div>
 
@@ -673,7 +1219,15 @@
         var MAX_DESC = 5000
         var MAX_PROJECT_TITLE = 200
         var MAX_IMAGE_DATA_URL = 480000
+        var MAX_FILE_DATA_URL = 2500000
+        var MAX_ATTACHMENTS_PER_TASK = 25
+        var MAX_LINKS_PER_TASK = 30
+        var MAX_LINK_URL = 2048
+        var MAX_LINK_LABEL = 200
+        var MAX_HISTORY_ENTRIES = 80
+        var MAX_HISTORY_TEXT = 4000
         var MAX_NAME = 120
+        var MAX_DEPENDS_PER_TASK = 40
         var ROLE_LABELS = {
           qs: 'QS',
           projektleitung: 'Projektleitung',
@@ -681,7 +1235,7 @@
           projektmitarbeit: 'Projektmitarbeit',
         }
 
-        var state = { v: 2, projects: [], openProjectId: null }
+        var state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {} }
         var taskRootRef = null
 
         function sanitizeDescription(s) {
@@ -698,6 +1252,102 @@
             }
           }
           return assigneeIds
+        }
+
+        function parseDependsOnTaskIdsRaw(raw) {
+          var out = []
+          var seen = {}
+          if (!Array.isArray(raw.dependsOnTaskIds)) return out
+          for (var i = 0; i < raw.dependsOnTaskIds.length && out.length < MAX_DEPENDS_PER_TASK; i++) {
+            var id = raw.dependsOnTaskIds[i]
+            if (typeof id !== 'string' || seen[id]) continue
+            seen[id] = true
+            out.push(id)
+          }
+          return out
+        }
+
+        function parseAttachmentsRaw(raw) {
+          var out = []
+          if (!Array.isArray(raw.attachments)) return out
+          for (var i = 0; i < raw.attachments.length && out.length < MAX_ATTACHMENTS_PER_TASK; i++) {
+            var a = raw.attachments[i]
+            if (!a || typeof a !== 'object') continue
+            if (typeof a.id !== 'string' || typeof a.name !== 'string') continue
+            var dataUrl = typeof a.dataUrl === 'string' ? a.dataUrl : ''
+            if (!dataUrl || dataUrl.length > MAX_FILE_DATA_URL) continue
+            var mime = typeof a.mime === 'string' ? a.mime : 'application/octet-stream'
+            out.push({
+              id: a.id,
+              name: a.name.slice(0, 260),
+              mime: mime,
+              dataUrl: dataUrl,
+            })
+          }
+          return out
+        }
+
+        function sanitizeUrlInput(s) {
+          if (typeof s !== 'string') return null
+          var t = s.trim()
+          if (t.length < 10 || t.length > MAX_LINK_URL) return null
+          if (!/^https?:\/\//i.test(t)) return null
+          try {
+            var u = new URL(t)
+            if (u.protocol !== 'http:' && u.protocol !== 'https:') return null
+            return u.href
+          } catch (e) {
+            return null
+          }
+        }
+
+        function parseLinksRaw(raw) {
+          var out = []
+          if (!Array.isArray(raw.links)) return out
+          for (var i = 0; i < raw.links.length && out.length < MAX_LINKS_PER_TASK; i++) {
+            var L = raw.links[i]
+            if (!L || typeof L !== 'object') continue
+            if (typeof L.id !== 'string') continue
+            var url = typeof L.url === 'string' ? sanitizeUrlInput(L.url) : null
+            if (!url) continue
+            var label = typeof L.label === 'string' ? L.label.trim().slice(0, MAX_LINK_LABEL) : ''
+            if (!label) {
+              try {
+                label = new URL(url).hostname || 'Link'
+              } catch (e2) {
+                label = 'Link'
+              }
+            }
+            out.push({ id: L.id, url: url, label: label })
+          }
+          return out
+        }
+
+        function parseHistoryRaw(raw) {
+          var out = []
+          if (!Array.isArray(raw.history)) return out
+          for (var i = 0; i < raw.history.length && out.length < MAX_HISTORY_ENTRIES; i++) {
+            var h = raw.history[i]
+            if (!h || typeof h !== 'object') continue
+            if (typeof h.id !== 'string' || typeof h.createdAt !== 'string') continue
+            var entryDate = isValidYmd(h.entryDate) ? h.entryDate : null
+            if (!entryDate) continue
+            var txt =
+              typeof h.text === 'string'
+                ? h.text.replace(/\r\n/g, '\n').trim().slice(0, MAX_HISTORY_TEXT)
+                : ''
+            if (!txt) continue
+            var pid = null
+            if (typeof h.participantId === 'string' && h.participantId) pid = h.participantId
+            out.push({
+              id: h.id,
+              createdAt: h.createdAt,
+              entryDate: entryDate,
+              participantId: pid,
+              text: txt,
+            })
+          }
+          return out
         }
 
         function normalizeParticipant(raw) {
@@ -753,14 +1403,104 @@
           return false
         }
 
-        function collectAssigneeIdsFrom(container) {
-          if (!container) return []
-          var boxes = container.querySelectorAll('input[type="checkbox"][data-participant-id]')
-          var ids = []
-          for (var i = 0; i < boxes.length; i++) {
-            if (boxes[i].checked) ids.push(boxes[i].getAttribute('data-participant-id'))
+        function findNodeByIdInForest(nodes, id) {
+          if (!nodes) return null
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === id) return nodes[i]
+            var f = findNodeByIdInForest(nodes[i].children, id)
+            if (f) return f
           }
-          return ids
+          return null
+        }
+
+        function flattenTasksWithPath(nodes, ancestors) {
+          var out = []
+          ancestors = ancestors || []
+          if (!nodes) return out
+          for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i]
+            var pathParts = ancestors.concat([n.title])
+            var pathLabel = pathParts.join(' › ')
+            out.push({ id: n.id, pathLabel: pathLabel })
+            var sub = flattenTasksWithPath(n.children, pathParts)
+            for (var j = 0; j < sub.length; j++) out.push(sub[j])
+          }
+          return out
+        }
+
+        function getExcludedIdsForDependencyPicker(currentNode) {
+          var ex = {}
+          if (!currentNode) return ex
+          ex[currentNode.id] = true
+          function walk(n) {
+            for (var i = 0; i < n.children.length; i++) {
+              ex[n.children[i].id] = true
+              walk(n.children[i])
+            }
+          }
+          walk(currentNode)
+          return ex
+        }
+
+        /** Folgt Kanten „hängt ab von“ (dependsOnTaskIds): true, wenn mustReachId von fromTaskId aus erreichbar ist. */
+        function taskRequiresOther(nodes, fromTaskId, mustReachId) {
+          var queue = [fromTaskId]
+          var seen = {}
+          while (queue.length) {
+            var tid = queue.shift()
+            if (tid === mustReachId) return true
+            if (seen[tid]) continue
+            seen[tid] = true
+            var n = findNodeByIdInForest(nodes, tid)
+            if (!n) continue
+            var deps = n.dependsOnTaskIds || []
+            for (var i = 0; i < deps.length; i++) queue.push(deps[i])
+          }
+          return false
+        }
+
+        function isValidDependencyPredecessor(nodes, taskNodeId, currentNode, candidateId) {
+          var ex = getExcludedIdsForDependencyPicker(currentNode)
+          if (ex[candidateId]) return false
+          if (taskNodeId && taskRequiresOther(nodes, candidateId, taskNodeId)) return false
+          return true
+        }
+
+        function setDependenciesOnNode(nodes, nodeId, ids) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === nodeId) {
+              nodes[i].dependsOnTaskIds = ids.slice()
+              return true
+            }
+            if (setDependenciesOnNode(nodes[i].children, nodeId, ids)) return true
+          }
+          return false
+        }
+
+        function collectAllTaskIds(nodes, out) {
+          out = out || {}
+          if (!nodes) return out
+          for (var i = 0; i < nodes.length; i++) {
+            out[nodes[i].id] = true
+            collectAllTaskIds(nodes[i].children, out)
+          }
+          return out
+        }
+
+        function filterDepsTree(node, validSet) {
+          var d = node.dependsOnTaskIds || []
+          node.dependsOnTaskIds = d.filter(function (id) {
+            return validSet[id]
+          })
+          for (var i = 0; i < node.children.length; i++) {
+            filterDepsTree(node.children[i], validSet)
+          }
+        }
+
+        function filterDepsForest(nodes, validSet) {
+          for (var i = 0; i < nodes.length; i++) {
+            filterDepsTree(nodes[i], validSet)
+          }
         }
 
         function pad2(n) {
@@ -787,11 +1527,30 @@
           }
         }
 
+        function formatHistoryTimeDe(iso) {
+          if (typeof iso !== 'string') return ''
+          try {
+            var d = new Date(iso)
+            if (isNaN(d.getTime())) return ''
+            return new Intl.DateTimeFormat('de-DE', { dateStyle: 'short', timeStyle: 'short' }).format(d)
+          } catch (e) {
+            return ''
+          }
+        }
+
         function sortSiblings(nodes) {
           nodes.sort(function (a, b) {
             var pa = PRIORITY_ORDER[a.priority]
             var pb = PRIORITY_ORDER[b.priority]
             if (pa !== pb) return pa - pb
+            var as = isValidYmd(a.startDate) ? a.startDate : null
+            var bs = isValidYmd(b.startDate) ? b.startDate : null
+            if (as !== bs) {
+              if (!as) return 1
+              if (!bs) return -1
+              if (as < bs) return -1
+              if (as > bs) return 1
+            }
             var ad = isValidYmd(a.dueDate) ? a.dueDate : null
             var bd = isValidYmd(b.dueDate) ? b.dueDate : null
             if (ad !== bd) {
@@ -821,17 +1580,24 @@
             }
           }
           var dueDate = isValidYmd(raw.dueDate) ? raw.dueDate : null
+          var startDate = isValidYmd(raw.startDate) ? raw.startDate : null
           var description = sanitizeDescription(typeof raw.description === 'string' ? raw.description : '')
           var assigneeIds = parseAssigneeIdsRaw(raw)
+          var dependsOnTaskIds = parseDependsOnTaskIdsRaw(raw)
           return {
             id: raw.id,
             title: raw.title,
             priority: raw.priority,
             done: raw.done,
             createdAt: raw.createdAt,
+            startDate: startDate,
             dueDate: dueDate,
             description: description,
             assigneeIds: assigneeIds,
+            dependsOnTaskIds: dependsOnTaskIds,
+            attachments: parseAttachmentsRaw(raw),
+            links: parseLinksRaw(raw),
+            history: parseHistoryRaw(raw),
             children: children,
           }
         }
@@ -842,6 +1608,7 @@
           if (raw.priority !== 'low' && raw.priority !== 'medium' && raw.priority !== 'high') return null
           if (typeof raw.done !== 'boolean' || typeof raw.createdAt !== 'string') return null
           var dueL = isValidYmd(raw.dueDate) ? raw.dueDate : null
+          var startL = isValidYmd(raw.startDate) ? raw.startDate : null
           var descL = sanitizeDescription(typeof raw.description === 'string' ? raw.description : '')
           return {
             id: raw.id,
@@ -849,9 +1616,14 @@
             priority: raw.priority,
             done: raw.done,
             createdAt: raw.createdAt,
+            startDate: startL,
             dueDate: dueL,
             description: descL,
             assigneeIds: parseAssigneeIdsRaw(raw),
+            dependsOnTaskIds: parseDependsOnTaskIdsRaw(raw),
+            attachments: parseAttachmentsRaw(raw),
+            links: parseLinksRaw(raw),
+            history: parseHistoryRaw(raw),
             children: [],
           }
         }
@@ -896,6 +1668,8 @@
             }
           }
           filterAssigneesForest(tasks, validSet)
+          var taskValidSet = collectAllTaskIds(tasks, {})
+          filterDepsForest(tasks, taskValidSet)
           var img = raw.image
           if (img !== null && typeof img !== 'string') img = null
           if (typeof img === 'string' && img.length > MAX_IMAGE_DATA_URL) img = null
@@ -913,7 +1687,7 @@
           try {
             var raw = localStorage.getItem(STORAGE_KEY)
             if (!raw) {
-              state = { v: 2, projects: [], openProjectId: null }
+              state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {} }
               return
             }
             var parsed = JSON.parse(raw)
@@ -923,11 +1697,18 @@
                 var p = normalizeProject(parsed.projects[i])
                 if (p) projects.push(p)
               }
+              var collapsed =
+                parsed.collapsedSubtasks &&
+                typeof parsed.collapsedSubtasks === 'object' &&
+                parsed.collapsedSubtasks !== null
+                  ? parsed.collapsedSubtasks
+                  : {}
               state = {
                 v: 2,
                 projects: projects,
                 openProjectId:
                   typeof parsed.openProjectId === 'string' ? parsed.openProjectId : null,
+                collapsedSubtasks: collapsed,
               }
               return
             }
@@ -946,12 +1727,13 @@
                   },
                 ],
                 openProjectId: null,
+                collapsedSubtasks: {},
               }
               saveState()
               return
             }
           } catch (e) {}
-          state = { v: 2, projects: [], openProjectId: null }
+          state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {} }
         }
 
         function saveState() {
@@ -961,8 +1743,30 @@
               v: 2,
               projects: state.projects,
               openProjectId: state.openProjectId,
+              collapsedSubtasks: state.collapsedSubtasks || {},
             }),
           )
+        }
+
+        function collapsedSubtasksMapForProject() {
+          var p = getCurrentProject()
+          if (!p) return null
+          if (!state.collapsedSubtasks) state.collapsedSubtasks = {}
+          if (!state.collapsedSubtasks[p.id]) state.collapsedSubtasks[p.id] = {}
+          return state.collapsedSubtasks[p.id]
+        }
+
+        function isSubtasksCollapsed(taskId) {
+          var m = collapsedSubtasksMapForProject()
+          return !!(m && m[taskId])
+        }
+
+        function setSubtasksCollapsed(taskId, collapsed) {
+          var m = collapsedSubtasksMapForProject()
+          if (!m) return
+          if (collapsed) m[taskId] = true
+          else delete m[taskId]
+          saveState()
         }
 
         function getCurrentProject() {
@@ -982,6 +1786,16 @@
             if (removeById(nodes[i].children, id)) return true
           }
           return false
+        }
+
+        function stripRemovedTaskIdFromDependencies(nodes, removedId) {
+          for (var i = 0; i < nodes.length; i++) {
+            var d = nodes[i].dependsOnTaskIds || []
+            nodes[i].dependsOnTaskIds = d.filter(function (id) {
+              return id !== removedId
+            })
+            stripRemovedTaskIdFromDependencies(nodes[i].children, removedId)
+          }
         }
 
         function setDoneById(nodes, id, done) {
@@ -1006,6 +1820,17 @@
           return false
         }
 
+        function setStartById(nodes, id, startDate) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === id) {
+              nodes[i].startDate = startDate
+              return true
+            }
+            if (setStartById(nodes[i].children, id, startDate)) return true
+          }
+          return false
+        }
+
         function setDescriptionById(nodes, id, text) {
           var v = sanitizeDescription(text)
           for (var i = 0; i < nodes.length; i++) {
@@ -1016,6 +1841,714 @@
             if (setDescriptionById(nodes[i].children, id, text)) return true
           }
           return false
+        }
+
+        function addAttachmentsToNodeById(nodes, nodeId, items) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === nodeId) {
+              if (!nodes[i].attachments) nodes[i].attachments = []
+              for (var j = 0; j < items.length; j++) {
+                if (nodes[i].attachments.length >= MAX_ATTACHMENTS_PER_TASK) break
+                nodes[i].attachments.push(items[j])
+              }
+              return true
+            }
+            if (addAttachmentsToNodeById(nodes[i].children, nodeId, items)) return true
+          }
+          return false
+        }
+
+        function removeAttachmentFromNodeById(nodes, nodeId, attachmentId) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === nodeId) {
+              var a = nodes[i].attachments || []
+              var next = []
+              for (var j = 0; j < a.length; j++) {
+                if (a[j].id !== attachmentId) next.push(a[j])
+              }
+              nodes[i].attachments = next
+              return true
+            }
+            if (removeAttachmentFromNodeById(nodes[i].children, nodeId, attachmentId)) return true
+          }
+          return false
+        }
+
+        function addLinkToNodeById(nodes, nodeId, link) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === nodeId) {
+              if (!nodes[i].links) nodes[i].links = []
+              if (nodes[i].links.length >= MAX_LINKS_PER_TASK) return false
+              nodes[i].links.push(link)
+              return true
+            }
+            if (addLinkToNodeById(nodes[i].children, nodeId, link)) return true
+          }
+          return false
+        }
+
+        function removeLinkFromNodeById(nodes, nodeId, linkId) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === nodeId) {
+              var a = nodes[i].links || []
+              var next = []
+              for (var j = 0; j < a.length; j++) {
+                if (a[j].id !== linkId) next.push(a[j])
+              }
+              nodes[i].links = next
+              return true
+            }
+            if (removeLinkFromNodeById(nodes[i].children, nodeId, linkId)) return true
+          }
+          return false
+        }
+
+        function addHistoryEntryToNodeById(nodes, nodeId, entry) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === nodeId) {
+              if (!nodes[i].history) nodes[i].history = []
+              if (nodes[i].history.length >= MAX_HISTORY_ENTRIES) return false
+              nodes[i].history.push(entry)
+              return true
+            }
+            if (addHistoryEntryToNodeById(nodes[i].children, nodeId, entry)) return true
+          }
+          return false
+        }
+
+        function removeHistoryEntryFromNodeById(nodes, nodeId, entryId) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === nodeId) {
+              var h = nodes[i].history || []
+              var next = []
+              for (var j = 0; j < h.length; j++) {
+                if (h[j].id !== entryId) next.push(h[j])
+              }
+              nodes[i].history = next
+              return true
+            }
+            if (removeHistoryEntryFromNodeById(nodes[i].children, nodeId, entryId)) return true
+          }
+          return false
+        }
+
+        function readFilesAsAttachmentsSequential(files, startIndex, acc, done) {
+          if (startIndex >= files.length) return done(acc)
+          var file = files[startIndex]
+          var reader = new FileReader()
+          reader.onload = function () {
+            var d = reader.result
+            if (typeof d === 'string' && d.length <= MAX_FILE_DATA_URL) {
+              acc.push({
+                id: crypto.randomUUID(),
+                name: file.name.slice(0, 260),
+                mime: file.type || 'application/octet-stream',
+                dataUrl: d,
+              })
+            } else {
+              alert('Datei zu groß oder ungültig (max. ca. 1,8 MB pro Datei): ' + file.name)
+            }
+            readFilesAsAttachmentsSequential(files, startIndex + 1, acc, done)
+          }
+          reader.onerror = function () {
+            readFilesAsAttachmentsSequential(files, startIndex + 1, acc, done)
+          }
+          reader.readAsDataURL(file)
+        }
+
+        function readFilesAsAttachments(fileList, existingCount, callback) {
+          var files = []
+          for (var i = 0; i < fileList.length; i++) files.push(fileList[i])
+          var maxAdd = Math.max(0, MAX_ATTACHMENTS_PER_TASK - existingCount)
+          if (files.length > maxAdd) {
+            alert('Es können noch höchstens ' + maxAdd + ' weitere Datei(en) hinzugefügt werden.')
+            files = files.slice(0, maxAdd)
+          }
+          if (files.length === 0) return callback([])
+          readFilesAsAttachmentsSequential(files, 0, [], callback)
+        }
+
+        function buildPendingAttachmentsUI(containerEl, pendingRef) {
+          if (!containerEl) {
+            return {
+              refresh: function () {},
+            }
+          }
+          var leg = document.createElement('span')
+          leg.className = 'form__legend'
+          leg.textContent = 'Anhänge (optional)'
+          var hint = document.createElement('p')
+          hint.className = 'task-attachments__hint'
+          hint.textContent =
+            'PDF, Word, Excel, PowerPoint, Bilder, XML und andere Formate — lokal im Browser (max. ' +
+            MAX_ATTACHMENTS_PER_TASK +
+            ' Dateien, je ca. 1,8 MB).'
+          var fileInp = document.createElement('input')
+          fileInp.type = 'file'
+          fileInp.multiple = true
+          fileInp.setAttribute('accept', '*/*')
+          fileInp.className = 'form__file'
+          fileInp.setAttribute('aria-label', 'Dateien auswählen')
+          var listUl = document.createElement('ul')
+          listUl.className = 'task-attachments__list'
+          function refreshList() {
+            listUl.innerHTML = ''
+            for (var i = 0; i < pendingRef.length; i++) {
+              var att = pendingRef[i]
+              var li = document.createElement('li')
+              li.className = 'task-attachments__item'
+              var name = document.createElement('span')
+              name.className = 'task-attachments__name'
+              name.textContent = att.name
+              var rm = document.createElement('button')
+              rm.type = 'button'
+              rm.className = 'task__btn task__btn--danger'
+              rm.textContent = 'Entfernen'
+              ;(function (aid) {
+                rm.addEventListener('click', function () {
+                  for (var k = 0; k < pendingRef.length; k++) {
+                    if (pendingRef[k].id === aid) {
+                      pendingRef.splice(k, 1)
+                      break
+                    }
+                  }
+                  refreshList()
+                })
+              })(att.id)
+              li.appendChild(name)
+              li.appendChild(rm)
+              listUl.appendChild(li)
+            }
+          }
+          fileInp.addEventListener('change', function (e) {
+            readFilesAsAttachments(e.target.files, pendingRef.length, function (newOnes) {
+              for (var j = 0; j < newOnes.length; j++) pendingRef.push(newOnes[j])
+              fileInp.value = ''
+              refreshList()
+            })
+          })
+          containerEl.appendChild(leg)
+          containerEl.appendChild(hint)
+          containerEl.appendChild(fileInp)
+          containerEl.appendChild(listUl)
+          refreshList()
+          return {
+            refresh: function () {
+              pendingRef.length = 0
+              refreshList()
+            },
+          }
+        }
+
+        function appendAttachmentsEditorToRow(row, node) {
+          var wrap = document.createElement('div')
+          wrap.className = 'task-attachments'
+          var leg = document.createElement('span')
+          leg.className = 'task__desc-label'
+          leg.textContent = 'Anhänge'
+          var hint = document.createElement('p')
+          hint.className = 'task-attachments__hint'
+          hint.textContent =
+            'PDF, Office, Bilder, XML … werden lokal gespeichert (kein Server). Bis zu ' +
+            MAX_ATTACHMENTS_PER_TASK +
+            ' Dateien.'
+          var fileInp = document.createElement('input')
+          fileInp.type = 'file'
+          fileInp.multiple = true
+          fileInp.setAttribute('accept', '*/*')
+          fileInp.className = 'form__file'
+          fileInp.setAttribute('aria-label', 'Datei anfügen: ' + node.title)
+          var listUl = document.createElement('ul')
+          listUl.className = 'task-attachments__list'
+          function countAtt() {
+            return (node.attachments && node.attachments.length) || 0
+          }
+          function renderList() {
+            listUl.innerHTML = ''
+            var atts = node.attachments || []
+            for (var i = 0; i < atts.length; i++) {
+              var att = atts[i]
+              var li = document.createElement('li')
+              li.className = 'task-attachments__item'
+              var name = document.createElement('span')
+              name.className = 'task-attachments__name'
+              name.textContent = att.name
+              var actions = document.createElement('div')
+              actions.className = 'task-attachments__actions'
+              var dl = document.createElement('a')
+              dl.className = 'task__btn'
+              dl.href = att.dataUrl
+              dl.download = att.name
+              dl.textContent = 'Herunterladen'
+              var rm = document.createElement('button')
+              rm.type = 'button'
+              rm.className = 'task__btn task__btn--danger'
+              rm.textContent = 'Entfernen'
+              ;(function (nid, aid) {
+                rm.addEventListener('click', function (e) {
+                  e.preventDefault()
+                  removeAttachmentFromNodeById(taskRootRef, nid, aid)
+                  saveState()
+                  render()
+                })
+              })(node.id, att.id)
+              actions.appendChild(dl)
+              actions.appendChild(rm)
+              li.appendChild(name)
+              li.appendChild(actions)
+              listUl.appendChild(li)
+            }
+          }
+          fileInp.addEventListener('change', function (e) {
+            readFilesAsAttachments(e.target.files, countAtt(), function (newOnes) {
+              if (newOnes.length) {
+                addAttachmentsToNodeById(taskRootRef, node.id, newOnes)
+                saveState()
+                render()
+              }
+              fileInp.value = ''
+            })
+          })
+          renderList()
+          wrap.appendChild(leg)
+          wrap.appendChild(hint)
+          wrap.appendChild(fileInp)
+          wrap.appendChild(listUl)
+          row.appendChild(wrap)
+        }
+
+        function truncateFileNameCard(s, max) {
+          if (s.length <= max) return s
+          var h = Math.floor((max - 1) / 2)
+          return s.slice(0, h) + '…' + s.slice(s.length - h)
+        }
+
+        function appendTaskCardQuickStrip(row, node) {
+          var atts = node.attachments || []
+          var lnks = node.links || []
+          if (atts.length === 0 && lnks.length === 0) return
+          var strip = document.createElement('div')
+          strip.className = 'task__quick-strip'
+          strip.setAttribute('aria-label', 'Anhänge und Links')
+          for (var i = 0; i < atts.length; i++) {
+            var att = atts[i]
+            var a = document.createElement('a')
+            a.className = 'task__quick-chip'
+            a.href = att.dataUrl
+            a.download = att.name
+            a.target = '_blank'
+            a.rel = 'noopener'
+            a.textContent = '📎 ' + truncateFileNameCard(att.name, 24)
+            a.title = att.name + ' — öffnen oder speichern'
+            strip.appendChild(a)
+          }
+          for (var j = 0; j < lnks.length; j++) {
+            var L = lnks[j]
+            var la = document.createElement('a')
+            la.className = 'task__quick-chip task__quick-chip--ext'
+            la.href = L.url
+            la.target = '_blank'
+            la.rel = 'noopener noreferrer'
+            var lt = L.label || L.url
+            la.textContent = '🔗 ' + (lt.length > 28 ? lt.slice(0, 25) + '…' : lt)
+            la.title = L.url
+            strip.appendChild(la)
+          }
+          row.appendChild(strip)
+        }
+
+        function appendLinksEditorToRow(row, node) {
+          var wrap = document.createElement('div')
+          wrap.className = 'task-links-editor'
+          var leg = document.createElement('span')
+          leg.className = 'task__desc-label'
+          leg.textContent = 'Links'
+          var hint = document.createElement('p')
+          hint.className = 'task-attachments__hint'
+          hint.textContent =
+            'Nur http(s)-Adressen (z. B. SharePoint, Wiki, Tickets). Max. ' + MAX_LINKS_PER_TASK + ' Links.'
+          var urlInp = document.createElement('input')
+          urlInp.type = 'url'
+          urlInp.className = 'form__input'
+          urlInp.placeholder = 'https://…'
+          urlInp.setAttribute('aria-label', 'Link-URL')
+          var labInp = document.createElement('input')
+          labInp.type = 'text'
+          labInp.className = 'form__input'
+          labInp.placeholder = 'Bezeichnung (optional)'
+          labInp.maxLength = MAX_LINK_LABEL
+          labInp.setAttribute('aria-label', 'Link-Bezeichnung')
+          var addBtn = document.createElement('button')
+          addBtn.type = 'button'
+          addBtn.className = 'form__submit form__submit--small'
+          addBtn.textContent = 'Link hinzufügen'
+          var listUl = document.createElement('ul')
+          listUl.className = 'task-attachments__list'
+          function renderLinkList() {
+            listUl.innerHTML = ''
+            var ls = node.links || []
+            for (var i = 0; i < ls.length; i++) {
+              var L = ls[i]
+              var li = document.createElement('li')
+              li.className = 'task-attachments__item'
+              var name = document.createElement('span')
+              name.className = 'task-attachments__name'
+              var la = document.createElement('a')
+              la.href = L.url
+              la.target = '_blank'
+              la.rel = 'noopener noreferrer'
+              la.textContent = L.label
+              la.title = L.url
+              name.appendChild(la)
+              var rm = document.createElement('button')
+              rm.type = 'button'
+              rm.className = 'task__btn task__btn--danger'
+              rm.textContent = 'Entfernen'
+              ;(function (nid, lid) {
+                rm.addEventListener('click', function () {
+                  removeLinkFromNodeById(taskRootRef, nid, lid)
+                  saveState()
+                  render()
+                })
+              })(node.id, L.id)
+              li.appendChild(name)
+              li.appendChild(rm)
+              listUl.appendChild(li)
+            }
+          }
+          addBtn.addEventListener('click', function () {
+            var url = sanitizeUrlInput(urlInp.value)
+            if (!url) {
+              alert('Bitte eine gültige http(s)-URL eingeben (mit https:// oder http://).')
+              return
+            }
+            var lbl = labInp.value.trim().slice(0, MAX_LINK_LABEL)
+            if (!lbl) {
+              try {
+                lbl = new URL(url).hostname
+              } catch (e) {
+                lbl = 'Link'
+              }
+            }
+            if ((node.links || []).length >= MAX_LINKS_PER_TASK) {
+              alert('Maximal ' + MAX_LINKS_PER_TASK + ' Links pro Aufgabe.')
+              return
+            }
+            addLinkToNodeById(taskRootRef, node.id, {
+              id: crypto.randomUUID(),
+              url: url,
+              label: lbl,
+            })
+            urlInp.value = ''
+            labInp.value = ''
+            saveState()
+            render()
+          })
+          renderLinkList()
+          var rowInp = document.createElement('div')
+          rowInp.className = 'task-links-editor__row'
+          rowInp.appendChild(urlInp)
+          rowInp.appendChild(labInp)
+          rowInp.appendChild(addBtn)
+          wrap.appendChild(leg)
+          wrap.appendChild(hint)
+          wrap.appendChild(rowInp)
+          wrap.appendChild(listUl)
+          row.appendChild(wrap)
+        }
+
+        function buildPendingLinksUI(containerEl, pendingRef) {
+          if (!containerEl) {
+            return { refresh: function () {} }
+          }
+          var leg = document.createElement('span')
+          leg.className = 'form__legend'
+          leg.textContent = 'Links (optional)'
+          var hint = document.createElement('p')
+          hint.className = 'task-attachments__hint'
+          hint.textContent =
+            'http(s)-Weblinks (Wiki, Tickets, Cloud …). Max. ' + MAX_LINKS_PER_TASK + ' Stück.'
+          var urlInp = document.createElement('input')
+          urlInp.type = 'url'
+          urlInp.className = 'form__input'
+          urlInp.placeholder = 'https://…'
+          var labInp = document.createElement('input')
+          labInp.type = 'text'
+          labInp.className = 'form__input'
+          labInp.placeholder = 'Bezeichnung (optional)'
+          labInp.maxLength = MAX_LINK_LABEL
+          var addBtn = document.createElement('button')
+          addBtn.type = 'button'
+          addBtn.className = 'form__submit form__submit--small'
+          addBtn.textContent = 'Link hinzufügen'
+          var listUl = document.createElement('ul')
+          listUl.className = 'task-attachments__list'
+          function refreshList() {
+            listUl.innerHTML = ''
+            for (var i = 0; i < pendingRef.length; i++) {
+              var L = pendingRef[i]
+              var li = document.createElement('li')
+              li.className = 'task-attachments__item'
+              var name = document.createElement('span')
+              name.className = 'task-attachments__name'
+              var la = document.createElement('a')
+              la.href = L.url
+              la.target = '_blank'
+              la.rel = 'noopener noreferrer'
+              la.textContent = L.label
+              la.title = L.url
+              name.appendChild(la)
+              var rm = document.createElement('button')
+              rm.type = 'button'
+              rm.className = 'task__btn task__btn--danger'
+              rm.textContent = 'Entfernen'
+              ;(function (lid) {
+                rm.addEventListener('click', function () {
+                  for (var k = 0; k < pendingRef.length; k++) {
+                    if (pendingRef[k].id === lid) {
+                      pendingRef.splice(k, 1)
+                      break
+                    }
+                  }
+                  refreshList()
+                })
+              })(L.id)
+              li.appendChild(name)
+              li.appendChild(rm)
+              listUl.appendChild(li)
+            }
+          }
+          addBtn.addEventListener('click', function () {
+            var url = sanitizeUrlInput(urlInp.value)
+            if (!url) {
+              alert('Bitte eine gültige http(s)-URL eingeben.')
+              return
+            }
+            if (pendingRef.length >= MAX_LINKS_PER_TASK) {
+              alert('Maximal ' + MAX_LINKS_PER_TASK + ' Links.')
+              return
+            }
+            var lbl = labInp.value.trim().slice(0, MAX_LINK_LABEL)
+            if (!lbl) {
+              try {
+                lbl = new URL(url).hostname
+              } catch (e) {
+                lbl = 'Link'
+              }
+            }
+            pendingRef.push({ id: crypto.randomUUID(), url: url, label: lbl })
+            urlInp.value = ''
+            labInp.value = ''
+            refreshList()
+          })
+          var rowInp = document.createElement('div')
+          rowInp.className = 'task-links-editor__row'
+          rowInp.appendChild(urlInp)
+          rowInp.appendChild(labInp)
+          rowInp.appendChild(addBtn)
+          containerEl.appendChild(leg)
+          containerEl.appendChild(hint)
+          containerEl.appendChild(rowInp)
+          containerEl.appendChild(listUl)
+          refreshList()
+          return {
+            refresh: function () {
+              pendingRef.length = 0
+              refreshList()
+            },
+          }
+        }
+
+        function appendHistorySection(row, node) {
+          function sortHistoryEntriesDesc(items) {
+            var a = (items || []).slice()
+            a.sort(function (x, y) {
+              if (x.createdAt < y.createdAt) return 1
+              if (x.createdAt > y.createdAt) return -1
+              return 0
+            })
+            return a
+          }
+
+          var details = document.createElement('details')
+          details.className = 'task-history'
+          details.id = 'task-history-' + node.id
+          var sum = document.createElement('summary')
+          sum.className = 'task-history__summary'
+          var hc = (node.history && node.history.length) || 0
+          sum.textContent = 'Historie' + (hc ? ' (' + hc + ')' : '')
+
+          var inner = document.createElement('div')
+          inner.className = 'task-history__inner'
+
+          var formHint = document.createElement('p')
+          formHint.className = 'task-attachments__hint'
+          formHint.style.margin = '0'
+          formHint.textContent =
+            'Neuer Eintrag: Datum des Ereignisses, optional Gruppenmitglied und Text. Liste: neueste zuerst (nach Speicherzeit).'
+
+          var grid = document.createElement('div')
+          grid.className = 'task-history__form-grid'
+
+          var dBlock = document.createElement('div')
+          dBlock.className = 'task-history__label-block'
+          var dLbl = document.createElement('span')
+          dLbl.className = 'form__legend'
+          dLbl.textContent = 'Datum'
+          var dateInp = document.createElement('input')
+          dateInp.type = 'date'
+          dateInp.className = 'form__input form__input--date'
+          dateInp.required = true
+          dateInp.value = todayYmd()
+          dBlock.appendChild(dLbl)
+          dBlock.appendChild(dateInp)
+
+          var pBlock = document.createElement('div')
+          pBlock.className = 'task-history__label-block'
+          var pLbl = document.createElement('label')
+          pLbl.className = 'form__legend'
+          pLbl.setAttribute('for', 'hist-part-' + node.id)
+          pLbl.textContent = 'Gruppenmitglied'
+          var partSel = document.createElement('select')
+          partSel.className = 'form__input'
+          partSel.id = 'hist-part-' + node.id
+          var optEmpty = document.createElement('option')
+          optEmpty.value = ''
+          optEmpty.textContent = '— keine Auswahl —'
+          partSel.appendChild(optEmpty)
+          var proj = getCurrentProject()
+          if (proj && proj.participants) {
+            for (var pi = 0; pi < proj.participants.length; pi++) {
+              var pp = proj.participants[pi]
+              var o = document.createElement('option')
+              o.value = pp.id
+              o.textContent = participantLabel(pp)
+              partSel.appendChild(o)
+            }
+          }
+          pBlock.appendChild(pLbl)
+          pBlock.appendChild(partSel)
+
+          var tBlock = document.createElement('div')
+          tBlock.className = 'task-history__label-block task-history__label-block--full'
+          var tLbl = document.createElement('label')
+          tLbl.className = 'form__legend'
+          tLbl.setAttribute('for', 'hist-text-' + node.id)
+          tLbl.textContent = 'Eintrag'
+          var txtTa = document.createElement('textarea')
+          txtTa.id = 'hist-text-' + node.id
+          txtTa.className = 'form__input form__textarea'
+          txtTa.rows = 3
+          txtTa.maxLength = MAX_HISTORY_TEXT
+          txtTa.placeholder = 'Freitext …'
+          tBlock.appendChild(tLbl)
+          tBlock.appendChild(txtTa)
+
+          var addBtn = document.createElement('button')
+          addBtn.type = 'button'
+          addBtn.className = 'form__submit form__submit--small'
+          addBtn.textContent = 'Eintrag hinzufügen'
+          addBtn.style.gridColumn = '1 / -1'
+          addBtn.style.justifySelf = 'start'
+
+          addBtn.addEventListener('click', function () {
+            if (!isValidYmd(dateInp.value)) {
+              alert('Bitte ein gültiges Datum wählen.')
+              return
+            }
+            var t = txtTa.value.trim()
+            if (!t) {
+              alert('Bitte einen Text eingeben.')
+              return
+            }
+            var pid = partSel.value ? partSel.value : null
+            var entry = {
+              id: crypto.randomUUID(),
+              createdAt: new Date().toISOString(),
+              entryDate: dateInp.value,
+              participantId: pid,
+              text: t.slice(0, MAX_HISTORY_TEXT),
+            }
+            if (!addHistoryEntryToNodeById(taskRootRef, node.id, entry)) {
+              alert('Maximal ' + MAX_HISTORY_ENTRIES + ' Historieneinträge pro Aufgabe.')
+              return
+            }
+            txtTa.value = ''
+            dateInp.value = todayYmd()
+            partSel.value = ''
+            saveState()
+            render()
+          })
+
+          grid.appendChild(dBlock)
+          grid.appendChild(pBlock)
+          grid.appendChild(tBlock)
+          grid.appendChild(addBtn)
+
+          var listTitle = document.createElement('div')
+          listTitle.className = 'form__legend'
+          listTitle.textContent = 'Bisherige Einträge'
+
+          var listUl = document.createElement('ul')
+          listUl.className = 'task-history__list'
+          var sorted = sortHistoryEntriesDesc(node.history)
+          for (var hi = 0; hi < sorted.length; hi++) {
+            var e = sorted[hi]
+            var li = document.createElement('li')
+            li.className = 'task-history__item'
+            var proj2 = getCurrentProject()
+            var who = '— kein Mitglied —'
+            if (e.participantId && proj2 && proj2.participants) {
+              var fp = findParticipantById(proj2.participants, e.participantId)
+              who = fp ? participantLabel(fp) : 'Unbekannt (ID entfernt)'
+            }
+            var meta = document.createElement('div')
+            meta.className = 'task-history__meta'
+            meta.textContent = formatDueDe(e.entryDate) + ' · ' + who
+            var foot = document.createElement('div')
+            foot.className = 'task-history__foot'
+            foot.textContent = 'Erfasst: ' + formatHistoryTimeDe(e.createdAt)
+            var body = document.createElement('div')
+            body.className = 'task-history__text'
+            body.textContent = e.text
+            var act = document.createElement('div')
+            act.className = 'task-history__item-actions'
+            var rm = document.createElement('button')
+            rm.type = 'button'
+            rm.className = 'task__btn task__btn--danger'
+            rm.textContent = 'Löschen'
+            ;(function (nid, eid) {
+              rm.addEventListener('click', function () {
+                if (!confirm('Diesen Historieneintrag löschen?')) return
+                removeHistoryEntryFromNodeById(taskRootRef, nid, eid)
+                saveState()
+                render()
+              })
+            })(node.id, e.id)
+            act.appendChild(rm)
+            li.appendChild(meta)
+            li.appendChild(foot)
+            li.appendChild(body)
+            li.appendChild(act)
+            listUl.appendChild(li)
+          }
+
+          inner.appendChild(formHint)
+          inner.appendChild(grid)
+          if (sorted.length > 0) {
+            inner.appendChild(listTitle)
+            inner.appendChild(listUl)
+          } else {
+            var empty = document.createElement('p')
+            empty.className = 'task-attachments__hint'
+            empty.style.margin = '0'
+            empty.textContent = 'Noch keine Einträge — oben hinzufügen.'
+            inner.appendChild(empty)
+          }
+
+          details.appendChild(sum)
+          details.appendChild(inner)
+          row.appendChild(details)
         }
 
         function addChildToParent(nodes, parentId, newNode) {
@@ -1085,6 +2618,7 @@
         var viewProjects = document.getElementById('view-projects')
         var viewTasks = document.getElementById('view-tasks')
         var projectForm = document.getElementById('project-form')
+        var btnToggleProjectForm = document.getElementById('btn-toggle-project-form')
         var projectTitle = document.getElementById('project-title')
         var projectDesc = document.getElementById('project-desc')
         var projectImage = document.getElementById('project-image')
@@ -1098,55 +2632,629 @@
         var form = document.getElementById('task-form')
         var titleInput = document.getElementById('task-title')
         var taskDesc = document.getElementById('task-desc')
+        var taskStart = document.getElementById('task-start')
         var taskDue = document.getElementById('task-due')
         var submitBtn = document.getElementById('submit-btn')
         var emptyMsg = document.getElementById('empty-msg')
         var taskList = document.getElementById('task-list')
-        var newTaskAssigneesEl = document.getElementById('new-task-assignees')
+        var taskPanelList = document.getElementById('task-panel-list')
+        var taskPanelGantt = document.getElementById('task-panel-gantt')
+        var taskPanelKanban = document.getElementById('task-panel-kanban')
+        var btnViewList = document.getElementById('btn-view-list')
+        var btnViewGantt = document.getElementById('btn-view-gantt')
+        var btnViewKanban = document.getElementById('btn-view-kanban')
+        var btnGanttAddMain = document.getElementById('btn-gantt-add-main')
+        var ganttRoot = document.getElementById('gantt-root')
+        var newTaskAssigneesMount = document.getElementById('new-task-assignees')
         var participantFormEl = document.getElementById('participant-form')
+        var btnToggleParticipantForm = document.getElementById('btn-toggle-participant-form')
+        var newTaskAssigneeIdsCache = []
+        var newTaskPickerInstance = null
+        var assignPickerUid = 0
+        var btnToggleMainTask = document.getElementById('btn-toggle-main-task')
+        var pendingMainAttachments = []
+        var mainTaskAttachmentsPanel = null
+        var pendingMainLinks = []
+        var mainTaskLinksPanel = null
+        var newTaskDepsMount = document.getElementById('main-task-deps')
+        var newTaskDependencyIdsCache = []
+        var newTaskDepPickerInstance = null
+        var depPickerUid = 0
+        var currentTaskView = 'list'
+        var ganttOpenMap = {}
 
-        function bindAssigneeContainer(container, taskNodeId) {
-          container.addEventListener('change', function (e) {
-            if (e.target.type !== 'checkbox' || !e.target.getAttribute('data-participant-id')) return
-            var ids = collectAssigneeIdsFrom(container)
-            setAssigneesOnNode(taskRootRef, taskNodeId, ids)
-            saveState()
-          })
+        function resetMainTaskFormFields() {
+          titleInput.value = ''
+          taskDesc.value = ''
+          syncTaskDueDefault()
+          newTaskAssigneeIdsCache = []
+          if (newTaskPickerInstance) newTaskPickerInstance.setIds([])
+          else renderNewTaskAssignees()
+          newTaskDependencyIdsCache = []
+          if (newTaskDepPickerInstance) newTaskDepPickerInstance.setIds([])
+          else renderNewTaskDependencies()
+          submitBtn.disabled = true
+          if (mainTaskAttachmentsPanel) mainTaskAttachmentsPanel.refresh()
+          if (mainTaskLinksPanel) mainTaskLinksPanel.refresh()
         }
 
-        function renderAssigneeCheckboxes(container, taskNode, idPrefix) {
-          container.innerHTML = ''
-          var proj = getCurrentProject()
-          if (!proj || !proj.participants || proj.participants.length === 0) {
-            var hint = document.createElement('p')
-            hint.className = 'task__assign-hint'
-            hint.textContent = 'Noch keine Teilnehmenden — oben anlegen.'
-            container.appendChild(hint)
-            return
+        function setMainTaskFormOpen(open) {
+          form.hidden = !open
+          btnToggleMainTask.setAttribute('aria-expanded', open ? 'true' : 'false')
+          btnToggleMainTask.textContent = open ? 'Formular schließen' : 'Aufgabe hinzufügen'
+          if (open) {
+            renderNewTaskAssignees()
+            renderNewTaskDependencies()
+            syncTaskDueDefault()
+            setTimeout(function () {
+              titleInput.focus()
+            }, 0)
           }
-          var selected = {}
-          if (taskNode && Array.isArray(taskNode.assigneeIds)) {
-            for (var si = 0; si < taskNode.assigneeIds.length; si++) {
-              selected[taskNode.assigneeIds[si]] = true
+        }
+
+        function closeMainTaskForm() {
+          resetMainTaskFormFields()
+          setMainTaskFormOpen(false)
+        }
+
+        function resetParticipantFormFields() {
+          var pf = document.getElementById('pf-first')
+          var pl = document.getElementById('pf-last')
+          var pr = document.getElementById('pf-role')
+          if (pf) pf.value = ''
+          if (pl) pl.value = ''
+          if (pr) pr.value = 'projektmitarbeit'
+        }
+
+        function setParticipantFormOpen(open) {
+          if (!participantFormEl) return
+          participantFormEl.hidden = !open
+          if (btnToggleParticipantForm) {
+            btnToggleParticipantForm.setAttribute('aria-expanded', open ? 'true' : 'false')
+            btnToggleParticipantForm.textContent = open ? 'Formular schließen' : 'Teilnehmenden hinzufügen'
+          }
+          if (open) {
+            setTimeout(function () {
+              var f = document.getElementById('pf-first')
+              if (f) f.focus()
+            }, 0)
+          }
+        }
+
+        function closeParticipantForm() {
+          resetParticipantFormFields()
+          setParticipantFormOpen(false)
+        }
+
+        function resetProjectFormFields() {
+          if (!projectTitle || !projectDesc || !projectImage) return
+          projectTitle.value = ''
+          projectDesc.value = ''
+          projectImage.value = ''
+        }
+
+        function setProjectFormOpen(open) {
+          if (!projectForm) return
+          projectForm.hidden = !open
+          if (open) {
+            projectForm.removeAttribute('hidden')
+          } else {
+            projectForm.setAttribute('hidden', '')
+          }
+          if (btnToggleProjectForm) {
+            btnToggleProjectForm.setAttribute('aria-expanded', open ? 'true' : 'false')
+            btnToggleProjectForm.textContent = open ? 'Formular schließen' : 'Neues Projekt'
+          }
+          if (open) {
+            setTimeout(function () {
+              if (projectTitle) projectTitle.focus()
+            }, 0)
+          }
+        }
+
+        function closeProjectForm() {
+          resetProjectFormFields()
+          setProjectFormOpen(false)
+        }
+
+        function findParticipantById(participants, pid) {
+          if (!participants) return null
+          for (var i = 0; i < participants.length; i++) {
+            if (participants[i].id === pid) return participants[i]
+          }
+          return null
+        }
+
+        /**
+         * @param {HTMLElement} mountEl - leeres Mount-Element
+         * @param {{ initialIds?: string[], taskNodeId?: string, onChange?: function(string[]): void }} options
+         */
+        function mountAssigneePicker(mountEl, options) {
+          options = options || {}
+          var ids = (options.initialIds || []).slice()
+          var taskNodeId = options.taskNodeId
+          var onExternalChange = options.onChange
+
+          var uid = ++assignPickerUid
+          var ddId = 'assign-picker-dd-' + uid
+
+          var root = document.createElement('div')
+          root.className = 'assign-picker'
+          var chipsEl = document.createElement('div')
+          chipsEl.className = 'assign-picker__chips'
+          chipsEl.setAttribute('role', 'list')
+
+          var addWrap = document.createElement('div')
+          addWrap.className = 'assign-picker__add'
+          var toggleBtn = document.createElement('button')
+          toggleBtn.type = 'button'
+          toggleBtn.className = 'assign-picker__toggle'
+          toggleBtn.textContent = '+ Verantwortliche hinzufügen'
+          toggleBtn.setAttribute('aria-haspopup', 'dialog')
+          toggleBtn.setAttribute('aria-expanded', 'false')
+
+          var dropdown = document.createElement('div')
+          dropdown.id = ddId
+          dropdown.className = 'assign-picker__dropdown'
+          dropdown.hidden = true
+          dropdown.setAttribute('role', 'dialog')
+          dropdown.setAttribute('aria-label', 'Mitarbeitende auswählen')
+          toggleBtn.setAttribute('aria-controls', ddId)
+
+          var searchInput = document.createElement('input')
+          searchInput.type = 'search'
+          searchInput.className = 'form__input assign-picker__search'
+          searchInput.placeholder = 'Mitarbeitende suchen …'
+          searchInput.setAttribute('autocomplete', 'off')
+          searchInput.setAttribute('aria-label', 'Suche')
+
+          var listUl = document.createElement('ul')
+          listUl.className = 'assign-picker__list'
+          listUl.setAttribute('role', 'listbox')
+
+          var emptyMsg = document.createElement('p')
+          emptyMsg.className = 'assign-picker__empty-msg'
+          emptyMsg.hidden = true
+
+          dropdown.appendChild(searchInput)
+          dropdown.appendChild(listUl)
+          dropdown.appendChild(emptyMsg)
+          addWrap.appendChild(toggleBtn)
+          addWrap.appendChild(dropdown)
+          root.appendChild(chipsEl)
+          root.appendChild(addWrap)
+          mountEl.appendChild(root)
+
+          var open = false
+
+          function closeDropdown() {
+            if (!open) return
+            open = false
+            dropdown.hidden = true
+            toggleBtn.setAttribute('aria-expanded', 'false')
+            searchInput.value = ''
+            renderDropdownList()
+          }
+
+          function openDropdown() {
+            var proj = getCurrentProject()
+            if (!proj || !proj.participants || proj.participants.length === 0) return
+            open = true
+            dropdown.hidden = false
+            toggleBtn.setAttribute('aria-expanded', 'true')
+            renderDropdownList()
+            setTimeout(function () {
+              searchInput.focus()
+            }, 0)
+          }
+
+          function renderDropdownList() {
+            var q = (searchInput.value || '').trim().toLowerCase()
+            var proj = getCurrentProject()
+            listUl.innerHTML = ''
+            if (!proj || !proj.participants || proj.participants.length === 0) {
+              emptyMsg.textContent = 'Zuerst Teilnehmende im Projekt anlegen.'
+              emptyMsg.hidden = false
+              return
+            }
+            var count = 0
+            for (var i = 0; i < proj.participants.length; i++) {
+              var part = proj.participants[i]
+              if (ids.indexOf(part.id) !== -1) continue
+              var label = participantLabel(part)
+              if (q && label.toLowerCase().indexOf(q) === -1) continue
+              var li = document.createElement('li')
+              li.setAttribute('role', 'none')
+              var btn = document.createElement('button')
+              btn.type = 'button'
+              btn.className = 'assign-picker__option'
+              btn.setAttribute('role', 'option')
+              btn.textContent = label
+              ;(function (pid) {
+                btn.addEventListener('click', function () {
+                  if (ids.indexOf(pid) === -1) ids.push(pid)
+                  refreshChips()
+                  notify()
+                  searchInput.value = ''
+                  renderDropdownList()
+                  searchInput.focus()
+                })
+              })(part.id)
+              li.appendChild(btn)
+              listUl.appendChild(li)
+              count++
+            }
+            if (count === 0) {
+              emptyMsg.textContent = q
+                ? 'Keine Treffer — Suchbegriff ändern.'
+                : 'Alle passenden Mitarbeitenden sind bereits zugewiesen.'
+              emptyMsg.hidden = false
+            } else {
+              emptyMsg.hidden = true
             }
           }
-          for (var i = 0; i < proj.participants.length; i++) {
-            var part = proj.participants[i]
-            var lab = document.createElement('label')
-            lab.className = 'form__radioLabel'
-            var inp = document.createElement('input')
-            inp.type = 'checkbox'
-            inp.setAttribute('data-participant-id', part.id)
-            inp.id = idPrefix + '-a-' + part.id
-            if (selected[part.id]) inp.checked = true
-            lab.appendChild(inp)
-            lab.appendChild(document.createTextNode(' ' + participantLabel(part)))
-            container.appendChild(lab)
+
+          function refreshChips() {
+            chipsEl.innerHTML = ''
+            var proj = getCurrentProject()
+            var parts = proj && proj.participants ? proj.participants : []
+            for (var i = 0; i < ids.length; i++) {
+              var pid = ids[i]
+              var part = findParticipantById(parts, pid)
+              var label = part ? participantLabel(part) : 'Unbekannt'
+              var chip = document.createElement('span')
+              chip.className = 'assign-picker__chip'
+              chip.setAttribute('role', 'listitem')
+              var txt = document.createElement('span')
+              txt.textContent = label
+              var rm = document.createElement('button')
+              rm.type = 'button'
+              rm.className = 'assign-picker__chip-remove'
+              rm.setAttribute('aria-label', 'Zuordnung entfernen: ' + label)
+              rm.textContent = '×'
+              ;(function (pidRem) {
+                rm.addEventListener('click', function () {
+                  var ix = ids.indexOf(pidRem)
+                  if (ix !== -1) ids.splice(ix, 1)
+                  refreshChips()
+                  notify()
+                  if (open) renderDropdownList()
+                  updateToggleState()
+                })
+              })(pid)
+              chip.appendChild(txt)
+              chip.appendChild(rm)
+              chipsEl.appendChild(chip)
+            }
+            updateToggleState()
+          }
+
+          function updateToggleState() {
+            var proj = getCurrentProject()
+            toggleBtn.disabled = !proj || !proj.participants || proj.participants.length === 0
+          }
+
+          function notify() {
+            if (taskNodeId != null) {
+              setAssigneesOnNode(taskRootRef, taskNodeId, ids.slice())
+              saveState()
+            }
+            if (onExternalChange) onExternalChange(ids.slice())
+          }
+
+          function onDocMouseDown(ev) {
+            if (!open) return
+            if (!root.contains(ev.target)) closeDropdown()
+          }
+
+          toggleBtn.addEventListener('click', function () {
+            var proj = getCurrentProject()
+            if (!proj || !proj.participants || proj.participants.length === 0) return
+            if (open) closeDropdown()
+            else openDropdown()
+          })
+          searchInput.addEventListener('input', renderDropdownList)
+          searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+              e.preventDefault()
+              e.stopPropagation()
+              closeDropdown()
+              toggleBtn.focus()
+            }
+          })
+          document.addEventListener('mousedown', onDocMouseDown)
+
+          refreshChips()
+
+          return {
+            getIds: function () {
+              return ids.slice()
+            },
+            setIds: function (arr) {
+              ids = (arr || []).slice()
+              refreshChips()
+              if (open) renderDropdownList()
+            },
+            destroy: function () {
+              document.removeEventListener('mousedown', onDocMouseDown)
+              closeDropdown()
+              if (mountEl.firstChild) mountEl.removeChild(mountEl.firstChild)
+            },
+          }
+        }
+
+        /**
+         * @param {HTMLElement} mountEl
+         * @param {{ initialIds?: string[], taskNodeId?: string, currentNode?: object|null, onChange?: function(string[]): void }} options
+         */
+        function mountDependencyPicker(mountEl, options) {
+          options = options || {}
+          var ids = (options.initialIds || []).slice()
+          var taskNodeId = options.taskNodeId
+          var currentNode = options.currentNode != null ? options.currentNode : null
+          var onExternalChange = options.onChange
+
+          var uid = ++depPickerUid
+          var ddId = 'dep-picker-dd-' + uid
+
+          var root = document.createElement('div')
+          root.className = 'assign-picker'
+          var chipsEl = document.createElement('div')
+          chipsEl.className = 'assign-picker__chips'
+          chipsEl.setAttribute('role', 'list')
+
+          var addWrap = document.createElement('div')
+          addWrap.className = 'assign-picker__add'
+          var toggleBtn = document.createElement('button')
+          toggleBtn.type = 'button'
+          toggleBtn.className = 'assign-picker__toggle'
+          toggleBtn.textContent = '+ Vorgänger hinzufügen'
+          toggleBtn.setAttribute('aria-haspopup', 'dialog')
+          toggleBtn.setAttribute('aria-expanded', 'false')
+
+          var dropdown = document.createElement('div')
+          dropdown.id = ddId
+          dropdown.className = 'assign-picker__dropdown'
+          dropdown.hidden = true
+          dropdown.setAttribute('role', 'dialog')
+          dropdown.setAttribute('aria-label', 'Vorgänger-Aufgaben auswählen')
+          toggleBtn.setAttribute('aria-controls', ddId)
+
+          var searchInput = document.createElement('input')
+          searchInput.type = 'search'
+          searchInput.className = 'form__input assign-picker__search'
+          searchInput.placeholder = 'Aufgaben suchen …'
+          searchInput.setAttribute('autocomplete', 'off')
+          searchInput.setAttribute('aria-label', 'Suche')
+
+          var listUl = document.createElement('ul')
+          listUl.className = 'assign-picker__list'
+          listUl.setAttribute('role', 'listbox')
+
+          var emptyMsg = document.createElement('p')
+          emptyMsg.className = 'assign-picker__empty-msg'
+          emptyMsg.hidden = true
+
+          dropdown.appendChild(searchInput)
+          dropdown.appendChild(listUl)
+          dropdown.appendChild(emptyMsg)
+          addWrap.appendChild(toggleBtn)
+          addWrap.appendChild(dropdown)
+          root.appendChild(chipsEl)
+          root.appendChild(addWrap)
+          mountEl.appendChild(root)
+
+          var open = false
+
+          function closeDropdown() {
+            if (!open) return
+            open = false
+            dropdown.hidden = true
+            toggleBtn.setAttribute('aria-expanded', 'false')
+            searchInput.value = ''
+            renderDropdownList()
+          }
+
+          function openDropdown() {
+            if (toggleBtn.disabled) return
+            open = true
+            dropdown.hidden = false
+            toggleBtn.setAttribute('aria-expanded', 'true')
+            renderDropdownList()
+            setTimeout(function () {
+              searchInput.focus()
+            }, 0)
+          }
+
+          function pathLabelForTaskId(tid) {
+            var flat = flattenTasksWithPath(taskRootRef || [], [])
+            for (var i = 0; i < flat.length; i++) {
+              if (flat[i].id === tid) return flat[i].pathLabel
+            }
+            return 'Unbekannte Aufgabe'
+          }
+
+          function renderDropdownList() {
+            var q = (searchInput.value || '').trim().toLowerCase()
+            listUl.innerHTML = ''
+            var flat = flattenTasksWithPath(taskRootRef || [], [])
+            if (!taskRootRef || flat.length === 0) {
+              emptyMsg.textContent = 'Noch keine Aufgaben im Projekt.'
+              emptyMsg.hidden = false
+              return
+            }
+            var count = 0
+            for (var i = 0; i < flat.length; i++) {
+              var item = flat[i]
+              if (ids.indexOf(item.id) !== -1) continue
+              if (!isValidDependencyPredecessor(taskRootRef, taskNodeId, currentNode, item.id)) continue
+              if (q && item.pathLabel.toLowerCase().indexOf(q) === -1) continue
+              var li = document.createElement('li')
+              li.setAttribute('role', 'none')
+              var btn = document.createElement('button')
+              btn.type = 'button'
+              btn.className = 'assign-picker__option'
+              btn.setAttribute('role', 'option')
+              btn.textContent = item.pathLabel
+              ;(function (tid) {
+                btn.addEventListener('click', function () {
+                  if (ids.length >= MAX_DEPENDS_PER_TASK) return
+                  if (ids.indexOf(tid) === -1) ids.push(tid)
+                  refreshChips()
+                  notify()
+                  searchInput.value = ''
+                  renderDropdownList()
+                  searchInput.focus()
+                })
+              })(item.id)
+              li.appendChild(btn)
+              listUl.appendChild(li)
+              count++
+            }
+            if (count === 0) {
+              emptyMsg.textContent = q
+                ? 'Keine Treffer — Suchbegriff ändern.'
+                : 'Keine weiteren Vorgänger wählbar (oder alle passenden sind bereits gewählt).'
+              emptyMsg.hidden = false
+            } else {
+              emptyMsg.hidden = true
+            }
+          }
+
+          function refreshChips() {
+            chipsEl.innerHTML = ''
+            for (var i = 0; i < ids.length; i++) {
+              var tid = ids[i]
+              var label = pathLabelForTaskId(tid)
+              var chip = document.createElement('span')
+              chip.className = 'assign-picker__chip'
+              chip.setAttribute('role', 'listitem')
+              chip.title = label
+              var txt = document.createElement('span')
+              txt.textContent = label
+              var rm = document.createElement('button')
+              rm.type = 'button'
+              rm.className = 'assign-picker__chip-remove'
+              rm.setAttribute('aria-label', 'Vorgänger entfernen: ' + label)
+              rm.textContent = '×'
+              ;(function (tidRem) {
+                rm.addEventListener('click', function () {
+                  var ix = ids.indexOf(tidRem)
+                  if (ix !== -1) ids.splice(ix, 1)
+                  refreshChips()
+                  notify()
+                  if (open) renderDropdownList()
+                  updateToggleState()
+                })
+              })(tid)
+              chip.appendChild(txt)
+              chip.appendChild(rm)
+              chipsEl.appendChild(chip)
+            }
+            updateToggleState()
+          }
+
+          function updateToggleState() {
+            if (!taskRootRef || taskRootRef.length === 0) {
+              toggleBtn.disabled = true
+              return
+            }
+            if (ids.length >= MAX_DEPENDS_PER_TASK) {
+              toggleBtn.disabled = true
+              return
+            }
+            var flat = flattenTasksWithPath(taskRootRef, [])
+            var hasCandidate = false
+            for (var fi = 0; fi < flat.length; fi++) {
+              var item = flat[fi]
+              if (ids.indexOf(item.id) !== -1) continue
+              if (isValidDependencyPredecessor(taskRootRef, taskNodeId, currentNode, item.id)) {
+                hasCandidate = true
+                break
+              }
+            }
+            toggleBtn.disabled = !hasCandidate
+          }
+
+          function notify() {
+            if (taskNodeId != null) {
+              setDependenciesOnNode(taskRootRef, taskNodeId, ids.slice())
+              saveState()
+            }
+            if (onExternalChange) onExternalChange(ids.slice())
+          }
+
+          function onDocMouseDown(ev) {
+            if (!open) return
+            if (!root.contains(ev.target)) closeDropdown()
+          }
+
+          toggleBtn.addEventListener('click', function () {
+            if (toggleBtn.disabled) return
+            if (open) closeDropdown()
+            else openDropdown()
+          })
+          searchInput.addEventListener('input', renderDropdownList)
+          searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+              e.preventDefault()
+              e.stopPropagation()
+              closeDropdown()
+              toggleBtn.focus()
+            }
+          })
+          document.addEventListener('mousedown', onDocMouseDown)
+
+          refreshChips()
+
+          return {
+            getIds: function () {
+              return ids.slice()
+            },
+            setIds: function (arr) {
+              ids = (arr || []).slice()
+              refreshChips()
+              if (open) renderDropdownList()
+            },
+            destroy: function () {
+              document.removeEventListener('mousedown', onDocMouseDown)
+              closeDropdown()
+              if (mountEl.firstChild) mountEl.removeChild(mountEl.firstChild)
+            },
           }
         }
 
         function renderNewTaskAssignees() {
-          renderAssigneeCheckboxes(newTaskAssigneesEl, null, 'new-main')
+          var mount = newTaskAssigneesMount
+          if (!mount) return
+          if (newTaskPickerInstance) {
+            newTaskAssigneeIdsCache = newTaskPickerInstance.getIds()
+            newTaskPickerInstance.destroy()
+            newTaskPickerInstance = null
+          }
+          newTaskPickerInstance = mountAssigneePicker(mount, {
+            initialIds: newTaskAssigneeIdsCache,
+            onChange: function (nextIds) {
+              newTaskAssigneeIdsCache = nextIds.slice()
+            },
+          })
+        }
+
+        function renderNewTaskDependencies() {
+          var mount = newTaskDepsMount
+          if (!mount) return
+          if (newTaskDepPickerInstance) {
+            newTaskDependencyIdsCache = newTaskDepPickerInstance.getIds()
+            newTaskDepPickerInstance.destroy()
+            newTaskDepPickerInstance = null
+          }
+          newTaskDepPickerInstance = mountDependencyPicker(mount, {
+            initialIds: newTaskDependencyIdsCache,
+            currentNode: null,
+            onChange: function (nextIds) {
+              newTaskDependencyIdsCache = nextIds.slice()
+            },
+          })
         }
 
         function renderParticipantList() {
@@ -1192,7 +3300,9 @@
         }
 
         function syncTaskDueDefault() {
-          taskDue.value = todayYmd()
+          var t = todayYmd()
+          if (taskStart) taskStart.value = t
+          taskDue.value = t
         }
 
         function renderProjectHeader() {
@@ -1230,10 +3340,9 @@
           taskViewSub.textContent = 'Aufgaben in diesem Projekt'
           renderProjectHeader()
           taskRootRef = p.tasks
-          syncTaskDueDefault()
-          titleInput.value = ''
-          taskDesc.value = ''
-          submitBtn.disabled = true
+          closeMainTaskForm()
+          closeParticipantForm()
+          setTaskViewMode('list')
           renderParticipantList()
           renderNewTaskAssignees()
           render()
@@ -1245,6 +3354,7 @@
           saveState()
           viewTasks.hidden = true
           viewProjects.hidden = false
+          closeProjectForm()
           renderProjectList()
         }
 
@@ -1325,6 +3435,217 @@
           return card
         }
 
+        function setTaskViewMode(mode) {
+          currentTaskView = mode
+          taskPanelList.hidden = mode !== 'list'
+          taskPanelGantt.hidden = mode !== 'gantt'
+          taskPanelKanban.hidden = mode !== 'kanban'
+          btnViewList.classList.toggle('is-active', mode === 'list')
+          btnViewGantt.classList.toggle('is-active', mode === 'gantt')
+          btnViewKanban.classList.toggle('is-active', mode === 'kanban')
+          btnViewList.setAttribute('aria-selected', mode === 'list' ? 'true' : 'false')
+          btnViewGantt.setAttribute('aria-selected', mode === 'gantt' ? 'true' : 'false')
+          btnViewKanban.setAttribute('aria-selected', mode === 'kanban' ? 'true' : 'false')
+        }
+
+        function ymdToDayIndex(ymd) {
+          if (!isValidYmd(ymd)) return null
+          return Math.floor(new Date(ymd + 'T12:00:00').getTime() / 86400000)
+        }
+
+        function collectGanttRows(nodes, depth, out) {
+          depth = depth || 0
+          out = out || []
+          for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i]
+            var isOpen = ganttOpenMap[n.id] !== false
+            out.push({ node: n, depth: depth, isOpen: isOpen })
+            if (n.children && n.children.length && isOpen) {
+              collectGanttRows(n.children, depth + 1, out)
+            }
+          }
+          return out
+        }
+
+        function addQuickSubtask(parentId) {
+          var t = prompt('Titel der Unteraufgabe:')
+          if (!t || !t.trim()) return
+          var td = todayYmd()
+          addChildToParent(taskRootRef, parentId, {
+            id: crypto.randomUUID(),
+            title: t.trim(),
+            priority: 'medium',
+            done: false,
+            createdAt: new Date().toISOString(),
+            startDate: td,
+            dueDate: td,
+            description: '',
+            assigneeIds: [],
+            dependsOnTaskIds: [],
+            attachments: [],
+            links: [],
+            history: [],
+            children: [],
+          })
+          render()
+        }
+
+        function openTaskCardFromGantt(taskId) {
+          setTaskViewMode('list')
+          render()
+          setTimeout(function () {
+            var el = document.getElementById('task-block-' + taskId)
+            if (!el) return
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            var row = el.querySelector('.task')
+            if (row) {
+              row.classList.add('task--flash')
+              setTimeout(function () {
+                row.classList.remove('task--flash')
+              }, 1300)
+            }
+          }, 20)
+        }
+
+        function renderGantt() {
+          if (!ganttRoot) return
+          ganttRoot.innerHTML = ''
+          if (!taskRootRef || taskRootRef.length === 0) {
+            var empty = document.createElement('p')
+            empty.className = 'list__empty'
+            empty.textContent = 'Noch keine Aufgaben für den Projektplan.'
+            ganttRoot.appendChild(empty)
+            return
+          }
+          var rows = collectGanttRows(taskRootRef, 0, [])
+          var minDay = null
+          var maxDay = null
+          for (var i = 0; i < rows.length; i++) {
+            var n = rows[i].node
+            var s = ymdToDayIndex(n.startDate)
+            var d = ymdToDayIndex(n.dueDate)
+            if (s == null && d == null) continue
+            if (s == null) s = d
+            if (d == null) d = s
+            if (minDay == null || s < minDay) minDay = s
+            if (maxDay == null || d > maxDay) maxDay = d
+          }
+          if (minDay == null || maxDay == null) {
+            var today = ymdToDayIndex(todayYmd())
+            minDay = today - 3
+            maxDay = today + 14
+          }
+          var dayCount = Math.max(1, maxDay - minDay + 1)
+          var laneWidth = Math.max(900, dayCount * 28)
+          var barGeomById = {}
+
+          for (var r = 0; r < rows.length; r++) {
+            var row = rows[r]
+            var node = row.node
+            var rowEl = document.createElement('div')
+            rowEl.className = 'gantt__row'
+            var taskCol = document.createElement('div')
+            taskCol.className = 'gantt__task'
+            taskCol.style.paddingLeft = row.depth * 16 + 'px'
+            if (node.children && node.children.length) {
+              var tg = document.createElement('button')
+              tg.type = 'button'
+              tg.className = 'gantt__toggle'
+              tg.textContent = row.isOpen ? '−' : '+'
+              ;(function (nodeId) {
+                tg.addEventListener('click', function () {
+                  ganttOpenMap[nodeId] = ganttOpenMap[nodeId] === false
+                  render()
+                })
+              })(node.id)
+              taskCol.appendChild(tg)
+            }
+            var title = document.createElement('span')
+            title.className = 'gantt__title'
+            title.textContent = node.title + ' (' + LABELS[node.priority] + ')'
+            taskCol.appendChild(title)
+            var openBtn = document.createElement('button')
+            openBtn.type = 'button'
+            openBtn.className = 'task__btn'
+            openBtn.textContent = 'Karte öffnen'
+            ;(function (taskId) {
+              openBtn.addEventListener('click', function () {
+                openTaskCardFromGantt(taskId)
+              })
+            })(node.id)
+            taskCol.appendChild(openBtn)
+            var subBtn = document.createElement('button')
+            subBtn.type = 'button'
+            subBtn.className = 'task__btn'
+            subBtn.style.marginLeft = '0.2rem'
+            subBtn.textContent = '+ Unteraufgabe'
+            ;(function (pid) {
+              subBtn.addEventListener('click', function () {
+                addQuickSubtask(pid)
+              })
+            })(node.id)
+            taskCol.appendChild(subBtn)
+            rowEl.appendChild(taskCol)
+
+            var lane = document.createElement('div')
+            lane.className = 'gantt__lane'
+            lane.style.width = laneWidth + 'px'
+            var sDay = ymdToDayIndex(node.startDate)
+            var dDay = ymdToDayIndex(node.dueDate)
+            if (sDay == null && dDay == null) {
+              sDay = ymdToDayIndex(todayYmd())
+              dDay = sDay
+            } else if (sDay == null) {
+              sDay = dDay
+            } else if (dDay == null) {
+              dDay = sDay
+            }
+            var leftPx = ((sDay - minDay) / dayCount) * laneWidth
+            var widthPx = Math.max(6, ((dDay - sDay + 1) / dayCount) * laneWidth)
+            var bar = document.createElement('div')
+            bar.className = 'gantt__bar' + (node.done ? ' gantt__bar--done' : '')
+            bar.style.left = leftPx + 'px'
+            bar.style.width = widthPx + 'px'
+            bar.title =
+              (isValidYmd(node.startDate) ? formatDueDe(node.startDate) : 'ohne Start') +
+              ' – ' +
+              (isValidYmd(node.dueDate) ? formatDueDe(node.dueDate) : 'ohne Frist')
+            lane.appendChild(bar)
+            barGeomById[node.id] = { x1: leftPx, x2: leftPx + widthPx, y: r * 52 + 25 }
+            rowEl.appendChild(lane)
+            ganttRoot.appendChild(rowEl)
+          }
+
+          var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+          svg.setAttribute('class', 'gantt__deps')
+          svg.setAttribute('width', String(440 + laneWidth + 12))
+          svg.setAttribute('height', String(rows.length * 52 + 6))
+          svg.style.left = '0'
+          svg.style.top = '0'
+          for (var ri = 0; ri < rows.length; ri++) {
+            var target = rows[ri].node
+            var deps = target.dependsOnTaskIds || []
+            var tgGeom = barGeomById[target.id]
+            if (!tgGeom) continue
+            for (var di = 0; di < deps.length; di++) {
+              var srcGeom = barGeomById[deps[di]]
+              if (!srcGeom) continue
+              var p = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+              var x1 = 440 + srcGeom.x2 + 2
+              var y1 = srcGeom.y
+              var x2 = 440 + tgGeom.x1 - 2
+              var y2 = tgGeom.y
+              var cx = x1 + Math.max(10, (x2 - x1) * 0.45)
+              p.setAttribute('d', 'M' + x1 + ',' + y1 + ' C' + cx + ',' + y1 + ' ' + cx + ',' + y2 + ' ' + x2 + ',' + y2)
+              p.setAttribute('stroke', 'rgba(96,165,250,0.9)')
+              p.setAttribute('stroke-width', '1.5')
+              p.setAttribute('fill', 'none')
+              svg.appendChild(p)
+            }
+          }
+          ganttRoot.appendChild(svg)
+        }
+
         function render() {
           if (!taskRootRef) return
           sortSiblings(taskRootRef)
@@ -1333,7 +3654,9 @@
             emptyMsg.hidden = false
             taskList.hidden = true
             taskList.innerHTML = ''
+            renderGantt()
             renderNewTaskAssignees()
+            renderNewTaskDependencies()
             return
           }
           emptyMsg.hidden = true
@@ -1342,12 +3665,18 @@
           for (var i = 0; i < taskRootRef.length; i++) {
             taskList.appendChild(renderNode(taskRootRef[i]))
           }
+          renderGantt()
           renderNewTaskAssignees()
+          renderNewTaskDependencies()
         }
 
         function renderNode(node) {
           var block = document.createElement('li')
           block.className = 'task-block'
+          block.id = 'task-block-' + node.id
+
+          var subKids = Array.isArray(node.children) ? node.children : []
+          var subCount = subKids.length
 
           var row = document.createElement('div')
           var od = isOverdue(node.dueDate, node.done)
@@ -1359,6 +3688,34 @@
 
           var top = document.createElement('div')
           top.className = 'task__top'
+
+          var subListId = 'task-subtasks-' + node.id
+          if (subCount > 0) {
+            var subCollapsed = isSubtasksCollapsed(node.id)
+            var subToggle = document.createElement('button')
+            subToggle.type = 'button'
+            subToggle.className = 'task__collapse-subs'
+            subToggle.setAttribute('aria-expanded', subCollapsed ? 'false' : 'true')
+            subToggle.setAttribute('aria-controls', subListId)
+            subToggle.setAttribute(
+              'aria-label',
+              subCollapsed
+                ? subCount + ' Unteraufgaben einblenden'
+                : subCount + ' Unteraufgaben ausblenden',
+            )
+            subToggle.title =
+              (subCollapsed ? 'Einblenden: ' : 'Ausblenden: ') + subCount + ' Unteraufgabe' + (subCount === 1 ? '' : 'n')
+            subToggle.textContent = subCollapsed ? '▶' : '▼'
+            ;(function (taskId) {
+              subToggle.addEventListener('click', function (e) {
+                e.preventDefault()
+                e.stopPropagation()
+                setSubtasksCollapsed(taskId, !isSubtasksCollapsed(taskId))
+                render()
+              })
+            })(node.id)
+            top.appendChild(subToggle)
+          }
 
           var label = document.createElement('label')
           label.className = 'task__check'
@@ -1387,8 +3744,8 @@
           var btnSub = document.createElement('button')
           btnSub.type = 'button'
           btnSub.className = 'task__btn'
-          btnSub.textContent = 'Unteraufgabe'
-          btnSub.setAttribute('aria-label', 'Unteraufgabe zu: ' + node.title)
+          btnSub.textContent = 'Unteraufgabe hinzufügen'
+          btnSub.setAttribute('aria-label', 'Unteraufgabe hinzufügen zu: ' + node.title)
 
           var del = document.createElement('button')
           del.type = 'button'
@@ -1396,6 +3753,7 @@
           del.textContent = 'Löschen'
           del.setAttribute('aria-label', 'Löschen inkl. aller Unteraufgaben: ' + node.title)
           del.addEventListener('click', function () {
+            stripRemovedTaskIdFromDependencies(taskRootRef, node.id)
             removeById(taskRootRef, node.id)
             render()
           })
@@ -1408,14 +3766,42 @@
           top.appendChild(actions)
           row.appendChild(top)
 
-          var dueWrap = document.createElement('div')
-          dueWrap.className = 'task__due'
-          var dueLbl = document.createElement('span')
+          appendTaskCardQuickStrip(row, node)
+
+          var datesWrap = document.createElement('div')
+          datesWrap.className = 'task__dates'
+          var startField = document.createElement('div')
+          startField.className = 'task__date-field'
+          var startLbl = document.createElement('label')
+          startLbl.className = 'task__due-label'
+          startLbl.setAttribute('for', 'task-start-' + node.id)
+          startLbl.textContent = 'Beginn'
+          var startInput = document.createElement('input')
+          startInput.type = 'date'
+          startInput.className = 'form__input form__input--date'
+          startInput.id = 'task-start-' + node.id
+          startInput.value = isValidYmd(node.startDate) ? node.startDate : ''
+          startInput.setAttribute('aria-label', 'Beginn für: ' + node.title)
+          startInput.addEventListener('click', function (e) {
+            e.stopPropagation()
+          })
+          startInput.addEventListener('change', function () {
+            setStartById(taskRootRef, node.id, startInput.value ? startInput.value : null)
+            render()
+          })
+          startField.appendChild(startLbl)
+          startField.appendChild(startInput)
+
+          var dueField = document.createElement('div')
+          dueField.className = 'task__date-field'
+          var dueLbl = document.createElement('label')
           dueLbl.className = 'task__due-label'
+          dueLbl.setAttribute('for', 'task-due-' + node.id)
           dueLbl.textContent = 'Frist'
           var dueInput = document.createElement('input')
           dueInput.type = 'date'
           dueInput.className = 'form__input form__input--date'
+          dueInput.id = 'task-due-' + node.id
           dueInput.value = isValidYmd(node.dueDate) ? node.dueDate : ''
           dueInput.setAttribute('aria-label', 'Frist für: ' + node.title)
           dueInput.addEventListener('click', function (e) {
@@ -1426,18 +3812,36 @@
             setDueById(taskRootRef, node.id, v ? v : null)
             render()
           })
-          var dueHint = document.createElement('span')
-          dueHint.className = 'task__due-hint'
-          if (isValidYmd(node.dueDate)) {
-            dueHint.textContent = formatDueDe(node.dueDate)
-            if (od) dueHint.textContent += ' · überfällig'
-          } else {
-            dueHint.textContent = 'Kein Datum — bitte wählen'
+          dueField.appendChild(dueLbl)
+          dueField.appendChild(dueInput)
+
+          var datesHint = document.createElement('span')
+          datesHint.className = 'task__due-hint task__due-hint--block'
+          function buildDatesHint() {
+            var hasS = isValidYmd(node.startDate)
+            var hasD = isValidYmd(node.dueDate)
+            if (!hasS && !hasD) return 'Keine Termine gesetzt'
+            var bits = []
+            if (hasS) bits.push('Beginn ' + formatDueDe(node.startDate))
+            if (hasD) {
+              var fd = 'Frist ' + formatDueDe(node.dueDate)
+              if (od) fd += ' (überfällig)'
+              bits.push(fd)
+            } else {
+              bits.push('keine Frist')
+            }
+            var t = bits.join(' · ')
+            if (hasS && hasD && node.startDate > node.dueDate) {
+              t += ' — Hinweis: Beginn liegt nach der Frist'
+            }
+            return t
           }
-          dueWrap.appendChild(dueLbl)
-          dueWrap.appendChild(dueInput)
-          dueWrap.appendChild(dueHint)
-          row.appendChild(dueWrap)
+          datesHint.textContent = buildDatesHint()
+
+          datesWrap.appendChild(startField)
+          datesWrap.appendChild(dueField)
+          datesWrap.appendChild(datesHint)
+          row.appendChild(datesWrap)
 
           var descWrap = document.createElement('div')
           descWrap.className = 'task__desc-wrap'
@@ -1468,19 +3872,47 @@
           assignWrap.className = 'task__assign-wrap'
           var assignLegend = document.createElement('span')
           assignLegend.className = 'task__desc-label'
+          assignLegend.id = 'task-assign-legend-' + node.id
           assignLegend.textContent = 'Zuständig'
-          var assignChecks = document.createElement('div')
-          assignChecks.className = 'task__assign-checks'
-          assignChecks.setAttribute('aria-label', 'Zuständige für: ' + node.title)
-          renderAssigneeCheckboxes(assignChecks, node, 'task-' + node.id)
-          bindAssigneeContainer(assignChecks, node.id)
+          var assignMount = document.createElement('div')
+          assignMount.className = 'assign-picker-mount'
+          assignMount.setAttribute('role', 'group')
+          assignMount.setAttribute('aria-labelledby', 'task-assign-legend-' + node.id)
+          mountAssigneePicker(assignMount, {
+            initialIds: node.assigneeIds,
+            taskNodeId: node.id,
+          })
           assignWrap.appendChild(assignLegend)
-          assignWrap.appendChild(assignChecks)
+          assignWrap.appendChild(assignMount)
           row.appendChild(assignWrap)
 
+          var depWrap = document.createElement('div')
+          depWrap.className = 'task__assign-wrap'
+          var depLegend = document.createElement('span')
+          depLegend.className = 'task__desc-label'
+          depLegend.id = 'task-deps-legend-' + node.id
+          depLegend.textContent = 'Zuerst erledigen'
+          var depMount = document.createElement('div')
+          depMount.className = 'assign-picker-mount'
+          depMount.setAttribute('role', 'group')
+          depMount.setAttribute('aria-labelledby', 'task-deps-legend-' + node.id)
+          mountDependencyPicker(depMount, {
+            initialIds: node.dependsOnTaskIds || [],
+            taskNodeId: node.id,
+            currentNode: node,
+          })
+          depWrap.appendChild(depLegend)
+          depWrap.appendChild(depMount)
+          row.appendChild(depWrap)
+
+          appendAttachmentsEditorToRow(row, node)
+          appendLinksEditorToRow(row, node)
+          appendHistorySection(row, node)
+
           var addRow = document.createElement('div')
-          addRow.className = 'task-add-sub'
+          addRow.className = 'task-add-sub task-add-sub--hidden'
           addRow.hidden = true
+          addRow.setAttribute('hidden', '')
           var subPriorityName = 'sub-priority-' + node.id
 
           var subInput = document.createElement('input')
@@ -1504,7 +3936,26 @@
           subDescRow.appendChild(subDescLbl)
           subDescRow.appendChild(subDesc)
 
-          var subDueRow = document.createElement('div')
+          var subDatesRow = document.createElement('div')
+          subDatesRow.className = 'form__row--split'
+          subDatesRow.style.alignItems = 'flex-end'
+          var subStartCol = document.createElement('div')
+          subStartCol.style.flex = '1 1 10rem'
+          subStartCol.style.minWidth = '0'
+          var subStartLbl = document.createElement('label')
+          subStartLbl.className = 'form__legend'
+          subStartLbl.setAttribute('for', 'sub-start-' + node.id)
+          subStartLbl.textContent = 'Beginn'
+          var subStart = document.createElement('input')
+          subStart.type = 'date'
+          subStart.id = 'sub-start-' + node.id
+          subStart.className = 'form__input form__input--date'
+          subStart.value = todayYmd()
+          subStartCol.appendChild(subStartLbl)
+          subStartCol.appendChild(subStart)
+          var subDueCol = document.createElement('div')
+          subDueCol.style.flex = '1 1 10rem'
+          subDueCol.style.minWidth = '0'
           var subDueLbl = document.createElement('label')
           subDueLbl.className = 'form__legend'
           subDueLbl.setAttribute('for', 'sub-due-' + node.id)
@@ -1515,19 +3966,46 @@
           subDue.className = 'form__input form__input--date'
           subDue.required = true
           subDue.value = todayYmd()
-          subDueRow.appendChild(subDueLbl)
-          subDueRow.appendChild(subDue)
+          subDueCol.appendChild(subDueLbl)
+          subDueCol.appendChild(subDue)
+          subDatesRow.appendChild(subStartCol)
+          subDatesRow.appendChild(subDueCol)
 
           var subAssignWrap = document.createElement('div')
           subAssignWrap.className = 'task__assign-wrap'
           var subAssignLeg = document.createElement('span')
           subAssignLeg.className = 'form__legend'
+          subAssignLeg.id = 'sub-assign-legend-' + node.id
           subAssignLeg.textContent = 'Zuständig'
-          var subAssignChecks = document.createElement('div')
-          subAssignChecks.className = 'task__assign-checks'
-          renderAssigneeCheckboxes(subAssignChecks, null, 'sub-' + node.id)
+          var subAssignMount = document.createElement('div')
+          subAssignMount.className = 'assign-picker-mount'
+          subAssignMount.setAttribute('role', 'group')
+          subAssignMount.setAttribute('aria-labelledby', 'sub-assign-legend-' + node.id)
+          var subAssignPicker = mountAssigneePicker(subAssignMount, { initialIds: [] })
           subAssignWrap.appendChild(subAssignLeg)
-          subAssignWrap.appendChild(subAssignChecks)
+          subAssignWrap.appendChild(subAssignMount)
+
+          var subDepWrap = document.createElement('div')
+          subDepWrap.className = 'task__assign-wrap'
+          var subDepLeg = document.createElement('span')
+          subDepLeg.className = 'form__legend'
+          subDepLeg.id = 'sub-deps-legend-' + node.id
+          subDepLeg.textContent = 'Zuerst erledigen'
+          var subDepMount = document.createElement('div')
+          subDepMount.className = 'assign-picker-mount'
+          subDepMount.setAttribute('role', 'group')
+          subDepMount.setAttribute('aria-labelledby', 'sub-deps-legend-' + node.id)
+          var subDepPicker = mountDependencyPicker(subDepMount, { initialIds: [] })
+          subDepWrap.appendChild(subDepLeg)
+          subDepWrap.appendChild(subDepMount)
+
+          var pendingSubAttachments = []
+          var subAttachWrap = document.createElement('div')
+          var subAttachPanel = buildPendingAttachmentsUI(subAttachWrap, pendingSubAttachments)
+
+          var pendingSubLinks = []
+          var subLinksWrap = document.createElement('div')
+          var subLinksPanel = buildPendingLinksUI(subLinksWrap, pendingSubLinks)
 
           var subBtn = document.createElement('button')
           subBtn.type = 'button'
@@ -1568,18 +4046,41 @@
           function resetSubForm() {
             subInput.value = ''
             subDesc.value = ''
-            subDue.value = todayYmd()
+            var td = todayYmd()
+            subStart.value = td
+            subDue.value = td
             subBtn.disabled = true
             var mids = addRow.querySelectorAll('input[name="' + subPriorityName + '"]')
             for (var r = 0; r < mids.length; r++) {
               mids[r].checked = mids[r].value === 'medium'
             }
-            renderAssigneeCheckboxes(subAssignChecks, null, 'sub-' + node.id)
+            subAssignPicker.setIds([])
+            subDepPicker.setIds([])
+            subAttachPanel.refresh()
+            subLinksPanel.refresh()
           }
 
           function readSubPriority() {
             var sel = addRow.querySelector('input[name="' + subPriorityName + '"]:checked')
             return sel && sel.value ? sel.value : 'medium'
+          }
+
+          btnSub.setAttribute('aria-expanded', 'false')
+          btnSub.setAttribute('aria-controls', 'subtask-add-' + node.id)
+          addRow.id = 'subtask-add-' + node.id
+
+          function setSubtaskFormOpen(open) {
+            if (open) {
+              addRow.classList.remove('task-add-sub--hidden')
+              addRow.hidden = false
+              addRow.removeAttribute('hidden')
+              btnSub.setAttribute('aria-expanded', 'true')
+            } else {
+              addRow.hidden = true
+              addRow.setAttribute('hidden', '')
+              addRow.classList.add('task-add-sub--hidden')
+              btnSub.setAttribute('aria-expanded', 'false')
+            }
           }
 
           function tryAddSub() {
@@ -1592,14 +4093,29 @@
               priority: readSubPriority(),
               done: false,
               createdAt: new Date().toISOString(),
+              startDate: isValidYmd(subStart.value) ? subStart.value : null,
               dueDate: subDue.value,
               description: sanitizeDescription(subDesc.value),
-              assigneeIds: collectAssigneeIdsFrom(subAssignChecks),
+              assigneeIds: subAssignPicker.getIds(),
+              dependsOnTaskIds: subDepPicker.getIds(),
+              attachments: pendingSubAttachments.map(function (a) {
+                return {
+                  id: a.id,
+                  name: a.name,
+                  mime: a.mime,
+                  dataUrl: a.dataUrl,
+                }
+              }),
+              links: pendingSubLinks.map(function (L) {
+                return { id: L.id, url: L.url, label: L.label }
+              }),
+              history: [],
               children: [],
             }
             addChildToParent(taskRootRef, node.id, child)
+            setSubtasksCollapsed(node.id, false)
             resetSubForm()
-            addRow.hidden = true
+            setSubtaskFormOpen(false)
             render()
           }
 
@@ -1615,8 +4131,12 @@
           subBtn.addEventListener('click', tryAddSub)
 
           btnSub.addEventListener('click', function () {
-            addRow.hidden = !addRow.hidden
-            if (!addRow.hidden) {
+            var isOpen = !addRow.classList.contains('task-add-sub--hidden')
+            if (isOpen) {
+              setSubtaskFormOpen(false)
+              resetSubForm()
+            } else {
+              setSubtaskFormOpen(true)
               resetSubForm()
               subInput.focus()
             }
@@ -1629,23 +4149,45 @@
 
           addRow.appendChild(subInput)
           addRow.appendChild(subDescRow)
-          addRow.appendChild(subDueRow)
+          addRow.appendChild(subDatesRow)
           addRow.appendChild(subAssignWrap)
+          addRow.appendChild(subDepWrap)
+          addRow.appendChild(subAttachWrap)
+          addRow.appendChild(subLinksWrap)
           addRow.appendChild(rowSplit)
 
           block.appendChild(row)
-          block.appendChild(addRow)
 
-          if (node.children.length) {
+          if (subCount > 0) {
             var ul = document.createElement('ul')
+            ul.id = subListId
             ul.className = 'task-tree task-tree--nested'
-            for (var c = 0; c < node.children.length; c++) {
-              ul.appendChild(renderNode(node.children[c]))
+            if (isSubtasksCollapsed(node.id)) {
+              ul.classList.add('task-tree--subs-collapsed')
+              ul.setAttribute('hidden', '')
+            } else {
+              ul.removeAttribute('hidden')
+            }
+            for (var c = 0; c < subCount; c++) {
+              ul.appendChild(renderNode(subKids[c]))
             }
             block.appendChild(ul)
           }
 
+          block.appendChild(addRow)
+
           return block
+        }
+
+        if (btnToggleProjectForm) {
+          btnToggleProjectForm.addEventListener('click', function () {
+            if (!projectForm) return
+            if (projectForm.hidden) {
+              setProjectFormOpen(true)
+            } else {
+              closeProjectForm()
+            }
+          })
         }
 
         projectForm.addEventListener('submit', function (e) {
@@ -1666,9 +4208,7 @@
             state.projects.push(proj)
             state.openProjectId = proj.id
             saveState()
-            projectTitle.value = ''
-            projectDesc.value = ''
-            projectImage.value = ''
+            closeProjectForm()
             showTasksView()
             renderProjectList()
           }
@@ -1703,12 +4243,10 @@
             role: document.getElementById('pf-role').value,
           })
           saveState()
-          document.getElementById('pf-first').value = ''
-          document.getElementById('pf-last').value = ''
-          document.getElementById('pf-role').value = 'projektmitarbeit'
           renderParticipantList()
           renderNewTaskAssignees()
           render()
+          closeParticipantForm()
         })
 
         titleInput.addEventListener('input', function () {
@@ -1728,17 +4266,89 @@
             priority: priority,
             done: false,
             createdAt: new Date().toISOString(),
+            startDate: taskStart && isValidYmd(taskStart.value) ? taskStart.value : null,
             dueDate: isValidYmd(taskDue.value) ? taskDue.value : null,
             description: sanitizeDescription(taskDesc.value),
-            assigneeIds: collectAssigneeIdsFrom(newTaskAssigneesEl),
+            assigneeIds: newTaskPickerInstance ? newTaskPickerInstance.getIds() : [],
+            dependsOnTaskIds: newTaskDepPickerInstance ? newTaskDepPickerInstance.getIds() : [],
+            attachments: pendingMainAttachments.map(function (a) {
+              return {
+                id: a.id,
+                name: a.name,
+                mime: a.mime,
+                dataUrl: a.dataUrl,
+              }
+            }),
+            links: pendingMainLinks.map(function (L) {
+              return { id: L.id, url: L.url, label: L.label }
+            }),
+            history: [],
             children: [],
           })
+          newTaskAssigneeIdsCache = []
+          newTaskDependencyIdsCache = []
+          if (newTaskPickerInstance) newTaskPickerInstance.setIds([])
+          if (newTaskDepPickerInstance) newTaskDepPickerInstance.setIds([])
           titleInput.value = ''
           taskDesc.value = ''
           syncTaskDueDefault()
           submitBtn.disabled = true
+          setMainTaskFormOpen(false)
           render()
         })
+
+        btnToggleMainTask.addEventListener('click', function () {
+          if (form.hidden) {
+            setMainTaskFormOpen(true)
+          } else {
+            closeMainTaskForm()
+          }
+        })
+
+        if (btnToggleParticipantForm) {
+          btnToggleParticipantForm.addEventListener('click', function () {
+            if (!participantFormEl) return
+            if (participantFormEl.hidden) {
+              setParticipantFormOpen(true)
+            } else {
+              closeParticipantForm()
+            }
+          })
+        }
+
+        if (btnViewList) {
+          btnViewList.addEventListener('click', function () {
+            setTaskViewMode('list')
+            render()
+          })
+        }
+        if (btnViewGantt) {
+          btnViewGantt.addEventListener('click', function () {
+            setTaskViewMode('gantt')
+            render()
+          })
+        }
+        if (btnViewKanban) {
+          btnViewKanban.addEventListener('click', function () {
+            setTaskViewMode('kanban')
+            render()
+          })
+        }
+        if (btnGanttAddMain) {
+          btnGanttAddMain.addEventListener('click', function () {
+            setMainTaskFormOpen(true)
+            setTaskViewMode('gantt')
+          })
+        }
+
+        mainTaskAttachmentsPanel = buildPendingAttachmentsUI(
+          document.getElementById('main-task-attachments-wrap'),
+          pendingMainAttachments,
+        )
+        mainTaskLinksPanel = buildPendingLinksUI(
+          document.getElementById('main-task-links-wrap'),
+          pendingMainLinks,
+        )
 
         loadState()
         if (state.openProjectId && getCurrentProject()) {
