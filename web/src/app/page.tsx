@@ -1,8 +1,10 @@
 import { db } from "@/lib/db";
-import { projectMembers, projects } from "@/lib/schema";
+import { projectMembers, projects, users } from "@/lib/schema";
 import { readSessionFromCookie } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
+import LogoutButton from "./components/logout-button";
+import AdminPanel from "./components/admin-panel";
 
 export default async function HomePage() {
   const session = await readSessionFromCookie();
@@ -39,6 +41,30 @@ export default async function HomePage() {
           .innerJoin(projectMembers, eq(projectMembers.projectId, projects.id))
           .where(eq(projectMembers.userId, session.sub));
 
+  const userRows =
+    session.role === "admin"
+      ? await db
+          .select({
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            username: users.username,
+            role: users.role,
+          })
+          .from(users)
+      : [];
+  const membershipRows =
+    session.role === "admin"
+      ? await db.select({ userId: projectMembers.userId, projectId: projectMembers.projectId }).from(projectMembers)
+      : [];
+  const usersWithProjects =
+    session.role === "admin"
+      ? userRows.map((u) => ({
+          ...u,
+          projectIds: membershipRows.filter((m) => m.userId === u.id).map((m) => m.projectId),
+        }))
+      : [];
+
   return (
     <main className="container">
       <div className="card">
@@ -50,8 +76,11 @@ export default async function HomePage() {
           <Link href="/login">
             <button className="secondary">Anderer Login</button>
           </Link>
+          <LogoutButton />
         </div>
       </div>
+
+      {session.role === "admin" ? <AdminPanel projects={projectRows} users={usersWithProjects} /> : null}
 
       <div className="card">
         <h2>Verfügbare Projekte</h2>
