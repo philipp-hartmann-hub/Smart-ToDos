@@ -4606,14 +4606,26 @@
                   var card = document.createElement('div')
                   card.className = 'kanban__card protocol-task-card'
                   card.style.cursor = 'pointer'
+                  card.setAttribute('role', 'button')
+                  card.setAttribute('tabindex', '0')
                   ;(function (taskId) {
-                    card.addEventListener('click', function () {
+                    function openFromProtocol() {
                       state.openProjectId = project.id
                       taskRootRef = project.tasks
                       viewProjects.hidden = true
                       viewTasks.hidden = false
                       setTaskViewMode('gantt')
+                      render()
                       openGanttTaskModal(taskId)
+                    }
+                    card.addEventListener('click', function () {
+                      openFromProtocol()
+                    })
+                    card.addEventListener('keydown', function (evt) {
+                      if (evt.key === 'Enter' || evt.key === ' ') {
+                        evt.preventDefault()
+                        openFromProtocol()
+                      }
                     })
                   })(assignedId)
                   var ct = document.createElement('div')
