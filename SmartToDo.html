@@ -4569,9 +4569,11 @@
                 var tdTask = document.createElement('td')
                 var selTask = document.createElement('select')
                 selTask.className = 'form__input'
+                selTask.multiple = true
+                selTask.size = 5
                 var taskNone = document.createElement('option')
                 taskNone.value = ''
-                taskNone.textContent = 'Aufgabe hinzufügen …'
+                taskNone.textContent = '— Aufgaben wählen —'
                 selTask.appendChild(taskNone)
                 for (var ti = 0; ti < tasksFlat.length; ti++) {
                   var to = document.createElement('option')
@@ -4579,15 +4581,20 @@
                   to.textContent = tasksFlat[ti].pathLabel
                   selTask.appendChild(to)
                 }
-                selTask.value = ''
                 if (!Array.isArray(rowData.taskIds)) rowData.taskIds = []
+                for (var so = 0; so < selTask.options.length; so++) {
+                  var ov = selTask.options[so].value
+                  selTask.options[so].selected = ov && rowData.taskIds.indexOf(ov) >= 0
+                }
                 ;(function (r, s) {
                   s.addEventListener('change', function () {
-                    var picked = s.value || ''
-                    if (!picked) return
-                    if (!Array.isArray(r.taskIds)) r.taskIds = []
-                    if (r.taskIds.indexOf(picked) < 0) r.taskIds.push(picked)
-                    s.value = ''
+                    var ids = []
+                    for (var oi = 0; oi < s.options.length; oi++) {
+                      var v = s.options[oi].value
+                      if (!v || !s.options[oi].selected) continue
+                      ids.push(v)
+                    }
+                    r.taskIds = ids
                     saveState()
                     renderProtocols()
                   })

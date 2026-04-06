@@ -153,3 +153,4 @@ cd Smart-ToDos
 | 2026-04-06 | Protokoll-Sitzungskopf und Protokoll-Tabellenüberschriften auf lila Hintergrund mit weißer Schrift umgestellt (konsistentes Farbkonzept). |
 | 2026-04-06 | Protokoll-Aufgabenspalte erweitert: mehrere Karten pro Zeile möglich; Karten öffnen direkt per Klick (ohne extra Öffnen-Button) und wirken wie gewohnt auf Liste/Gantt/Kanban. |
 | 2026-04-06 | Helle „Eierschalen“-Flächen entfernt: Protokollbereich, Sitzungskörper und Filterleisten auf dunkles Kontrast-Design umgestellt. |
+| 2026-04-06 | Protokoll-Aufgabenwahl auf echtes Mehrfach-Select umgestellt, damit mehrere Karten pro Zeile gleichzeitig ausgewählt und gespeichert werden können. |
