@@ -150,3 +150,4 @@ cd Smart-ToDos
 | 2026-04-06 | Aufgabenliste begrenzt: pro Ebene (Hauptaufgaben und Unteraufgaben) sind nur ca. 5 Einträge sichtbar, danach vertikaler Scroll innerhalb der Liste. |
 | 2026-04-06 | Protokoll-Bereichsüberschriften visuell angeglichen: Toggle-Schaltflächen nutzen jetzt das lila Button-Design mit weißer Schrift. |
 | 2026-04-06 | Ockerfarbe in Aufgaben-Badges entfernt: mittlere Priorität nutzt nun ebenfalls lilafarbenes Styling statt gelb/ocker. |
+| 2026-04-06 | Protokoll-Sitzungskopf und Protokoll-Tabellenüberschriften auf lila Hintergrund mit weißer Schrift umgestellt (konsistentes Farbkonzept). |
