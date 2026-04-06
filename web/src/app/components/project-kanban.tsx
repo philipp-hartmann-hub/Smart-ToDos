@@ -323,20 +323,22 @@ export default function ProjectKanban({ projectId, initialTasks }: Props) {
                       setDragTaskId(null);
                     }}
                   >
-                    {isBacklogCol ? (
-                      <div className="kanban-column__add">
-                        <input
-                          placeholder="+ Karte"
-                          value={newByCell[key] || ""}
-                          onChange={(e) => setNewByCell((prev) => ({ ...prev, [key]: e.target.value }))}
-                        />
-                        <button type="button" onClick={() => addCard(lane.id, col.id)} disabled={busy}>
-                          Hinzufügen
-                        </button>
-                      </div>
-                    ) : (
-                      <p className="kanban-cell__hint">Neue Karten werden im Backlog angelegt.</p>
-                    )}
+                    <div className="kanban-cell__composer">
+                      {isBacklogCol ? (
+                        <div className="kanban-column__add">
+                          <input
+                            placeholder="+ Karte"
+                            value={newByCell[key] || ""}
+                            onChange={(e) => setNewByCell((prev) => ({ ...prev, [key]: e.target.value }))}
+                          />
+                          <button type="button" onClick={() => addCard(lane.id, col.id)} disabled={busy}>
+                            Hinzufügen
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="kanban-cell__hint">Neue Karten werden im Backlog angelegt.</p>
+                      )}
+                    </div>
 
                     <div className="kanban-cards">
                       {cellTasks.map((task) => (

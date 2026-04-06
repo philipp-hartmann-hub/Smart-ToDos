@@ -243,26 +243,33 @@ button.secondary {
   padding: 0.6rem;
   background: #0b1220;
   min-height: 220px;
+  display: flex;
+  flex-direction: column;
 }
 
 .kanban-cell .kanban-column__add input {
   width: 100%;
 }
 
+.kanban-cell__composer {
+  min-height: 82px;
+}
+
 .kanban-cell .kanban-column__add {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin-bottom: 0.7rem;
+  margin: 0;
 }
 
 .kanban-cell .kanban-cards {
+  margin-top: 0.7rem;
   max-height: 320px;
   overflow: auto;
 }
 
 .kanban-cell__hint {
-  margin: 0 0 0.7rem;
+  margin: 0;
   font-size: 0.8rem;
   opacity: 0.8;
 }
