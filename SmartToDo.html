@@ -3976,7 +3976,7 @@
 
         /**
          * @param {HTMLElement} mountEl
-         * @param {{ initialIds?: string[], taskNodeId?: string, currentNode?: object|null, onChange?: function(string[]): void }} options
+         * @param {{ initialIds?: string[], taskNodeId?: string, currentNode?: object|null, onChange?: function(string[]): void, toggleLabel?: string, dialogLabel?: string }} options
          */
         function mountDependencyPicker(mountEl, options) {
           options = options || {}
@@ -3999,7 +3999,7 @@
           var toggleBtn = document.createElement('button')
           toggleBtn.type = 'button'
           toggleBtn.className = 'assign-picker__toggle'
-          toggleBtn.textContent = '+ Vorgänger hinzufügen'
+          toggleBtn.textContent = options.toggleLabel || '+ Vorgänger hinzufügen'
           toggleBtn.setAttribute('aria-haspopup', 'dialog')
           toggleBtn.setAttribute('aria-expanded', 'false')
 
@@ -4008,7 +4008,7 @@
           dropdown.className = 'assign-picker__dropdown'
           dropdown.hidden = true
           dropdown.setAttribute('role', 'dialog')
-          dropdown.setAttribute('aria-label', 'Vorgänger-Aufgaben auswählen')
+          dropdown.setAttribute('aria-label', options.dialogLabel || 'Vorgänger-Aufgaben auswählen')
           toggleBtn.setAttribute('aria-controls', ddId)
 
           var searchInput = document.createElement('input')
@@ -4567,39 +4567,20 @@
                 tdText.appendChild(txtInput)
                 tr.appendChild(tdText)
                 var tdTask = document.createElement('td')
-                var selTask = document.createElement('select')
-                selTask.className = 'form__input'
-                selTask.multiple = true
-                selTask.size = 5
-                var taskNone = document.createElement('option')
-                taskNone.value = ''
-                taskNone.textContent = '— Aufgaben wählen —'
-                selTask.appendChild(taskNone)
-                for (var ti = 0; ti < tasksFlat.length; ti++) {
-                  var to = document.createElement('option')
-                  to.value = tasksFlat[ti].id
-                  to.textContent = tasksFlat[ti].pathLabel
-                  selTask.appendChild(to)
-                }
                 if (!Array.isArray(rowData.taskIds)) rowData.taskIds = []
-                for (var so = 0; so < selTask.options.length; so++) {
-                  var ov = selTask.options[so].value
-                  selTask.options[so].selected = ov && rowData.taskIds.indexOf(ov) >= 0
-                }
-                ;(function (r, s) {
-                  s.addEventListener('change', function () {
-                    var ids = []
-                    for (var oi = 0; oi < s.options.length; oi++) {
-                      var v = s.options[oi].value
-                      if (!v || !s.options[oi].selected) continue
-                      ids.push(v)
-                    }
-                    r.taskIds = ids
+                var taskPickMount = document.createElement('div')
+                taskPickMount.className = 'assign-picker-mount'
+                mountDependencyPicker(taskPickMount, {
+                  initialIds: rowData.taskIds,
+                  onChange: function (ids) {
+                    rowData.taskIds = ids
                     saveState()
                     renderProtocols()
-                  })
-                })(rowData, selTask)
-                tdTask.appendChild(selTask)
+                  },
+                  toggleLabel: 'Aufgabe zuordnen',
+                  dialogLabel: 'Aufgaben für Protokollzeile auswählen',
+                })
+                tdTask.appendChild(taskPickMount)
                 for (var tci = 0; tci < rowData.taskIds.length; tci++) {
                   var assignedId = rowData.taskIds[tci]
                   if (!taskById[assignedId]) continue
