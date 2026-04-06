@@ -466,6 +466,50 @@ button.secondary {
   gap: 0.45rem;
 }
 
+.task-detail-modal {
+  max-width: min(920px, 96vw);
+  max-height: min(92vh, 980px);
+  scrollbar-gutter: stable both-edges;
+}
+
+.task-detail-modal .gantt-modal__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-bottom: 0.25rem;
+  background: #111827;
+}
+
+.task-detail-modal input,
+.task-detail-modal select,
+.task-detail-modal textarea {
+  width: 100%;
+}
+
+.task-detail-modal__dates > div {
+  flex: 1 1 180px;
+}
+
+.task-detail-modal__triple-row > input {
+  flex: 1 1 220px;
+  min-width: 220px;
+}
+
+.task-detail-modal__triple-row > button {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 720px) {
+  .task-detail-modal {
+    max-width: 98vw;
+    padding: 0.8rem;
+  }
+
+  .task-detail-modal__triple-row > input {
+    min-width: 100%;
+  }
+}
+
 .gantt-modal__head {
   display: flex;
   justify-content: space-between;

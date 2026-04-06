@@ -157,7 +157,7 @@ export default function TaskDetailModal({ projectId, task, activeTasks, protocol
 
   return (
     <div className="gantt-modal-overlay" role="dialog" aria-modal onClick={onClose}>
-      <div className="gantt-modal" onClick={(e) => e.stopPropagation()} key={task.id}>
+      <div className="gantt-modal task-detail-modal" onClick={(e) => e.stopPropagation()} key={task.id}>
         <div className="gantt-modal__head">
           <h3>Aufgabe bearbeiten</h3>
           <button type="button" className="secondary" onClick={onClose}>
@@ -170,7 +170,7 @@ export default function TaskDetailModal({ projectId, task, activeTasks, protocol
           defaultValue={task.title}
           onBlur={(e) => patchTask(task.id, { title: e.target.value.trim() || task.title })}
         />
-        <div className="row" style={{ marginTop: 8 }}>
+        <div className="row task-detail-modal__dates" style={{ marginTop: 8 }}>
           <div>
             <label className="gantt-modal-label">Beginn</label>
             <input
@@ -273,7 +273,7 @@ export default function TaskDetailModal({ projectId, task, activeTasks, protocol
           )}
         </div>
         <label className="gantt-modal-label">Links</label>
-        <div className="row">
+        <div className="row task-detail-modal__triple-row">
           <input placeholder="https://..." value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} />
           <input placeholder="Bezeichnung (optional)" value={linkLabel} onChange={(e) => setLinkLabel(e.target.value)} />
           <button type="button" onClick={() => void addModalLink()}>
@@ -301,7 +301,7 @@ export default function TaskDetailModal({ projectId, task, activeTasks, protocol
           )}
         </div>
         <label className="gantt-modal-label">Historie</label>
-        <div className="row">
+        <div className="row task-detail-modal__triple-row">
           <input type="date" value={historyDate} onChange={(e) => setHistoryDate(e.target.value)} />
           <input placeholder="Eintragtext" value={historyText} onChange={(e) => setHistoryText(e.target.value)} />
           <button type="button" onClick={() => void addModalHistoryEntry()}>
