@@ -48,6 +48,7 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 
 ### 1) Aufgabenliste
 - Kompakte Standardansicht: Titel, Zuständigkeit und Frist
+- Such- und Filterleiste für Titel/Beschreibung, Verantwortliche, Priorität, Fristfenster und Status
 - Weitere Felder per „Details anzeigen“ aufklappbar
 - Abschließen archiviert Aufgaben; aktive Liste zeigt nur nicht archivierte Karten
 - Archivbereich mit Öffnen, Wiederherstellen und Endgültig löschen
@@ -140,3 +141,4 @@ cd Smart-ToDos
 | 2026-04-06 | Protokolle erweitert: Bereiche als Obergruppen eingeführt (auswählen/neu anlegen), Einträge werden gruppiert nach Bereich dargestellt. |
 | 2026-04-06 | Protokolle pro Projekt umgestellt: Bereiche enthalten Sitzungen mit aufklappbarer Tabelle (Verantwortlicher, Bereich, Erläuterung, Aufgabe mit Popup, Ergebnis). |
 | 2026-04-06 | Protokoll-UI in Projektansicht verlagert: kein übergreifender Startseiten-Bereich mehr, Anzeige/Bearbeitung nur im jeweils geöffneten Projekt. |
+| 2026-04-06 | Aufgabenliste durchsuch- und filterbar gemacht: Suche plus Filter nach Verantwortlichen, Priorität, Fristfenster und Status mit Reset. |

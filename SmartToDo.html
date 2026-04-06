@@ -189,6 +189,24 @@
         font-size: 0.78rem;
         vertical-align: top;
       }
+      .task-filters {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: end;
+        margin: 0 0 0.6rem;
+        padding: 0.55rem;
+        border: 1px solid var(--line);
+        border-radius: 0.6rem;
+        background: #f8f9fd;
+      }
+      .task-filters__field {
+        flex: 1 1 10rem;
+        min-width: 10rem;
+      }
+      .task-filters__field--search {
+        flex: 2 1 16rem;
+      }
       .project-card {
         display: flex;
         gap: 0.85rem;
@@ -1583,6 +1601,46 @@
 
       <section class="list" aria-label="Aufgabenliste">
         <div id="task-panel-list" class="task-view-panel">
+          <div class="task-filters" aria-label="Aufgaben filtern">
+            <div class="task-filters__field task-filters__field--search">
+              <label for="task-filter-search" class="form__legend">Suche</label>
+              <input id="task-filter-search" class="form__input" type="text" placeholder="Titel oder Beschreibung …" />
+            </div>
+            <div class="task-filters__field">
+              <label for="task-filter-assignee" class="form__legend">Verantwortlich</label>
+              <select id="task-filter-assignee" class="form__input">
+                <option value="">Alle</option>
+              </select>
+            </div>
+            <div class="task-filters__field">
+              <label for="task-filter-priority" class="form__legend">Priorität</label>
+              <select id="task-filter-priority" class="form__input">
+                <option value="">Alle</option>
+                <option value="high">Hoch</option>
+                <option value="medium">Mittel</option>
+                <option value="low">Niedrig</option>
+              </select>
+            </div>
+            <div class="task-filters__field">
+              <label for="task-filter-due" class="form__legend">Frist</label>
+              <select id="task-filter-due" class="form__input">
+                <option value="">Alle</option>
+                <option value="overdue">Überfällig</option>
+                <option value="today">Heute</option>
+                <option value="next7">Nächste 7 Tage</option>
+                <option value="none">Ohne Frist</option>
+              </select>
+            </div>
+            <div class="task-filters__field">
+              <label for="task-filter-status" class="form__legend">Status</label>
+              <select id="task-filter-status" class="form__input">
+                <option value="">Alle</option>
+                <option value="open">Offen</option>
+                <option value="done">Erledigt</option>
+              </select>
+            </div>
+            <button type="button" class="task__btn" id="btn-task-filter-reset">Zurücksetzen</button>
+          </div>
           <p class="list__empty" id="empty-msg">Noch keine Aufgaben — „Aufgabe hinzufügen“ nutzen.</p>
           <ul class="task-tree" id="task-list" hidden></ul>
           <section id="archive-panel" class="archive-panel" hidden>
@@ -3456,6 +3514,12 @@
         var archivePanel = document.getElementById('archive-panel')
         var archiveList = document.getElementById('archive-list')
         var btnToggleArchive = document.getElementById('btn-toggle-archive')
+        var taskFilterSearch = document.getElementById('task-filter-search')
+        var taskFilterAssignee = document.getElementById('task-filter-assignee')
+        var taskFilterPriority = document.getElementById('task-filter-priority')
+        var taskFilterDue = document.getElementById('task-filter-due')
+        var taskFilterStatus = document.getElementById('task-filter-status')
+        var btnTaskFilterReset = document.getElementById('btn-task-filter-reset')
         var taskPanelList = document.getElementById('task-panel-list')
         var taskPanelGantt = document.getElementById('task-panel-gantt')
         var taskPanelKanban = document.getElementById('task-panel-kanban')
@@ -3499,6 +3563,13 @@
         var taskDetailsOpenMap = {}
         var archiveListOpen = false
         var kanbanDraggedTaskId = null
+        var listFilterState = {
+          search: '',
+          assigneeId: '',
+          priority: '',
+          dueMode: '',
+          status: '',
+        }
         var ganttModalTaskId = null
         var ganttModalAssigneePicker = null
         var ganttModalDependencyPicker = null
@@ -4187,6 +4258,8 @@
           setTaskViewMode('list')
           renderParticipantList()
           renderNewTaskAssignees()
+          renderTaskFilterAssigneeOptions()
+          syncTaskFilterControlsFromState()
           renderProtocolGroupSelect()
           renderProtocols()
           render()
@@ -5229,6 +5302,99 @@
           }
         }
 
+        function hasActiveListFilter() {
+          return !!(
+            (listFilterState.search && listFilterState.search.trim()) ||
+            listFilterState.assigneeId ||
+            listFilterState.priority ||
+            listFilterState.dueMode ||
+            listFilterState.status
+          )
+        }
+
+        function passesDueFilter(node, dueMode) {
+          if (!dueMode) return true
+          var due = isValidYmd(node.dueDate) ? node.dueDate : null
+          var today = todayYmd()
+          if (dueMode === 'none') return !due
+          if (!due) return false
+          if (dueMode === 'today') return due === today
+          if (dueMode === 'overdue') return due < today && !node.done
+          if (dueMode === 'next7') {
+            if (due < today) return false
+            var a = new Date(today + 'T12:00:00')
+            var b = new Date(due + 'T12:00:00')
+            var diff = Math.round((b.getTime() - a.getTime()) / 86400000)
+            return diff >= 0 && diff <= 7
+          }
+          return true
+        }
+
+        function nodeMatchesListFilter(node) {
+          var q = (listFilterState.search || '').trim().toLowerCase()
+          if (q) {
+            var title = (node.title || '').toLowerCase()
+            var desc = (node.description || '').toLowerCase()
+            if (title.indexOf(q) < 0 && desc.indexOf(q) < 0) return false
+          }
+          if (listFilterState.assigneeId) {
+            var ids = node.assigneeIds || []
+            if (ids.indexOf(listFilterState.assigneeId) < 0) return false
+          }
+          if (listFilterState.priority && node.priority !== listFilterState.priority) return false
+          if (listFilterState.status === 'open' && node.done) return false
+          if (listFilterState.status === 'done' && !node.done) return false
+          if (!passesDueFilter(node, listFilterState.dueMode)) return false
+          return true
+        }
+
+        function filterTreeForList(nodes) {
+          var out = []
+          if (!nodes) return out
+          for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i]
+            var filteredChildren = filterTreeForList(n.children || [])
+            if (nodeMatchesListFilter(n) || filteredChildren.length) {
+              var clone = Object.assign({}, n)
+              clone.children = filteredChildren
+              out.push(clone)
+            }
+          }
+          return out
+        }
+
+        function renderTaskFilterAssigneeOptions() {
+          if (!taskFilterAssignee) return
+          var p = getCurrentProject()
+          var parts = p && Array.isArray(p.participants) ? p.participants : []
+          var prev = listFilterState.assigneeId || ''
+          taskFilterAssignee.innerHTML = ''
+          var optAll = document.createElement('option')
+          optAll.value = ''
+          optAll.textContent = 'Alle'
+          taskFilterAssignee.appendChild(optAll)
+          for (var i = 0; i < parts.length; i++) {
+            var opt = document.createElement('option')
+            opt.value = parts[i].id
+            opt.textContent = participantLabel(parts[i])
+            taskFilterAssignee.appendChild(opt)
+          }
+          if (prev && taskFilterAssignee.querySelector('option[value="' + prev + '"]')) {
+            taskFilterAssignee.value = prev
+          } else {
+            listFilterState.assigneeId = ''
+            taskFilterAssignee.value = ''
+          }
+        }
+
+        function syncTaskFilterControlsFromState() {
+          if (taskFilterSearch) taskFilterSearch.value = listFilterState.search || ''
+          if (taskFilterAssignee) taskFilterAssignee.value = listFilterState.assigneeId || ''
+          if (taskFilterPriority) taskFilterPriority.value = listFilterState.priority || ''
+          if (taskFilterDue) taskFilterDue.value = listFilterState.dueMode || ''
+          if (taskFilterStatus) taskFilterStatus.value = listFilterState.status || ''
+        }
+
         function render() {
           if (!taskRootRef) return
           sortSiblings(taskRootRef)
@@ -5241,15 +5407,20 @@
             for (var li = 0; li < projForRender.kanbanSwimlanes.length; li++) lSet[projForRender.kanbanSwimlanes[li].id] = true
             normalizeTaskKanbanPlacement(taskRootRef, cSet, lSet, projForRender.kanbanSwimlanes[0].id)
           }
+          renderTaskFilterAssigneeOptions()
           saveState()
           var activeTopLevel = taskRootRef.filter(function (n) {
             return !n.archived
           })
+          if (hasActiveListFilter()) activeTopLevel = filterTreeForList(activeTopLevel)
           var archivedItems = collectArchivedTasksWithPath(taskRootRef, [], [])
           if (activeTopLevel.length === 0) {
             emptyMsg.hidden = false
             taskList.hidden = true
             taskList.innerHTML = ''
+            emptyMsg.textContent = hasActiveListFilter()
+              ? 'Keine Aufgaben passen zu den aktiven Filtern.'
+              : 'Noch keine Aufgaben — „Aufgabe hinzufügen“ nutzen.'
             renderGantt()
             renderKanban()
             renderNewTaskAssignees()
@@ -6037,6 +6208,52 @@
             if (protocolGroupNew) protocolGroupNew.value = ''
             renderProtocolGroupSelect()
             renderProtocols()
+          })
+        }
+
+        if (taskFilterSearch) {
+          taskFilterSearch.addEventListener('input', function () {
+            listFilterState.search = taskFilterSearch.value || ''
+            render()
+          })
+        }
+        if (taskFilterAssignee) {
+          taskFilterAssignee.addEventListener('change', function () {
+            listFilterState.assigneeId = taskFilterAssignee.value || ''
+            render()
+          })
+        }
+        if (taskFilterPriority) {
+          taskFilterPriority.addEventListener('change', function () {
+            listFilterState.priority = taskFilterPriority.value || ''
+            render()
+          })
+        }
+        if (taskFilterDue) {
+          taskFilterDue.addEventListener('change', function () {
+            listFilterState.dueMode = taskFilterDue.value || ''
+            render()
+          })
+        }
+        if (taskFilterStatus) {
+          taskFilterStatus.addEventListener('change', function () {
+            listFilterState.status = taskFilterStatus.value || ''
+            render()
+          })
+        }
+        if (btnTaskFilterReset) {
+          btnTaskFilterReset.addEventListener('click', function () {
+            listFilterState.search = ''
+            listFilterState.assigneeId = ''
+            listFilterState.priority = ''
+            listFilterState.dueMode = ''
+            listFilterState.status = ''
+            if (taskFilterSearch) taskFilterSearch.value = ''
+            if (taskFilterAssignee) taskFilterAssignee.value = ''
+            if (taskFilterPriority) taskFilterPriority.value = ''
+            if (taskFilterDue) taskFilterDue.value = ''
+            if (taskFilterStatus) taskFilterStatus.value = ''
+            render()
           })
         }
 
