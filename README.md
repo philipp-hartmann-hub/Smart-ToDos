@@ -160,3 +160,4 @@ cd Smart-ToDos
 | 2026-04-06 | Protokoll-Anlage auf zwei Buttons mit Popups umgestellt: `Bereich anlegen` und `Sitzung anlegen` öffnen eigene Dialoge statt Inline-Templates. |
 | 2026-04-06 | Protokoll-Mehrfachzuordnung robuster gemacht: neue Aufgaben werden additiv zur bestehenden Kartenliste gespeichert statt eine vorhandene Auswahl zu ersetzen. |
 | 2026-04-06 | Protokoll-Kartenöffnung korrigiert: Karten verwenden jetzt denselben Popup-Öffnungsweg wie Kanban/Gantt und sind dadurch direkt bearbeitbar. |
+| 2026-04-06 | Aufgaben-Popup erweitert: Historie ist jetzt auch im Gantt/Kanban/Protokoll-Modal sichtbar und direkt dort pflegbar. |
