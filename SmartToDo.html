@@ -1487,19 +1487,8 @@
                 hidden
               />
             </div>
-            <div style="flex: 1 1 20rem; min-width: 0">
-              <label for="protocol-text" class="form__legend">Eintrag</label>
-              <textarea
-                id="protocol-text"
-                class="form__input form__textarea"
-                rows="2"
-                maxlength="2000"
-                placeholder="Kurzprotokoll …"
-                required
-              ></textarea>
-            </div>
           </div>
-          <button type="submit" class="form__submit form__submit--small">Eintrag speichern</button>
+          <button type="submit" class="form__submit form__submit--small">Sitzung anlegen</button>
         </form>
         <ul id="protocol-list" class="protocols-list"></ul>
       </section>
@@ -3496,7 +3485,6 @@
         var protocolDate = document.getElementById('protocol-date')
         var protocolGroup = document.getElementById('protocol-group')
         var protocolGroupNew = document.getElementById('protocol-group-new')
-        var protocolText = document.getElementById('protocol-text')
         var protocolList = document.getElementById('protocol-list')
         var btnBack = document.getElementById('btn-back-projects')
         var taskViewTitle = document.getElementById('task-view-title')
@@ -4336,8 +4324,7 @@
               var tbl = document.createElement('table')
               tbl.className = 'protocol-table'
               var thead = document.createElement('thead')
-              thead.innerHTML =
-                '<tr><th>Verantwortlicher</th><th>Bereich</th><th>Erläuterung</th><th>Aufgabe</th><th>Ergebnis</th></tr>'
+              thead.innerHTML = '<tr><th>Verantwortlicher</th><th>Erläuterung</th><th>Aufgabenkarte</th><th>Ergebnis</th></tr>'
               tbl.appendChild(thead)
               var tbody = document.createElement('tbody')
               var rows = session.rows || []
@@ -4370,9 +4357,6 @@
                 })(rowData, selResp)
                 tdResp.appendChild(selResp)
                 tr.appendChild(tdResp)
-                var tdGroup = document.createElement('td')
-                tdGroup.textContent = group.name
-                tr.appendChild(tdGroup)
                 var tdText = document.createElement('td')
                 var txtInput = document.createElement('textarea')
                 txtInput.className = 'form__input form__textarea'
@@ -6144,11 +6128,6 @@
               alert('Bitte ein gültiges Datum wählen.')
               return
             }
-            var t = (protocolText.value || '').trim().slice(0, MAX_PROTOCOL_TEXT)
-            if (!t) {
-              alert('Bitte einen Protokolltext eingeben.')
-              return
-            }
             var currentProject = getCurrentProject()
             if (!currentProject) {
               alert('Bitte zuerst ein Projekt öffnen.')
@@ -6197,13 +6176,12 @@
                   id: crypto.randomUUID(),
                   participantId: null,
                   taskId: null,
-                  text: t,
+                  text: '',
                   result: '',
                 },
               ],
             })
             saveState()
-            protocolText.value = ''
             protocolDate.value = todayYmd()
             if (protocolGroupNew) protocolGroupNew.value = ''
             renderProtocolGroupSelect()

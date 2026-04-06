@@ -40,8 +40,8 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 - Eigener Bereich **„Protokolle“** innerhalb der geöffneten Projektansicht (nicht global auf der Startseite)
 - **Projektgebunden**: jedes Projekt hat seinen eigenen separaten Protokollbereich
 - Bereiche als **Obergruppen** (z. B. `JF`, `Kundentermin`) auswählbar oder direkt neu anlegbar
-- Pro Bereich können **Sitzungen** mit Datum angelegt werden (aufklappbar)
-- In jeder Sitzung pro Zeile: Verantwortlicher, Bereich, Erläuterung, Aufgabe (inkl. Popup-Öffnen), Ergebnis
+- Pro Bereich können **Sitzungen** mit Datum angelegt werden (Datum als aufklappbare Überschrift)
+- In jeder Sitzung pro Zeile: Verantwortlicher, Freitext zur Erläuterung, Aufgabenkarte (zuordnen + Popup öffnen/bearbeiten), Ergebnis
 - Zusätzliche Sitzungszeilen per `+ Zeile`; Änderungen werden direkt in `localStorage` gespeichert
 
 ## Aufgabenansichten im Überblick
@@ -142,3 +142,4 @@ cd Smart-ToDos
 | 2026-04-06 | Protokolle pro Projekt umgestellt: Bereiche enthalten Sitzungen mit aufklappbarer Tabelle (Verantwortlicher, Bereich, Erläuterung, Aufgabe mit Popup, Ergebnis). |
 | 2026-04-06 | Protokoll-UI in Projektansicht verlagert: kein übergreifender Startseiten-Bereich mehr, Anzeige/Bearbeitung nur im jeweils geöffneten Projekt. |
 | 2026-04-06 | Aufgabenliste durchsuch- und filterbar gemacht: Suche plus Filter nach Verantwortlichen, Priorität, Fristfenster und Status mit Reset. |
+| 2026-04-06 | Protokollstruktur geschärft: Sitzungen werden je Bereich angelegt (ohne Pflichttext), Sitzungszeilen nutzen feste 4-Feld-Struktur inkl. Aufgabenkarten-Zuordnung mit Popup. |
