@@ -62,3 +62,17 @@ button {
 button.secondary {
   background: #334155;
 }
+
+.task-node {
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 0.7rem;
+  margin-top: 0.7rem;
+}
+
+.task-row {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  flex-wrap: wrap;
+}

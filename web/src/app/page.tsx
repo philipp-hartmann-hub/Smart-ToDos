@@ -86,9 +86,14 @@ export default async function HomePage() {
         <h2>Verfügbare Projekte</h2>
         {projectRows.length === 0 ? <p>Keine zugeordneten Projekte vorhanden.</p> : null}
         {projectRows.map((p) => (
-          <div key={p.id} style={{ marginBottom: "0.7rem" }}>
+          <div key={p.id} style={{ marginBottom: "0.9rem", borderBottom: "1px solid #334155", paddingBottom: "0.7rem" }}>
             <strong>{p.title}</strong>
             {p.description ? <div>{p.description}</div> : null}
+            <div style={{ marginTop: "0.45rem" }}>
+              <Link href={`/projects/${p.id}`}>
+                <button>Projekt öffnen</button>
+              </Link>
+            </div>
           </div>
         ))}
       </div>

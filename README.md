@@ -113,6 +113,8 @@ Erster technischer Start liegt jetzt in `web/`:
 - Drizzle-Schema für `users`, `projects`, `project_members`, `tasks`
 - API-Basis für Login und Admin-User-Anlage
 - Admin-Oberfläche in der Cloud-App: Projekte anlegen, Benutzer anlegen und Projektzuordnungen pro Benutzer bearbeiten
+- Projektübersicht in der Cloud-App ist klickbar; Detailroute `/projects/[id]` mit Zugriffsprüfung (Admin oder Projektzuordnung) ergänzt
+- Aufgabenkern in Cloud-Detailseite ergänzt: Aufgaben/Unteraufgaben anlegen, bearbeiten, abschließen, archivieren und wiederherstellen (serverseitig per API)
 
 Lokaler Start:
 
@@ -202,3 +204,5 @@ Danach auf Vercel deployen und dieselben Env-Variablen im Vercel-Projekt hinterl
 | 2026-04-06 | Rebranding auf „Der Projektmanager“: App-Titel, Cloud-UI, Projektregeln und README/Repo-Links auf den neuen Namen umgestellt. |
 | 2026-04-06 | Neon-Anbindung aktiviert: Schema erfolgreich in Neon gepusht und initialer Admin-Seed (`admin`) in der Cloud-Datenbank ausgeführt. |
 | 2026-04-06 | Cloud-Admin erweitert: fehlende Admin-Aktionen ergänzt (Projekt anlegen, Benutzer anlegen, Projektzuordnung speichern) inkl. API-Routen. |
+| 2026-04-06 | Cloud-Navigation ergänzt: Projekte in der Übersicht sind jetzt öffnbar; neue Detailseite mit serverseitiger Zugriffskontrolle hinzugefügt. |
+| 2026-04-06 | Welle 1 gestartet: Aufgaben-CRUD in Cloud-Projekten ergänzt (inkl. Unteraufgaben, Archiv/Wiederherstellen und Aufgaben-APIs). |
