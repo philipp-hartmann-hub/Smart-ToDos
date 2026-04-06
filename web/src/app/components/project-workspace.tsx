@@ -4,6 +4,7 @@ import { useState } from "react";
 import ProjectTasks, { type ProjectMember } from "./project-tasks";
 import ProjectKanban from "./project-kanban";
 import ProjectGantt from "./project-gantt";
+import ProjectProtocols from "./project-protocols";
 
 type Task = {
   id: string;
@@ -30,13 +31,16 @@ export default function ProjectWorkspace({
   initialTasks: Task[];
   projectMembers: ProjectMember[];
 }) {
-  const [mode, setMode] = useState<"list" | "gantt" | "kanban">("list");
+  const [mode, setMode] = useState<"list" | "protocols" | "gantt" | "kanban">("list");
   return (
     <>
       <div className="card">
         <div className="row">
           <button className={mode === "list" ? "" : "secondary"} onClick={() => setMode("list")}>
             Aufgabenliste
+          </button>
+          <button className={mode === "protocols" ? "" : "secondary"} onClick={() => setMode("protocols")}>
+            Protokolle
           </button>
           <button className={mode === "gantt" ? "" : "secondary"} onClick={() => setMode("gantt")}>
             Projektplan
@@ -48,6 +52,8 @@ export default function ProjectWorkspace({
       </div>
       {mode === "list" ? (
         <ProjectTasks projectId={projectId} initialTasks={initialTasks} projectMembers={projectMembers} />
+      ) : mode === "protocols" ? (
+        <ProjectProtocols projectId={projectId} projectMembers={projectMembers} />
       ) : mode === "gantt" ? (
         <ProjectGantt projectId={projectId} initialTasks={initialTasks} />
       ) : (

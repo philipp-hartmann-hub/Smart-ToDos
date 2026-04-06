@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, jsonb, pgTable, text, timestamp, uuid, primaryKey } from "drizzle-orm/pg-core";
+import { boolean, index, jsonb, pgTable, text, timestamp, uuid, primaryKey } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -56,5 +56,75 @@ export const tasks = pgTable("tasks", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const protocolGroups = pgTable(
+  "protocol_groups",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    projectIdx: index("protocol_groups_project_id_idx").on(t.projectId),
+  }),
+);
+
+export const protocolSessions = pgTable(
+  "protocol_sessions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    groupId: uuid("group_id")
+      .notNull()
+      .references(() => protocolGroups.id, { onDelete: "cascade" }),
+    /** YYYY-MM-DD */
+    date: text("date").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    groupIdx: index("protocol_sessions_group_id_idx").on(t.groupId),
+  }),
+);
+
+export const protocolRows = pgTable(
+  "protocol_rows",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    sessionId: uuid("session_id")
+      .notNull()
+      .references(() => protocolSessions.id, { onDelete: "cascade" }),
+    /** Verantwortlicher (User-ID) */
+    responsibleUserId: uuid("responsible_user_id").references(() => users.id, { onDelete: "set null" }),
+    text: text("text").notNull().default(""),
+    result: text("result").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    sessionIdx: index("protocol_rows_session_id_idx").on(t.sessionId),
+    responsibleIdx: index("protocol_rows_responsible_user_id_idx").on(t.responsibleUserId),
+  }),
+);
+
+export const protocolRowTasks = pgTable(
+  "protocol_row_tasks",
+  {
+    rowId: uuid("row_id")
+      .notNull()
+      .references(() => protocolRows.id, { onDelete: "cascade" }),
+    taskId: uuid("task_id")
+      .notNull()
+      .references(() => tasks.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.rowId, t.taskId] }),
+    taskIdx: index("protocol_row_tasks_task_id_idx").on(t.taskId),
+  }),
+);
 
 export type UserRole = "admin" | "user";

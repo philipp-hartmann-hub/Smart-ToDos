@@ -439,3 +439,62 @@ button.secondary {
   font-size: 0.82rem;
   cursor: pointer;
 }
+
+/* Protokolle */
+.protocol-grid-head,
+.protocol-grid-row {
+  display: grid;
+  grid-template-columns: 220px 1.2fr 1fr 1fr 88px;
+  gap: 0.6rem;
+  align-items: start;
+}
+
+.protocol-grid-head {
+  font-size: 0.78rem;
+  opacity: 0.9;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #334155;
+}
+
+.protocol-grid-row {
+  padding: 0.55rem 0;
+  border-bottom: 1px dashed #334155;
+}
+
+.protocol-grid-row textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 2.2rem;
+}
+
+.protocol-taskchips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.protocol-taskchip {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #334155;
+  background: #111827;
+  padding: 0.35rem 0.45rem;
+  border-radius: 10px;
+}
+
+.protocol-taskchip span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.protocol-sub {
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  opacity: 0.85;
+}

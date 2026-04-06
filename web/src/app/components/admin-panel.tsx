@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Project = {
   id: string;
@@ -22,6 +22,15 @@ type Props = {
   users: User[];
 };
 
+type CreatedCredential = {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  password: string;
+  createdAt: string;
+};
+
 function usernameFromNames(firstName: string, lastName: string) {
   const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.+|\.+$/g, "");
   const base = slug(firstName) || "user";
@@ -41,14 +50,30 @@ export default function AdminPanel({ projects, users }: Props) {
   const [projectDescription, setProjectDescription] = useState("");
   const [newUserFirst, setNewUserFirst] = useState("");
   const [newUserLast, setNewUserLast] = useState("");
+  const [usersState, setUsersState] = useState<User[]>(users);
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
   const [userProjectMap, setUserProjectMap] = useState<Record<string, string[]>>(() =>
     Object.fromEntries(users.map((u) => [u.id, u.projectIds])),
   );
+  const [createdCredentials, setCreatedCredentials] = useState<CreatedCredential[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem("dpm-created-credentials");
+      if (!raw) return [];
+      const parsed = JSON.parse(raw) as CreatedCredential[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
 
-  const nonAdminUsers = useMemo(() => users.filter((u) => u.role !== "admin"), [users]);
+  useEffect(() => {
+    localStorage.setItem("dpm-created-credentials", JSON.stringify(createdCredentials.slice(0, 30)));
+  }, [createdCredentials]);
+
+  const nonAdminUsers = useMemo(() => usersState.filter((u) => u.role !== "admin"), [usersState]);
 
   function toggleSelectedProject(id: string) {
     setSelectedProjectIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -78,6 +103,7 @@ export default function AdminPanel({ projects, users }: Props) {
     setMessage("");
     const username = usernameFromNames(newUserFirst, newUserLast);
     const password = randomPassword();
+    const projectIds = [...selectedProjectIds];
     const res = await fetch("/api/admin/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -86,20 +112,45 @@ export default function AdminPanel({ projects, users }: Props) {
         lastName: newUserLast,
         username,
         password,
-        projectIds: selectedProjectIds,
+        projectIds,
       }),
     });
-    const data = (await res.json().catch(() => null)) as { error?: string } | null;
+    const data = (await res.json().catch(() => null)) as
+      | { error?: string; user?: { id: string; username: string } }
+      | null;
     setBusy(false);
     if (!res.ok) {
       setMessage(data?.error || "Benutzer konnte nicht angelegt werden.");
       return;
     }
-    setMessage(`Benutzer angelegt: ${username} / ${password}`);
+    const createdId = data?.user?.id || crypto.randomUUID();
+    setUsersState((prev) => [
+      ...prev,
+      {
+        id: createdId,
+        firstName: newUserFirst.trim(),
+        lastName: newUserLast.trim(),
+        username: data?.user?.username || username,
+        role: "user",
+        projectIds,
+      },
+    ]);
+    setUserProjectMap((prev) => ({ ...prev, [createdId]: projectIds }));
+    setCreatedCredentials((prev) => [
+      {
+        userId: createdId,
+        firstName: newUserFirst.trim(),
+        lastName: newUserLast.trim(),
+        username: data?.user?.username || username,
+        password,
+        createdAt: new Date().toISOString(),
+      },
+      ...prev,
+    ]);
+    setMessage("Benutzer angelegt. Zugangsdaten unten gespeichert.");
     setNewUserFirst("");
     setNewUserLast("");
     setSelectedProjectIds([]);
-    window.location.reload();
   }
 
   function toggleUserProject(userId: string, projectId: string) {
@@ -170,6 +221,22 @@ export default function AdminPanel({ projects, users }: Props) {
             Benutzer anlegen
           </button>
         </div>
+      </div>
+
+      <div className="card">
+        <h3>Letzte Zugangsdaten</h3>
+        {createdCredentials.length === 0 ? <p>Noch keine lokal gespeicherten Zugangsdaten.</p> : null}
+        {createdCredentials.map((c) => (
+          <div key={`${c.userId}-${c.createdAt}`} className="card" style={{ marginBottom: 10 }}>
+            <div>
+              <strong>
+                {c.firstName} {c.lastName}
+              </strong>
+            </div>
+            <div>Benutzername: {c.username}</div>
+            <div>Passwort: {c.password}</div>
+          </div>
+        ))}
       </div>
 
       <div className="card">

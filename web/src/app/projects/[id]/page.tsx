@@ -81,6 +81,21 @@ export default async function ProjectPage({ params }: Params) {
     .innerJoin(users, eq(projectMembers.userId, users.id))
     .where(eq(projectMembers.projectId, project.id));
 
+  const adminRows = await db
+    .select({
+      id: users.id,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      username: users.username,
+    })
+    .from(users)
+    .where(and(eq(users.role, "admin"), eq(users.active, true)));
+
+  const memberMap = new Map<string, (typeof projectMemberRows)[number]>();
+  for (const m of projectMemberRows) memberMap.set(m.id, m);
+  for (const a of adminRows) memberMap.set(a.id, a);
+  const selectableAssignees = [...memberMap.values()];
+
   return (
     <main className="container">
       <div className="card">
@@ -90,7 +105,11 @@ export default async function ProjectPage({ params }: Params) {
           <button className="secondary">Zurück zur Übersicht</button>
         </Link>
       </div>
-      <ProjectWorkspace projectId={project.id} initialTasks={projectTasks} projectMembers={projectMemberRows} />
+      <ProjectWorkspace
+        projectId={project.id}
+        initialTasks={projectTasks}
+        projectMembers={selectableAssignees}
+      />
     </main>
   );
 }

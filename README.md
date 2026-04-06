@@ -118,6 +118,7 @@ Erster technischer Start liegt jetzt in `web/`:
 - Kanban-Basis in Cloud ergänzt: Umschaltung Liste/Kanban, Karten pro Standardspalte, Verschieben via Spaltenauswahl und Kartenerstellung in Spalten
 - Gantt-Basis in Cloud ergänzt: Umschaltung Liste/Projektplan/Kanban, Zeitskala Tag/Monat/Jahr, Balken aus Beginn/Frist, hierarchische Zeilen mit Auf-/Zuklappen, Abhängigkeitslinien und Bearbeiten-Modal inkl. Vorgänger-Auswahl (serverseitig validiert)
 - Aufgabenliste in Cloud ergänzt: Filter (Suche, Zuständiger, Priorität, Fristfenster, Kanban-Spalte), Zuständige pro Aufgabe als Mehrfachauswahl nur unter Projektmitgliedern; bei Admin-Entzug einer Projektzuordnung werden betroffene Zuweisungen bereinigt
+- Protokolle in Cloud ergänzt: Bereiche → Sitzungen (Datum) → Zeilen (Verantwortlicher, Erläuterung, Aufgaben, Ergebnis) inkl. Suche/Filter (Bereich, Verantwortlicher, Aufgabe, Monat/Jahr) und Aufgabensprung in den Gantt
 
 Lokaler Start:
 
@@ -212,3 +213,6 @@ Danach auf Vercel deployen und dieselben Env-Variablen im Vercel-Projekt hinterl
 | 2026-04-06 | Welle 2 gestartet: Kanban-Grundfunktion in Cloud-Projekten ergänzt (Ansichtsumschalter, Spaltenboard, Kartenverschiebung, Kartenerstellung). |
 | 2026-04-06 | Welle 3 gestartet: Gantt-Grundfunktion in Cloud-Projekten ergänzt (Spalte `depends_on_task_ids`, Projektplan-Ansicht, Skalen, Balken, Abhängigkeiten, Modal). |
 | 2026-04-06 | Welle 4 gestartet: Cloud-Aufgabenliste mit Filtern, `assignee_ids` (nur Projektmitglieder), API-Validierung und Bereinigung bei Entzug der Mitgliedschaft. |
+| 2026-04-06 | Admin-Zugriff geschärft: Admin gilt in der Cloud global für alle Projekte und ist automatisch als zuständige Person auswählbar (ohne Projektmitgliedschaft). |
+| 2026-04-06 | Admin-Useranlage verbessert: generierte Benutzername/Passwort-Kombination bleibt sichtbar (lokal gespeicherte Zugangsdatenliste), kein sofortiger Reload mehr nach Anlage. |
+| 2026-04-06 | Welle 5 gestartet: Protokolle in der Cloud ergänzt (DB-Tabellen + API + Protokoll-Ansicht im Projekt inkl. Aufgaben-Zuordnung und Filter). |
