@@ -159,3 +159,4 @@ cd Smart-ToDos
 | 2026-04-06 | Protokoll-Aufgabenzuordnung auf Button-Flow umgestellt: `Aufgabe zuordnen` öffnet Suche/Filter-Auswahl und erlaubt wiederholtes Hinzufügen mehrerer Karten pro Zeile. |
 | 2026-04-06 | Protokoll-Anlage auf zwei Buttons mit Popups umgestellt: `Bereich anlegen` und `Sitzung anlegen` öffnen eigene Dialoge statt Inline-Templates. |
 | 2026-04-06 | Protokoll-Mehrfachzuordnung robuster gemacht: neue Aufgaben werden additiv zur bestehenden Kartenliste gespeichert statt eine vorhandene Auswahl zu ersetzen. |
+| 2026-04-06 | Protokoll-Kartenöffnung korrigiert: Karten verwenden jetzt denselben Popup-Öffnungsweg wie Kanban/Gantt und sind dadurch direkt bearbeitbar. |
