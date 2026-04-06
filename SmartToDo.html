@@ -122,6 +122,8 @@
       }
       .protocols-panel {
         margin-top: 1.1rem;
+        border-color: rgba(124, 58, 237, 0.35);
+        background: linear-gradient(180deg, rgba(124, 58, 237, 0.08), rgba(124, 58, 237, 0.02) 22%, var(--surface) 90%);
       }
       .protocols-list {
         list-style: none;
@@ -157,22 +159,76 @@
         margin: 0 0 0.35rem;
         font-size: 0.88rem;
         font-weight: 700;
-        color: var(--text-h);
+        color: #6d28d9;
+      }
+      .protocols-list--groups {
+        max-height: 28rem;
+        overflow-y: auto;
+        padding-right: 0.15rem;
+      }
+      .protocols-group__head {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        justify-content: space-between;
+        margin-bottom: 0.35rem;
+      }
+      .protocols-group__toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border: 1px solid rgba(124, 58, 237, 0.35);
+        background: rgba(124, 58, 237, 0.08);
+        color: #4c1d95;
+        border-radius: 999px;
+        padding: 0.3rem 0.65rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .protocols-group__actions {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+      }
+      .protocols-toolbar {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: end;
+        margin: 0.45rem 0 0.7rem;
+      }
+      .protocol-task-card {
+        margin-top: 0.4rem;
+      }
+      .protocol-task-actions {
+        display: flex;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+        margin-top: 0.35rem;
+      }
+      .protocol-session__date {
+        max-width: 11rem;
+      }
+      .protocol-table th {
+        background: rgba(124, 58, 237, 0.08);
+        color: #4c1d95;
       }
       .protocol-session {
-        border: 1px solid var(--line);
+        border: 1px solid rgba(124, 58, 237, 0.25);
         border-radius: 0.6rem;
-        background: #fff;
+        background: rgba(255, 255, 255, 0.96);
         margin-bottom: 0.45rem;
         overflow: hidden;
       }
       .protocol-session__head {
         width: 100%;
         border: 0;
-        background: #f8f9fd;
+        background: rgba(124, 58, 237, 0.12);
         padding: 0.45rem 0.6rem;
         text-align: left;
         font-weight: 700;
+        color: #4c1d95;
         cursor: pointer;
       }
       .protocol-session__body {
@@ -1476,6 +1532,13 @@
 
       <section class="form protocols-panel" aria-label="Protokolle im Projekt">
         <h3 class="participants-panel__title">Protokolle (dieses Projekt)</h3>
+        <div class="protocols-toolbar">
+          <div style="flex: 1 1 16rem; min-width: 14rem">
+            <label for="protocol-group-name" class="form__legend">Neuen Bereich anlegen</label>
+            <input id="protocol-group-name" class="form__input" type="text" maxlength="80" placeholder="z. B. JF" />
+          </div>
+          <button type="button" class="task__btn" id="btn-protocol-add-group">+ Bereich</button>
+        </div>
         <form id="protocol-form" class="participant-form__form">
           <div class="form__row--split">
             <div style="flex: 0 0 11rem; min-width: 10rem">
@@ -1485,19 +1548,11 @@
             <div style="flex: 0 0 14rem; min-width: 12rem">
               <label for="protocol-group" class="form__legend">Bereich</label>
               <select id="protocol-group" class="form__input"></select>
-              <input
-                id="protocol-group-new"
-                class="form__input"
-                type="text"
-                maxlength="80"
-                placeholder="Neuen Bereich eingeben …"
-                hidden
-              />
             </div>
           </div>
           <button type="submit" class="form__submit form__submit--small">Sitzung anlegen</button>
         </form>
-        <ul id="protocol-list" class="protocols-list"></ul>
+        <ul id="protocol-list" class="protocols-list protocols-list--groups"></ul>
       </section>
 
       <div class="task-add-toolbar">
@@ -3489,9 +3544,10 @@
         var projectListEl = document.getElementById('project-list')
         var projectsEmpty = document.getElementById('projects-empty')
         var protocolForm = document.getElementById('protocol-form')
+        var protocolGroupName = document.getElementById('protocol-group-name')
+        var btnProtocolAddGroup = document.getElementById('btn-protocol-add-group')
         var protocolDate = document.getElementById('protocol-date')
         var protocolGroup = document.getElementById('protocol-group')
-        var protocolGroupNew = document.getElementById('protocol-group-new')
         var protocolList = document.getElementById('protocol-list')
         var btnBack = document.getElementById('btn-back-projects')
         var taskViewTitle = document.getElementById('task-view-title')
@@ -3556,6 +3612,8 @@
         var ganttOpenMap = {}
         var ganttScaleMode = 'month'
         var taskDetailsOpenMap = {}
+        var protocolGroupOpenMap = {}
+        var protocolSessionOpenMap = {}
         var archiveListOpen = false
         var kanbanDraggedTaskId = null
         var listFilterState = {
@@ -4300,34 +4358,138 @@
           ensureProtocolDataConsistencyForProject(project)
           var participants = project.participants || []
           var tasksFlat = flattenTasksWithPath(project.tasks || [])
+          var taskById = {}
+          for (var tf = 0; tf < tasksFlat.length; tf++) taskById[tasksFlat[tf].id] = tasksFlat[tf]
           var hasAnySession = false
           for (var g = 0; g < project.protocolGroups.length; g++) {
             var group = project.protocolGroups[g]
+            var groupKey = group.id
+            var groupOpen = protocolGroupOpenMap[groupKey] !== false
             var sessions = group.sessions || []
-            if (!sessions.length) continue
-            hasAnySession = true
             var groupLi = document.createElement('li')
             groupLi.className = 'protocols-group'
-            var title = document.createElement('h4')
-            title.className = 'protocols-group__title'
-            title.textContent = group.name
-            groupLi.appendChild(title)
-            for (var si = 0; si < sessions.length; si++) {
+            var gHead = document.createElement('div')
+            gHead.className = 'protocols-group__head'
+            var gToggle = document.createElement('button')
+            gToggle.type = 'button'
+            gToggle.className = 'protocols-group__toggle'
+            gToggle.textContent = (groupOpen ? '▼ ' : '▶ ') + group.name + ' (' + sessions.length + ')'
+            ;(function (gid) {
+              gToggle.addEventListener('click', function () {
+                protocolGroupOpenMap[gid] = !(protocolGroupOpenMap[gid] !== false)
+                renderProtocols()
+              })
+            })(group.id)
+            gHead.appendChild(gToggle)
+            var gActs = document.createElement('div')
+            gActs.className = 'protocols-group__actions'
+            var renameGroupBtn = document.createElement('button')
+            renameGroupBtn.type = 'button'
+            renameGroupBtn.className = 'task__btn'
+            renameGroupBtn.textContent = 'Umbenennen'
+            ;(function (gr) {
+              renameGroupBtn.addEventListener('click', function () {
+                var n = prompt('Neuer Bereichsname:', gr.name || '')
+                if (!n) return
+                gr.name = n.trim().slice(0, 80) || gr.name
+                saveState()
+                renderProtocolGroupSelect()
+                renderProtocols()
+              })
+            })(group)
+            gActs.appendChild(renameGroupBtn)
+            var addSessionBtn = document.createElement('button')
+            addSessionBtn.type = 'button'
+            addSessionBtn.className = 'task__btn'
+            addSessionBtn.textContent = '+ Sitzung'
+            ;(function (gr) {
+              addSessionBtn.addEventListener('click', function () {
+                if (!Array.isArray(gr.sessions)) gr.sessions = []
+                gr.sessions.unshift({
+                  id: crypto.randomUUID(),
+                  date: todayYmd(),
+                  rows: [{ id: crypto.randomUUID(), participantId: null, taskId: null, text: '', result: '' }],
+                })
+                protocolGroupOpenMap[gr.id] = true
+                saveState()
+                renderProtocols()
+              })
+            })(group)
+            gActs.appendChild(addSessionBtn)
+            if (project.protocolGroups.length > 1) {
+              var delGroupBtn = document.createElement('button')
+              delGroupBtn.type = 'button'
+              delGroupBtn.className = 'task__btn task__btn--danger'
+              delGroupBtn.textContent = 'Bereich löschen'
+              ;(function (gid, gname) {
+                delGroupBtn.addEventListener('click', function () {
+                  if (!confirm('Bereich „' + gname + '“ inklusive Sitzungen löschen?')) return
+                  project.protocolGroups = project.protocolGroups.filter(function (x) {
+                    return x.id !== gid
+                  })
+                  saveState()
+                  renderProtocolGroupSelect()
+                  renderProtocols()
+                })
+              })(group.id, group.name)
+              gActs.appendChild(delGroupBtn)
+            }
+            gHead.appendChild(gActs)
+            groupLi.appendChild(gHead)
+            if (groupOpen) {
+              for (var si = 0; si < sessions.length; si++) {
+                hasAnySession = true
               var session = sessions[si]
+              var sessionKey = group.id + '::' + session.id
+              var sessionOpen = !!protocolSessionOpenMap[sessionKey]
               var sessionWrap = document.createElement('div')
               sessionWrap.className = 'protocol-session'
               var head = document.createElement('button')
               head.type = 'button'
               head.className = 'protocol-session__head'
-              head.textContent = formatDueDe(session.date)
+              head.textContent = (sessionOpen ? '▼ ' : '▶ ') + formatDueDe(session.date)
               var body = document.createElement('div')
               body.className = 'protocol-session__body'
-              body.hidden = true
-              ;(function (el) {
+              body.hidden = !sessionOpen
+              ;(function (el, skey, sess, headEl) {
                 head.addEventListener('click', function () {
+                  if (!el.hidden) saveState()
+                  protocolSessionOpenMap[skey] = el.hidden
                   el.hidden = !el.hidden
+                  headEl.textContent = (el.hidden ? '▶ ' : '▼ ') + formatDueDe(sess.date)
                 })
-              })(body)
+              })(body, sessionKey, session, head)
+              var sessionTop = document.createElement('div')
+              sessionTop.className = 'protocols-group__actions'
+              sessionTop.style.marginBottom = '0.45rem'
+              var dateInput = document.createElement('input')
+              dateInput.type = 'date'
+              dateInput.className = 'form__input form__input--date protocol-session__date'
+              dateInput.value = isValidYmd(session.date) ? session.date : todayYmd()
+              ;(function (s) {
+                dateInput.addEventListener('change', function () {
+                  if (!isValidYmd(dateInput.value)) return
+                  s.date = dateInput.value
+                  saveState()
+                  renderProtocols()
+                })
+              })(session)
+              sessionTop.appendChild(dateInput)
+              var delSessionBtn = document.createElement('button')
+              delSessionBtn.type = 'button'
+              delSessionBtn.className = 'task__btn task__btn--danger'
+              delSessionBtn.textContent = 'Sitzung löschen'
+              ;(function (gr, sid) {
+                delSessionBtn.addEventListener('click', function () {
+                  gr.sessions = (gr.sessions || []).filter(function (x) {
+                    return x.id !== sid
+                  })
+                  saveState()
+                  renderProtocols()
+                })
+              })(group, session.id)
+              sessionTop.appendChild(delSessionBtn)
+              body.appendChild(sessionTop)
               var tbl = document.createElement('table')
               tbl.className = 'protocol-table'
               var thead = document.createElement('thead')
@@ -4370,7 +4532,7 @@
                 txtInput.rows = 2
                 txtInput.value = rowData.text || ''
                 ;(function (r, t) {
-                  t.addEventListener('change', function () {
+                  t.addEventListener('input', function () {
                     r.text = (t.value || '').trim().slice(0, MAX_PROTOCOL_TEXT)
                     saveState()
                   })
@@ -4398,6 +4560,19 @@
                   })
                 })(rowData, selTask)
                 tdTask.appendChild(selTask)
+                if (rowData.taskId && taskById[rowData.taskId]) {
+                  var card = document.createElement('div')
+                  card.className = 'kanban__card protocol-task-card'
+                  var ct = document.createElement('div')
+                  ct.className = 'kanban__card-title'
+                  ct.textContent = taskById[rowData.taskId].node.title
+                  var cm = document.createElement('div')
+                  cm.className = 'kanban__card-meta'
+                  cm.textContent = taskById[rowData.taskId].pathLabel
+                  card.appendChild(ct)
+                  card.appendChild(cm)
+                  tdTask.appendChild(card)
+                }
                 var openTaskBtn = document.createElement('button')
                 openTaskBtn.type = 'button'
                 openTaskBtn.className = 'task__btn'
@@ -4414,7 +4589,22 @@
                     openGanttTaskModal(taskId)
                   })
                 })(rowData)
-                tdTask.appendChild(openTaskBtn)
+                var taskActs = document.createElement('div')
+                taskActs.className = 'protocol-task-actions'
+                taskActs.appendChild(openTaskBtn)
+                var clearTaskBtn = document.createElement('button')
+                clearTaskBtn.type = 'button'
+                clearTaskBtn.className = 'task__btn'
+                clearTaskBtn.textContent = 'Entfernen'
+                ;(function (r) {
+                  clearTaskBtn.addEventListener('click', function () {
+                    r.taskId = null
+                    saveState()
+                    renderProtocols()
+                  })
+                })(rowData)
+                taskActs.appendChild(clearTaskBtn)
+                tdTask.appendChild(taskActs)
                 tr.appendChild(tdTask)
                 var tdResult = document.createElement('td')
                 var resultInput = document.createElement('textarea')
@@ -4422,7 +4612,7 @@
                 resultInput.rows = 2
                 resultInput.value = rowData.result || ''
                 ;(function (r, t) {
-                  t.addEventListener('change', function () {
+                  t.addEventListener('input', function () {
                     r.result = (t.value || '').trim().slice(0, MAX_PROTOCOL_TEXT)
                     saveState()
                   })
@@ -4445,17 +4635,29 @@
                   renderProtocols()
                 })
               })(session)
-              body.appendChild(addRowBtn)
+              var sessActs = document.createElement('div')
+              sessActs.className = 'protocol-task-actions'
+              sessActs.appendChild(addRowBtn)
+              var saveSessionBtn = document.createElement('button')
+              saveSessionBtn.type = 'button'
+              saveSessionBtn.className = 'task__btn'
+              saveSessionBtn.textContent = 'Sitzung speichern'
+              saveSessionBtn.addEventListener('click', function () {
+                saveState()
+              })
+              sessActs.appendChild(saveSessionBtn)
+              body.appendChild(sessActs)
               sessionWrap.appendChild(head)
               sessionWrap.appendChild(body)
               groupLi.appendChild(sessionWrap)
+            }
             }
             protocolList.appendChild(groupLi)
           }
           if (!hasAnySession) {
             var liEmpty2 = document.createElement('li')
             liEmpty2.className = 'list__empty'
-            liEmpty2.textContent = 'Noch keine Sitzung vorhanden.'
+            liEmpty2.textContent = 'Noch keine Sitzung vorhanden. Bereich aufklappen und + Sitzung nutzen.'
             protocolList.appendChild(liEmpty2)
           }
         }
@@ -4477,12 +4679,7 @@
             opt.textContent = g.name
             protocolGroup.appendChild(opt)
           }
-          var optNew = document.createElement('option')
-          optNew.value = '__new__'
-          optNew.textContent = '+ Neuer Bereich …'
-          protocolGroup.appendChild(optNew)
           protocolGroup.value = prev && protocolGroup.querySelector('option[value="' + prev + '"]') ? prev : p.protocolGroups[0].id
-          if (protocolGroupNew) protocolGroupNew.hidden = protocolGroup.value !== '__new__'
         }
 
         function renderProjectCard(p) {
@@ -6121,11 +6318,29 @@
         })
 
         if (protocolDate) protocolDate.value = todayYmd()
-        if (protocolGroup) {
-          protocolGroup.addEventListener('change', function () {
-            if (!protocolGroupNew) return
-            protocolGroupNew.hidden = protocolGroup.value !== '__new__'
-            if (!protocolGroupNew.hidden) protocolGroupNew.focus()
+        if (btnProtocolAddGroup) {
+          btnProtocolAddGroup.addEventListener('click', function () {
+            var currentProject = getCurrentProject()
+            if (!currentProject) return
+            ensureProtocolDataConsistencyForProject(currentProject)
+            var name = protocolGroupName && protocolGroupName.value ? protocolGroupName.value.trim().slice(0, 80) : ''
+            if (!name) {
+              alert('Bitte Namen für den Bereich eingeben.')
+              return
+            }
+            for (var i = 0; i < currentProject.protocolGroups.length; i++) {
+              if (currentProject.protocolGroups[i].name.toLowerCase() === name.toLowerCase()) {
+                alert('Bereich existiert bereits.')
+                return
+              }
+            }
+            var newId = crypto.randomUUID()
+            currentProject.protocolGroups.push({ id: newId, name: name, sessions: [] })
+            protocolGroupOpenMap[newId] = true
+            saveState()
+            if (protocolGroupName) protocolGroupName.value = ''
+            renderProtocolGroupSelect()
+            renderProtocols()
           })
         }
         if (protocolForm) {
@@ -6142,29 +6357,6 @@
             }
             ensureProtocolDataConsistencyForProject(currentProject)
             var selectedGroupId = protocolGroup ? protocolGroup.value : PROTOCOL_DEFAULT_GROUP_ID
-            if (selectedGroupId === '__new__') {
-              var newGroupName =
-                protocolGroupNew && typeof protocolGroupNew.value === 'string'
-                  ? protocolGroupNew.value.trim().slice(0, 80)
-                  : ''
-              if (!newGroupName) {
-                alert('Bitte einen Namen für den neuen Bereich eingeben.')
-                return
-              }
-              var existingGroup = null
-              for (var gi = 0; gi < currentProject.protocolGroups.length; gi++) {
-                if (currentProject.protocolGroups[gi].name.toLowerCase() === newGroupName.toLowerCase()) {
-                  existingGroup = currentProject.protocolGroups[gi]
-                  break
-                }
-              }
-              if (existingGroup) {
-                selectedGroupId = existingGroup.id
-              } else {
-                selectedGroupId = crypto.randomUUID()
-                currentProject.protocolGroups.push({ id: selectedGroupId, name: newGroupName, sessions: [] })
-              }
-            }
             if (!selectedGroupId) selectedGroupId = currentProject.protocolGroups[0].id
             var selectedGroup = null
             for (var gidx = 0; gidx < currentProject.protocolGroups.length; gidx++) {
@@ -6190,7 +6382,7 @@
             })
             saveState()
             protocolDate.value = todayYmd()
-            if (protocolGroupNew) protocolGroupNew.value = ''
+            protocolGroupOpenMap[selectedGroup.id] = true
             renderProtocolGroupSelect()
             renderProtocols()
           })
