@@ -4411,6 +4411,10 @@
             title.className = 'gantt__title'
             title.textContent = node.title + ' (' + LABELS[node.priority] + ')'
             taskCol.appendChild(title)
+            var kbLabel = document.createElement('span')
+            kbLabel.className = 'gantt__kanban'
+            kbLabel.textContent = getKanbanColumnNameById(node.kanbanColumnId)
+            taskCol.appendChild(kbLabel)
             var openBtn = document.createElement('button')
             openBtn.type = 'button'
             openBtn.className = 'task__btn'
