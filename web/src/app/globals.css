@@ -499,6 +499,32 @@ button.secondary {
   flex: 0 0 auto;
 }
 
+.task-detail-modal__list {
+  min-height: 124px; /* mindestens zwei Einträge ohne inneres Scrollen sichtbar */
+  max-height: 240px;
+}
+
+.task-detail-modal__history-list {
+  min-height: 164px; /* zwei Historienkarten sichtbar */
+  max-height: 280px;
+}
+
+.task-detail-modal .gantt-dep-item,
+.task-detail-modal .task-rich__row {
+  min-height: 2.6rem;
+}
+
+.task-detail-modal .task-rich__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.task-detail-modal .task-rich__row a,
+.task-detail-modal .task-rich__row span {
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 720px) {
   .task-detail-modal {
     max-width: 98vw;
@@ -507,6 +533,10 @@ button.secondary {
 
   .task-detail-modal__triple-row > input {
     min-width: 100%;
+  }
+
+  .task-detail-modal .task-rich__row {
+    grid-template-columns: 1fr;
   }
 }
 

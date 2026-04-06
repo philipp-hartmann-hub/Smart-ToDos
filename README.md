@@ -198,6 +198,7 @@ Der aktuelle Fokus ist die **deployte Cloud-App** im Ordner `web/`.
 | 2026-04-06 | Protokoll-Aufgabenspalte erweitert: mehrere Karten pro Zeile möglich; Karten öffnen direkt per Klick (ohne extra Öffnen-Button) und wirken wie gewohnt auf Liste/Gantt/Kanban. |
 | 2026-04-06 | Helle „Eierschalen“-Flächen entfernt: Protokollbereich, Sitzungskörper und Filterleisten auf dunkles Kontrast-Design umgestellt. |
 | 2026-04-06 | Protokoll-Aufgabenwahl auf echtes Mehrfach-Select umgestellt, damit mehrere Karten pro Zeile gleichzeitig ausgewählt und gespeichert werden können. |
+| 2026-04-06 | Aufgaben-Popup weiter verbessert: scrollbare Detail-Listen zeigen jetzt standardmäßig mindestens zwei bearbeitbare Einträge gleichzeitig; Textumbrüche und Zeilenlayout im Modal robuster. |
 | 2026-04-06 | Aufgaben-Popup lesbarer gemacht: größere/robustere Modalfläche mit stabilem Scrollbereich, sticky Kopfzeile und flexiblen Eingabezeilen für lange Inhalte. |
 | 2026-04-06 | Kanban-Layout ausgerichtet: obere Inhaltszone je Zelle vereinheitlicht, damit Spalteninhalte pro Swimlane auf gleicher Ebene starten. |
 | 2026-04-06 | Aufgabenliste: optionaler grafischer Aufgabenbaum (Hierarchie + Abhängigkeiten), nur per Button ein-/ausblendbar; nutzt die aktuellen Listenfilter. |

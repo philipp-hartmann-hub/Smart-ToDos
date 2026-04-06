@@ -210,7 +210,7 @@ export default function TaskDetailModal({ projectId, task, activeTasks, protocol
         />
         <label className="gantt-modal-label">Zuerst erledigen (Vorgänger)</label>
         <input placeholder="Vorgänger suchen…" value={depSearch} onChange={(e) => setDepSearch(e.target.value)} />
-        <div className="gantt-dep-list">
+        <div className="gantt-dep-list task-detail-modal__list">
           {depBlockList.map((t) => {
             const checked = (task.dependsOnTaskIds || []).includes(t.id);
             return (
@@ -222,7 +222,7 @@ export default function TaskDetailModal({ projectId, task, activeTasks, protocol
           })}
         </div>
         <label className="gantt-modal-label">In Sitzungen verwendet</label>
-        <div className="gantt-dep-list">
+        <div className="gantt-dep-list task-detail-modal__list">
           {(protocolLinksByTaskId[task.id] || []).length === 0 ? (
             <div className="gantt-dep-item">Keine Protokollzuordnung.</div>
           ) : (
@@ -248,7 +248,7 @@ export default function TaskDetailModal({ projectId, task, activeTasks, protocol
         </div>
         <label className="gantt-modal-label">Anhänge</label>
         <input type="file" multiple onChange={(e) => void addModalAttachment(e.target.files)} />
-        <div className="gantt-dep-list">
+        <div className="gantt-dep-list task-detail-modal__list">
           {(task.attachments || []).length === 0 ? (
             <div className="gantt-dep-item">Keine Anhänge.</div>
           ) : (
@@ -280,7 +280,7 @@ export default function TaskDetailModal({ projectId, task, activeTasks, protocol
             + Link
           </button>
         </div>
-        <div className="gantt-dep-list">
+        <div className="gantt-dep-list task-detail-modal__list">
           {(task.links || []).length === 0 ? (
             <div className="gantt-dep-item">Keine Links.</div>
           ) : (
@@ -308,7 +308,7 @@ export default function TaskDetailModal({ projectId, task, activeTasks, protocol
             + Eintrag
           </button>
         </div>
-        <div className="gantt-dep-list">
+        <div className="gantt-dep-list task-detail-modal__list task-detail-modal__history-list">
           {(task.history || []).length === 0 ? (
             <div className="gantt-dep-item">Keine Einträge.</div>
           ) : (
