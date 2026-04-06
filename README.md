@@ -133,5 +133,5 @@ cd Smart-ToDos
 | 2026-04-06 | Archiv erweitert: archivierte Aufgaben können nun direkt geöffnet (Popup), zusätzlich zu Wiederherstellen und Endgültig löschen. |
 | 2026-04-06 | Kanban-Layout verbessert: Zellen auf ca. 5 sichtbare Karten begrenzt, weitere Karten per vertikalem Scrollen innerhalb der Zelle erreichbar. |
 | 2026-04-06 | Kanban-Auswahl in den Detailbereich verlagert: in Aufgabenliste nur noch bei aufgeklappten Details, im Gantt nur im Popup (nicht in der Standardzeile). |
-| 2026-04-06 | Standardansichten bereinigt: Kanban nur noch als Label in Liste/Gantt, Umstellung ausschließlich in Detailbereich bzw. Gantt-Popup. |
+| 2026-04-06 | Standardansichten bereinigt: Kanban-Status vollständig aus Standardzeilen entfernt; Umstellung ausschließlich in Detailbereich bzw. Gantt-Popup. |
 | 2026-04-06 | Startseite erweitert: neuer Bereich „Protokolle“ mit datierten Einträgen (anlegen, anzeigen, löschen), persistent in localStorage gespeichert. |

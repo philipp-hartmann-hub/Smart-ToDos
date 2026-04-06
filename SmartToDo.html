@@ -4541,10 +4541,6 @@
             title.className = 'gantt__title'
             title.textContent = node.title + ' (' + LABELS[node.priority] + ')'
             taskCol.appendChild(title)
-            var kbLabel = document.createElement('span')
-            kbLabel.className = 'gantt__kanban'
-            kbLabel.textContent = getKanbanColumnNameById(node.kanbanColumnId)
-            taskCol.appendChild(kbLabel)
             var openBtn = document.createElement('button')
             openBtn.type = 'button'
             openBtn.className = 'task__btn'
@@ -5118,12 +5114,8 @@
           var dueSummary = document.createElement('span')
           dueSummary.className = 'task__summary-item'
           dueSummary.textContent = 'Frist: ' + (isValidYmd(node.dueDate) ? formatDueDe(node.dueDate) : '—')
-          var colSummary = document.createElement('span')
-          colSummary.className = 'task__summary-item'
-          colSummary.textContent = 'Kanban: ' + getKanbanColumnNameById(node.kanbanColumnId)
           summary.appendChild(assigneeSummary)
           summary.appendChild(dueSummary)
-          summary.appendChild(colSummary)
           row.appendChild(summary)
 
           var detailsWrap = document.createElement('div')
