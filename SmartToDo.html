@@ -1396,46 +1396,6 @@
         <p class="list__empty" id="projects-empty">Noch keine Projekte — „Neues Projekt“ nutzen.</p>
         <div class="project-list" id="project-list" hidden></div>
       </section>
-      <section class="form protocols-panel" aria-label="Protokolle">
-        <h3 class="participants-panel__title">Protokolle</h3>
-        <form id="protocol-form" class="participant-form__form">
-          <div class="form__row--split">
-            <div style="flex: 0 0 14rem; min-width: 12rem">
-              <label for="protocol-project" class="form__legend">Projekt</label>
-              <select id="protocol-project" class="form__input"></select>
-            </div>
-            <div style="flex: 0 0 11rem; min-width: 10rem">
-              <label for="protocol-date" class="form__legend">Datum</label>
-              <input id="protocol-date" class="form__input form__input--date" type="date" required />
-            </div>
-            <div style="flex: 0 0 14rem; min-width: 12rem">
-              <label for="protocol-group" class="form__legend">Bereich</label>
-              <select id="protocol-group" class="form__input"></select>
-              <input
-                id="protocol-group-new"
-                class="form__input"
-                type="text"
-                maxlength="80"
-                placeholder="Neuen Bereich eingeben …"
-                hidden
-              />
-            </div>
-            <div style="flex: 1 1 20rem; min-width: 0">
-              <label for="protocol-text" class="form__legend">Eintrag</label>
-              <textarea
-                id="protocol-text"
-                class="form__input form__textarea"
-                rows="2"
-                maxlength="2000"
-                placeholder="Kurzprotokoll …"
-                required
-              ></textarea>
-            </div>
-          </div>
-          <button type="submit" class="form__submit form__submit--small">Eintrag speichern</button>
-        </form>
-        <ul id="protocol-list" class="protocols-list"></ul>
-      </section>
     </div>
 
     <div class="app" id="view-tasks" hidden>
@@ -1487,6 +1447,43 @@
           <button type="submit" class="form__submit">Teilnehmenden hinzufügen</button>
         </form>
         <ul id="participant-list" class="participant-list"></ul>
+      </section>
+
+      <section class="form protocols-panel" aria-label="Protokolle im Projekt">
+        <h3 class="participants-panel__title">Protokolle (dieses Projekt)</h3>
+        <form id="protocol-form" class="participant-form__form">
+          <div class="form__row--split">
+            <div style="flex: 0 0 11rem; min-width: 10rem">
+              <label for="protocol-date" class="form__legend">Datum</label>
+              <input id="protocol-date" class="form__input form__input--date" type="date" required />
+            </div>
+            <div style="flex: 0 0 14rem; min-width: 12rem">
+              <label for="protocol-group" class="form__legend">Bereich</label>
+              <select id="protocol-group" class="form__input"></select>
+              <input
+                id="protocol-group-new"
+                class="form__input"
+                type="text"
+                maxlength="80"
+                placeholder="Neuen Bereich eingeben …"
+                hidden
+              />
+            </div>
+            <div style="flex: 1 1 20rem; min-width: 0">
+              <label for="protocol-text" class="form__legend">Eintrag</label>
+              <textarea
+                id="protocol-text"
+                class="form__input form__textarea"
+                rows="2"
+                maxlength="2000"
+                placeholder="Kurzprotokoll …"
+                required
+              ></textarea>
+            </div>
+          </div>
+          <button type="submit" class="form__submit form__submit--small">Eintrag speichern</button>
+        </form>
+        <ul id="protocol-list" class="protocols-list"></ul>
       </section>
 
       <div class="task-add-toolbar">
@@ -3438,7 +3435,6 @@
         var projectListEl = document.getElementById('project-list')
         var projectsEmpty = document.getElementById('projects-empty')
         var protocolForm = document.getElementById('protocol-form')
-        var protocolProject = document.getElementById('protocol-project')
         var protocolDate = document.getElementById('protocol-date')
         var protocolGroup = document.getElementById('protocol-group')
         var protocolGroupNew = document.getElementById('protocol-group-new')
@@ -4177,6 +4173,7 @@
           var p = getCurrentProject()
           if (!p) return
           ensureKanbanProjectConfig(p)
+          ensureProtocolDataConsistencyForProject(p)
           state.openProjectId = p.id
           saveState()
           viewProjects.hidden = true
@@ -4190,6 +4187,8 @@
           setTaskViewMode('list')
           renderParticipantList()
           renderNewTaskAssignees()
+          renderProtocolGroupSelect()
+          renderProtocols()
           render()
         }
 
@@ -4200,10 +4199,7 @@
           viewTasks.hidden = true
           viewProjects.hidden = false
           closeProjectForm()
-          renderProtocolProjectSelect()
-          renderProtocolGroupSelect()
           renderProjectList()
-          renderProtocols()
         }
 
         function renderProjectList() {
@@ -4222,40 +4218,14 @@
           }
         }
 
-        function getSelectedProtocolProject() {
-          if (!protocolProject) return null
-          var pid = protocolProject.value
-          if (!pid) return null
-          for (var i = 0; i < state.projects.length; i++) {
-            if (state.projects[i].id === pid) return state.projects[i]
-          }
-          return null
-        }
-
-        function renderProtocolProjectSelect() {
-          if (!protocolProject) return
-          var prev = protocolProject.value
-          protocolProject.innerHTML = ''
-          for (var i = 0; i < state.projects.length; i++) {
-            var p = state.projects[i]
-            var opt = document.createElement('option')
-            opt.value = p.id
-            opt.textContent = p.title
-            protocolProject.appendChild(opt)
-          }
-          if (!state.projects.length) return
-          var hasPrev = prev && protocolProject.querySelector('option[value="' + prev + '"]')
-          protocolProject.value = hasPrev ? prev : state.projects[0].id
-        }
-
         function renderProtocols() {
           if (!protocolList) return
-          var project = getSelectedProtocolProject()
+          var project = getCurrentProject()
           protocolList.innerHTML = ''
           if (!project) {
             var liEmpty = document.createElement('li')
             liEmpty.className = 'list__empty'
-            liEmpty.textContent = 'Noch kein Projekt vorhanden.'
+            liEmpty.textContent = 'Kein Projekt geöffnet.'
             protocolList.appendChild(liEmpty)
             return
           }
@@ -4428,7 +4398,7 @@
 
         function renderProtocolGroupSelect() {
           if (!protocolGroup) return
-          var p = getSelectedProtocolProject()
+          var p = getCurrentProject()
           if (!p) {
             protocolGroup.innerHTML = ''
             return
@@ -4503,9 +4473,6 @@
             state.projects = next
             if (state.openProjectId === p.id) state.openProjectId = null
             saveState()
-            renderProtocolProjectSelect()
-            renderProtocolGroupSelect()
-            renderProtocols()
             renderProjectList()
           })
           actions.appendChild(openBtn)
@@ -5992,12 +5959,6 @@
         })
 
         if (protocolDate) protocolDate.value = todayYmd()
-        if (protocolProject) {
-          protocolProject.addEventListener('change', function () {
-            renderProtocolGroupSelect()
-            renderProtocols()
-          })
-        }
         if (protocolGroup) {
           protocolGroup.addEventListener('change', function () {
             if (!protocolGroupNew) return
@@ -6017,9 +5978,9 @@
               alert('Bitte einen Protokolltext eingeben.')
               return
             }
-            var currentProject = getSelectedProtocolProject()
+            var currentProject = getCurrentProject()
             if (!currentProject) {
-              alert('Bitte zuerst ein Projekt auswählen.')
+              alert('Bitte zuerst ein Projekt öffnen.')
               return
             }
             ensureProtocolDataConsistencyForProject(currentProject)
@@ -6074,7 +6035,6 @@
             protocolText.value = ''
             protocolDate.value = todayYmd()
             if (protocolGroupNew) protocolGroupNew.value = ''
-            renderProtocolProjectSelect()
             renderProtocolGroupSelect()
             renderProtocols()
           })

@@ -35,10 +35,10 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 5. **Abhängigkeiten setzen** (was zuerst erledigt sein muss)
 6. **Im Gantt prüfen**, ob Zeitplan und Reihenfolge passen
 
-## Protokolle (Startseite)
+## Protokolle (pro Projekt)
 
-- Eigener Bereich **„Protokolle“** in der Projekt-Startansicht
-- **Projektgebunden**: jedes Projekt hat seinen eigenen Protokollbereich
+- Eigener Bereich **„Protokolle“** innerhalb der geöffneten Projektansicht (nicht global auf der Startseite)
+- **Projektgebunden**: jedes Projekt hat seinen eigenen separaten Protokollbereich
 - Bereiche als **Obergruppen** (z. B. `JF`, `Kundentermin`) auswählbar oder direkt neu anlegbar
 - Pro Bereich können **Sitzungen** mit Datum angelegt werden (aufklappbar)
 - In jeder Sitzung pro Zeile: Verantwortlicher, Bereich, Erläuterung, Aufgabe (inkl. Popup-Öffnen), Ergebnis
@@ -139,3 +139,4 @@ cd Smart-ToDos
 | 2026-04-06 | Startseite erweitert: neuer Bereich „Protokolle“ mit datierten Einträgen (anlegen, anzeigen, löschen), persistent in localStorage gespeichert. |
 | 2026-04-06 | Protokolle erweitert: Bereiche als Obergruppen eingeführt (auswählen/neu anlegen), Einträge werden gruppiert nach Bereich dargestellt. |
 | 2026-04-06 | Protokolle pro Projekt umgestellt: Bereiche enthalten Sitzungen mit aufklappbarer Tabelle (Verantwortlicher, Bereich, Erläuterung, Aufgabe mit Popup, Ergebnis). |
+| 2026-04-06 | Protokoll-UI in Projektansicht verlagert: kein übergreifender Startseiten-Bereich mehr, Anzeige/Bearbeitung nur im jeweils geöffneten Projekt. |
