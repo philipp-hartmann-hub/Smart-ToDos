@@ -147,3 +147,4 @@ cd Smart-ToDos
 | 2026-04-06 | Protokollstruktur geschärft: Sitzungen werden je Bereich angelegt (ohne Pflichttext), Sitzungszeilen nutzen feste 4-Feld-Struktur inkl. Aufgabenkarten-Zuordnung mit Popup. |
 | 2026-04-06 | Filter-Beschriftung in der Aufgabenliste präzisiert: eindeutige Feldtitel und spezifische „Alle …“-Optionen für bessere Zuordenbarkeit. |
 | 2026-04-06 | Protokoll-UI überarbeitet: lila Design, eigener `+ Bereich`-Flow, ausklappbare Bereiche/Sitzungen, Kanban-Kartenstil für zugeordnete Aufgaben, mehr Aktionsbuttons und scrollbare Bereichsliste. |
+| 2026-04-06 | Aufgabenliste begrenzt: pro Ebene (Hauptaufgaben und Unteraufgaben) sind nur ca. 5 Einträge sichtbar, danach vertikaler Scroll innerhalb der Liste. |

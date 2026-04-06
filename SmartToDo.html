@@ -768,11 +768,19 @@
         flex-direction: column;
         gap: 0.5rem;
       }
+      #task-list.task-tree {
+        max-height: 25rem;
+        overflow-y: auto;
+        padding-right: 0.2rem;
+      }
       .task-tree--nested {
         margin-top: 0.5rem;
         margin-left: 0.5rem;
         padding-left: 0.75rem;
         border-left: 2px solid var(--border);
+        max-height: 24rem;
+        overflow-y: auto;
+        padding-right: 0.15rem;
       }
       .task-tree--nested.task-tree--subs-collapsed {
         display: none !important;
