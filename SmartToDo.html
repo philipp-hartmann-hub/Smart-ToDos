@@ -552,10 +552,13 @@
       }
       .kanban__cell {
         min-height: 110px;
+        max-height: 430px;
         padding: 0.45rem;
         display: flex;
         flex-direction: column;
         gap: 0.4rem;
+        overflow-y: auto;
+        overscroll-behavior: contain;
       }
       .kanban__card {
         border: 1px solid var(--border);

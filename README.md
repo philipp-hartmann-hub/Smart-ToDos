@@ -67,6 +67,7 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 - Unteraufgaben direkt an jeder Kanban-Karte anlegbar (`+ Unteraufgabe`)
 - Karten direkt aus Kanban abschließbar (wandern ins Archiv)
 - Aufgabenkarte als Popup direkt aus Kanban öffnbar (`Karte öffnen`) wie im Gantt
+- Pro Kanban-Zelle sind ca. 5 Karten sichtbar; danach scrollt die Zelle vertikal
 
 ## Technische Hinweise
 
@@ -122,3 +123,4 @@ cd Smart-ToDos
 | 2026-04-06 | Abschluss-UI deutlicher gemacht: sichtbarer „Abschließen“-Button direkt in der kompakten Aufgabenlisten-Kopfzeile; Kanban-Button klarer als „Abschließen (Archiv)“ benannt. |
 | 2026-04-06 | Kanban-Status aus Liste/Gantt steuerbar: Spaltenlabel als Dropdown umgestellt; Auswahl verschiebt die Karte sofort in die gewählte Kanban-Spalte. |
 | 2026-04-06 | Archiv erweitert: archivierte Aufgaben können nun direkt geöffnet (Popup), zusätzlich zu Wiederherstellen und Endgültig löschen. |
+| 2026-04-06 | Kanban-Layout verbessert: Zellen auf ca. 5 sichtbare Karten begrenzt, weitere Karten per vertikalem Scrollen innerhalb der Zelle erreichbar. |
