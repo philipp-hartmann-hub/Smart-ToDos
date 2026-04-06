@@ -4615,7 +4615,11 @@
                 mountDependencyPicker(taskPickMount, {
                   initialIds: rowData.taskIds,
                   onChange: function (ids) {
-                    rowData.taskIds = ids
+                    var merged = (rowData.taskIds || []).slice()
+                    for (var mi = 0; mi < ids.length; mi++) {
+                      if (merged.indexOf(ids[mi]) < 0) merged.push(ids[mi])
+                    }
+                    rowData.taskIds = merged
                     saveState()
                     renderProtocols()
                   },
