@@ -41,7 +41,7 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 - **Projektgebunden**: jedes Projekt hat seinen eigenen separaten Protokollbereich
 - Bereiche als **Obergruppen** (z. B. `JF`, `Kundentermin`) über eigene `+ Bereich`-Schaltfläche anlegbar
 - Bereiche sind ausklappbar; darunter liegen die Sitzungen mit Datum als aufklappbare Überschrift
-- In jeder Sitzung pro Zeile: Verantwortlicher, Freitext zur Erläuterung, Aufgabenkarte (zuordnen + im Popup öffnen/bearbeiten), Ergebnis
+- In jeder Sitzung pro Zeile: Verantwortlicher, Freitext zur Erläuterung, **mehrere** Aufgabenkarten (zuordnen + per Kartenklick im Popup öffnen/bearbeiten), Ergebnis
 - Zugeordnete Aufgaben erscheinen in Protokollen im **Kanban-Kartenstil**
 - Zusätzliche Schaltflächen für Bereich/Sitzung (umbenennen, löschen, speichern, + Sitzung, + Zeile)
 - Auto-Save beim Zuklappen einer Sitzung; Gruppenliste ist scrollbar (ca. 3 Bereiche gleichzeitig sichtbar)
@@ -151,3 +151,4 @@ cd Smart-ToDos
 | 2026-04-06 | Protokoll-Bereichsüberschriften visuell angeglichen: Toggle-Schaltflächen nutzen jetzt das lila Button-Design mit weißer Schrift. |
 | 2026-04-06 | Ockerfarbe in Aufgaben-Badges entfernt: mittlere Priorität nutzt nun ebenfalls lilafarbenes Styling statt gelb/ocker. |
 | 2026-04-06 | Protokoll-Sitzungskopf und Protokoll-Tabellenüberschriften auf lila Hintergrund mit weißer Schrift umgestellt (konsistentes Farbkonzept). |
+| 2026-04-06 | Protokoll-Aufgabenspalte erweitert: mehrere Karten pro Zeile möglich; Karten öffnen direkt per Klick (ohne extra Öffnen-Button) und wirken wie gewohnt auf Liste/Gantt/Kanban. |

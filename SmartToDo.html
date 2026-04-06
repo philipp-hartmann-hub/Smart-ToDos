@@ -1934,10 +1934,22 @@
               typeof p.text === 'string' ? p.text.replace(/\r\n/g, '\n').trim().slice(0, MAX_PROTOCOL_TEXT) : ''
             var result =
               typeof p.result === 'string' ? p.result.replace(/\r\n/g, '\n').trim().slice(0, MAX_PROTOCOL_TEXT) : ''
+            var taskIds = []
+            var seenTaskIds = {}
+            if (Array.isArray(p.taskIds)) {
+              for (var ti = 0; ti < p.taskIds.length; ti++) {
+                var tid = p.taskIds[ti]
+                if (typeof tid !== 'string' || !tid || seenTaskIds[tid]) continue
+                seenTaskIds[tid] = true
+                taskIds.push(tid)
+              }
+            } else if (typeof p.taskId === 'string' && p.taskId) {
+              taskIds.push(p.taskId)
+            }
             out.push({
               id: p.id,
               participantId: typeof p.participantId === 'string' && p.participantId ? p.participantId : null,
-              taskId: typeof p.taskId === 'string' && p.taskId ? p.taskId : null,
+              taskIds: taskIds,
               text: text,
               result: result,
             })
@@ -2020,7 +2032,7 @@
                   {
                     id: crypto.randomUUID(),
                     participantId: null,
-                    taskId: null,
+                    taskIds: [],
                     text: typeof legacy.text === 'string' ? legacy.text : '',
                     result: '',
                   },
@@ -4419,7 +4431,7 @@
                 gr.sessions.unshift({
                   id: crypto.randomUUID(),
                   date: todayYmd(),
-                  rows: [{ id: crypto.randomUUID(), participantId: null, taskId: null, text: '', result: '' }],
+                  rows: [{ id: crypto.randomUUID(), participantId: null, taskIds: [], text: '', result: '' }],
                 })
                 protocolGroupOpenMap[gr.id] = true
                 saveState()
@@ -4509,7 +4521,7 @@
               var tbody = document.createElement('tbody')
               var rows = session.rows || []
               if (!rows.length) {
-                rows.push({ id: crypto.randomUUID(), participantId: null, taskId: null, text: '', result: '' })
+                rows.push({ id: crypto.randomUUID(), participantId: null, taskIds: [], text: '', result: '' })
                 session.rows = rows
               }
               for (var ri = 0; ri < rows.length; ri++) {
@@ -4555,7 +4567,7 @@
                 selTask.className = 'form__input'
                 var taskNone = document.createElement('option')
                 taskNone.value = ''
-                taskNone.textContent = '—'
+                taskNone.textContent = 'Aufgabe hinzufügen …'
                 selTask.appendChild(taskNone)
                 for (var ti = 0; ti < tasksFlat.length; ti++) {
                   var to = document.createElement('option')
@@ -4563,59 +4575,62 @@
                   to.textContent = tasksFlat[ti].pathLabel
                   selTask.appendChild(to)
                 }
-                selTask.value = rowData.taskId || ''
+                selTask.value = ''
+                if (!Array.isArray(rowData.taskIds)) rowData.taskIds = []
                 ;(function (r, s) {
                   s.addEventListener('change', function () {
-                    r.taskId = s.value || null
-                    saveState()
-                  })
-                })(rowData, selTask)
-                tdTask.appendChild(selTask)
-                if (rowData.taskId && taskById[rowData.taskId]) {
-                  var card = document.createElement('div')
-                  card.className = 'kanban__card protocol-task-card'
-                  var ct = document.createElement('div')
-                  ct.className = 'kanban__card-title'
-                  ct.textContent = taskById[rowData.taskId].node.title
-                  var cm = document.createElement('div')
-                  cm.className = 'kanban__card-meta'
-                  cm.textContent = taskById[rowData.taskId].pathLabel
-                  card.appendChild(ct)
-                  card.appendChild(cm)
-                  tdTask.appendChild(card)
-                }
-                var openTaskBtn = document.createElement('button')
-                openTaskBtn.type = 'button'
-                openTaskBtn.className = 'task__btn'
-                openTaskBtn.textContent = 'Popup'
-                ;(function (r) {
-                  openTaskBtn.addEventListener('click', function () {
-                    var taskId = r.taskId
-                    if (!taskId) return
-                    state.openProjectId = project.id
-                    taskRootRef = project.tasks
-                    viewProjects.hidden = true
-                    viewTasks.hidden = false
-                    setTaskViewMode('gantt')
-                    openGanttTaskModal(taskId)
-                  })
-                })(rowData)
-                var taskActs = document.createElement('div')
-                taskActs.className = 'protocol-task-actions'
-                taskActs.appendChild(openTaskBtn)
-                var clearTaskBtn = document.createElement('button')
-                clearTaskBtn.type = 'button'
-                clearTaskBtn.className = 'task__btn'
-                clearTaskBtn.textContent = 'Entfernen'
-                ;(function (r) {
-                  clearTaskBtn.addEventListener('click', function () {
-                    r.taskId = null
+                    var picked = s.value || ''
+                    if (!picked) return
+                    if (!Array.isArray(r.taskIds)) r.taskIds = []
+                    if (r.taskIds.indexOf(picked) < 0) r.taskIds.push(picked)
+                    s.value = ''
                     saveState()
                     renderProtocols()
                   })
-                })(rowData)
-                taskActs.appendChild(clearTaskBtn)
-                tdTask.appendChild(taskActs)
+                })(rowData, selTask)
+                tdTask.appendChild(selTask)
+                for (var tci = 0; tci < rowData.taskIds.length; tci++) {
+                  var assignedId = rowData.taskIds[tci]
+                  if (!taskById[assignedId]) continue
+                  var card = document.createElement('div')
+                  card.className = 'kanban__card protocol-task-card'
+                  card.style.cursor = 'pointer'
+                  ;(function (taskId) {
+                    card.addEventListener('click', function () {
+                      state.openProjectId = project.id
+                      taskRootRef = project.tasks
+                      viewProjects.hidden = true
+                      viewTasks.hidden = false
+                      setTaskViewMode('gantt')
+                      openGanttTaskModal(taskId)
+                    })
+                  })(assignedId)
+                  var ct = document.createElement('div')
+                  ct.className = 'kanban__card-title'
+                  ct.textContent = taskById[assignedId].node.title
+                  var cm = document.createElement('div')
+                  cm.className = 'kanban__card-meta'
+                  cm.textContent = taskById[assignedId].pathLabel
+                  var rm = document.createElement('button')
+                  rm.type = 'button'
+                  rm.className = 'task__btn task__btn--danger'
+                  rm.textContent = '×'
+                  rm.style.marginTop = '0.35rem'
+                  ;(function (r, id) {
+                    rm.addEventListener('click', function (evt) {
+                      evt.stopPropagation()
+                      r.taskIds = (r.taskIds || []).filter(function (x) {
+                        return x !== id
+                      })
+                      saveState()
+                      renderProtocols()
+                    })
+                  })(rowData, assignedId)
+                  card.appendChild(ct)
+                  card.appendChild(cm)
+                  card.appendChild(rm)
+                  tdTask.appendChild(card)
+                }
                 tr.appendChild(tdTask)
                 var tdResult = document.createElement('td')
                 var resultInput = document.createElement('textarea')
@@ -4641,7 +4656,7 @@
               ;(function (sess) {
                 addRowBtn.addEventListener('click', function () {
                   if (!Array.isArray(sess.rows)) sess.rows = []
-                  sess.rows.push({ id: crypto.randomUUID(), participantId: null, taskId: null, text: '', result: '' })
+                  sess.rows.push({ id: crypto.randomUUID(), participantId: null, taskIds: [], text: '', result: '' })
                   saveState()
                   renderProtocols()
                 })
@@ -6385,7 +6400,7 @@
                 {
                   id: crypto.randomUUID(),
                   participantId: null,
-                  taskId: null,
+                  taskIds: [],
                   text: '',
                   result: '',
                 },
