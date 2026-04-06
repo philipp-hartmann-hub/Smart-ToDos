@@ -13,6 +13,7 @@ const querySchema = z.object({
   groupId: z.string().uuid().optional(),
   responsibleUserId: z.string().uuid().optional(),
   taskId: z.string().uuid().optional(),
+  date: ymd.optional(),
   month: z.string().regex(/^\d{4}-\d{2}$/).optional(),
   year: z.string().regex(/^\d{4}$/).optional(),
 });
@@ -31,6 +32,7 @@ export async function GET(req: Request, context: { params: Promise<{ id: string 
     groupId: url.searchParams.get("groupId") || undefined,
     responsibleUserId: url.searchParams.get("responsibleUserId") || undefined,
     taskId: url.searchParams.get("taskId") || undefined,
+    date: url.searchParams.get("date") || undefined,
     month: url.searchParams.get("month") || undefined,
     year: url.searchParams.get("year") || undefined,
   });
@@ -48,6 +50,7 @@ export async function GET(req: Request, context: { params: Promise<{ id: string 
 
   let filteredSessions = sessionRows.map((x) => x.protocol_sessions);
   if (q.groupId) filteredSessions = filteredSessions.filter((s) => s.groupId === q.groupId);
+  if (q.date) filteredSessions = filteredSessions.filter((s) => s.date === q.date);
   if (q.month) filteredSessions = filteredSessions.filter((s) => s.date.startsWith(q.month!));
   if (q.year) filteredSessions = filteredSessions.filter((s) => s.date.startsWith(q.year!));
 

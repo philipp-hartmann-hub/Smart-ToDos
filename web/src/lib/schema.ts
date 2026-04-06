@@ -53,6 +53,9 @@ export const tasks = pgTable("tasks", {
   swimlaneId: text("swimlane_id").notNull().default("kanban-lane-default"),
   dependsOnTaskIds: jsonb("depends_on_task_ids").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
   assigneeIds: jsonb("assignee_ids").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  attachments: jsonb("attachments").$type<Array<{ id: string; name: string; size: number; type: string; dataUrl: string }>>().notNull().default(sql`'[]'::jsonb`),
+  links: jsonb("links").$type<Array<{ id: string; url: string; label: string }>>().notNull().default(sql`'[]'::jsonb`),
+  history: jsonb("history").$type<Array<{ id: string; entryDate: string; participantId: string | null; text: string; createdAt: string }>>().notNull().default(sql`'[]'::jsonb`),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

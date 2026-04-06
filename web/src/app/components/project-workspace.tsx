@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import ProjectTasks, { type ProjectMember } from "./project-tasks";
 import ProjectKanban from "./project-kanban";
 import ProjectGantt from "./project-gantt";
@@ -22,16 +23,31 @@ type Task = {
   assigneeIds?: string[] | null;
 };
 
+type ProtocolTaskLink = {
+  rowId: string;
+  sessionId: string;
+  sessionDate: string;
+  groupId: string;
+  groupName: string;
+};
+
 export default function ProjectWorkspace({
   projectId,
   initialTasks,
   projectMembers,
+  initialProtocolLinksByTaskId,
 }: {
   projectId: string;
   initialTasks: Task[];
   projectMembers: ProjectMember[];
+  initialProtocolLinksByTaskId: Record<string, ProtocolTaskLink[]>;
 }) {
-  const [mode, setMode] = useState<"list" | "protocols" | "gantt" | "kanban">("list");
+  const searchParams = useSearchParams();
+  const view = searchParams.get("view");
+  const initialMode: "list" | "protocols" | "gantt" | "kanban" =
+    view === "protocols" || view === "gantt" || view === "kanban" ? view : "list";
+  const initialOpenTaskId = searchParams.get("openTaskId");
+  const [mode, setMode] = useState<"list" | "protocols" | "gantt" | "kanban">(initialMode);
   return (
     <>
       <div className="card">
@@ -51,11 +67,21 @@ export default function ProjectWorkspace({
         </div>
       </div>
       {mode === "list" ? (
-        <ProjectTasks projectId={projectId} initialTasks={initialTasks} projectMembers={projectMembers} />
+        <ProjectTasks
+          projectId={projectId}
+          initialTasks={initialTasks}
+          projectMembers={projectMembers}
+          initialProtocolLinksByTaskId={initialProtocolLinksByTaskId}
+        />
       ) : mode === "protocols" ? (
         <ProjectProtocols projectId={projectId} projectMembers={projectMembers} />
       ) : mode === "gantt" ? (
-        <ProjectGantt projectId={projectId} initialTasks={initialTasks} />
+        <ProjectGantt
+          projectId={projectId}
+          initialTasks={initialTasks}
+          initialOpenTaskId={initialOpenTaskId}
+          initialProtocolLinksByTaskId={initialProtocolLinksByTaskId}
+        />
       ) : (
         <ProjectKanban projectId={projectId} initialTasks={initialTasks} />
       )}

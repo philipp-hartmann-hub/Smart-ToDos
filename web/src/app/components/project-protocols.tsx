@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 type Group = { id: string; name: string };
 type Session = { id: string; groupId: string; date: string };
@@ -26,13 +26,13 @@ function userLabel(u: UserLite) {
 }
 
 export default function ProjectProtocols({ projectId, projectMembers }: Props) {
-  const router = useRouter();
   const sp = useSearchParams();
-
   const [search, setSearch] = useState("");
   const [groupId, setGroupId] = useState("");
   const [responsibleUserId, setResponsibleUserId] = useState("");
   const [taskId, setTaskId] = useState("");
+  const [dateMode, setDateMode] = useState<"" | "date" | "month" | "year">("");
+  const [dateValue, setDateValue] = useState("");
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
 
@@ -50,9 +50,13 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
   const [newGroupName, setNewGroupName] = useState("");
   const [newSessionDate, setNewSessionDate] = useState("");
   const [newSessionGroupId, setNewSessionGroupId] = useState("");
+  const [groupModalOpen, setGroupModalOpen] = useState(false);
+  const [sessionModalOpen, setSessionModalOpen] = useState(false);
 
   const [assignRowId, setAssignRowId] = useState<string | null>(null);
   const [assignSearch, setAssignSearch] = useState("");
+  const focusSessionId = sp.get("focusSessionId");
+  const focusGroupId = sp.get("focusGroupId");
 
   const usersForResponsible = useMemo(() => {
     // prefer provided projectMembers (members + admins in this project page)
@@ -62,7 +66,7 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
     return [...map.values()].sort((a, b) => userLabel(a).localeCompare(userLabel(b)));
   }, [allUsers, projectMembers]);
 
-  async function load() {
+  const load = useCallback(async () => {
     setBusy(true);
     setMessage("");
     const qs = new URLSearchParams();
@@ -70,8 +74,9 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
     if (groupId) qs.set("groupId", groupId);
     if (responsibleUserId) qs.set("responsibleUserId", responsibleUserId);
     if (taskId) qs.set("taskId", taskId);
-    if (month) qs.set("month", month);
-    if (year) qs.set("year", year);
+    if (dateMode === "date" && dateValue) qs.set("date", dateValue);
+    if (dateMode === "month" && month) qs.set("month", month);
+    if (dateMode === "year" && year) qs.set("year", year);
     const res = await fetch(`/api/projects/${projectId}/protocols?${qs.toString()}`, { cache: "no-store" });
     const data = (await res.json().catch(() => null)) as any;
     setBusy(false);
@@ -84,7 +89,7 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
     setRows(data.rows || []);
     setAllUsers(data.users || []);
     setTasks(data.tasks || []);
-  }
+  }, [projectId, search, groupId, responsibleUserId, taskId, dateMode, dateValue, month, year]);
 
   async function createGroup() {
     const name = newGroupName.trim();
@@ -102,6 +107,7 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
       return;
     }
     setNewGroupName("");
+    setGroupModalOpen(false);
     await load();
   }
 
@@ -120,6 +126,7 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
       return;
     }
     setNewSessionDate("");
+    setSessionModalOpen(false);
     await load();
   }
 
@@ -249,14 +256,22 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
       .sort((a, b) => a.title.localeCompare(b.title));
   }, [tasks, assignSearch]);
 
-  const view = sp.get("view");
-  const openTaskId = sp.get("openTaskId");
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      void load();
+    }, 220);
+    return () => window.clearTimeout(t);
+  }, [load]);
+
+  useEffect(() => {
+    if (!focusSessionId) return;
+    const el = document.getElementById(`protocol-session-${focusSessionId}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [sessions, focusSessionId]);
+
   function jumpToTask(taskId: string) {
-    // switch to gantt + open modal
-    const params = new URLSearchParams(sp.toString());
-    params.set("view", "gantt");
-    params.set("openTaskId", taskId);
-    router.push(`/projects/${projectId}?${params.toString()}`);
+    // full navigation so workspace initializes directly in Gantt mode
+    window.location.assign(`/projects/${projectId}?view=gantt&openTaskId=${encodeURIComponent(taskId)}`);
   }
 
   return (
@@ -311,27 +326,55 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
           </select>
         </div>
         <div className="task-filters__field">
-          <label>Monat</label>
-          <select value={month} onChange={(e) => setMonth(e.target.value)}>
+          <label>Zeitfilter</label>
+          <select
+            value={dateMode}
+            onChange={(e) => {
+              const next = (e.target.value || "") as "" | "date" | "month" | "year";
+              setDateMode(next);
+              setDateValue("");
+              setMonth("");
+              setYear("");
+            }}
+          >
             <option value="">Alle</option>
-            {monthOptions.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
+            <option value="date">Datum</option>
+            <option value="month">Monat</option>
+            <option value="year">Jahr</option>
           </select>
         </div>
-        <div className="task-filters__field">
-          <label>Jahr</label>
-          <select value={year} onChange={(e) => setYear(e.target.value)}>
-            <option value="">Alle</option>
-            {yearOptions.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-        </div>
+        {dateMode === "date" ? (
+          <div className="task-filters__field">
+            <label>Wert</label>
+            <input type="date" value={dateValue} onChange={(e) => setDateValue(e.target.value)} />
+          </div>
+        ) : null}
+        {dateMode === "month" ? (
+          <div className="task-filters__field">
+            <label>Wert</label>
+            <select value={month} onChange={(e) => setMonth(e.target.value)}>
+              <option value="">Alle</option>
+              {monthOptions.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
+        {dateMode === "year" ? (
+          <div className="task-filters__field">
+            <label>Wert</label>
+            <select value={year} onChange={(e) => setYear(e.target.value)}>
+              <option value="">Alle</option>
+              {yearOptions.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
         <div className="task-filters__actions">
           <button
             type="button"
@@ -341,6 +384,8 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
               setGroupId("");
               setResponsibleUserId("");
               setTaskId("");
+              setDateMode("");
+              setDateValue("");
               setMonth("");
               setYear("");
             }}
@@ -350,40 +395,21 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
-        <h3>Bereich anlegen</h3>
-        <div className="row">
-          <input value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} placeholder="z. B. Kundentermin" />
-          <button type="button" onClick={createGroup} disabled={busy}>
-            + Bereich
-          </button>
-        </div>
+      <div className="row" style={{ marginTop: 12 }}>
+        <button type="button" onClick={() => setGroupModalOpen(true)}>
+          + Bereich anlegen
+        </button>
+        <button type="button" onClick={() => setSessionModalOpen(true)}>
+          + Sitzung anlegen
+        </button>
       </div>
 
-      <div className="card">
-        <h3>Sitzung anlegen</h3>
-        <div className="row">
-          <select value={newSessionGroupId} onChange={(e) => setNewSessionGroupId(e.target.value)}>
-            <option value="">Bereich wählen…</option>
-            {filteredGroups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-          </select>
-          <input type="date" value={newSessionDate} onChange={(e) => setNewSessionDate(e.target.value)} />
-          <button type="button" onClick={createSession} disabled={busy}>
-            + Sitzung
-          </button>
-        </div>
-      </div>
-
-      <div className="card">
+      <div className="card protocols-groups-scroll">
         <h3>Bereiche</h3>
         {groups.length === 0 ? <p>Noch keine Bereiche. Lege oben einen Bereich an.</p> : null}
 
         {filteredGroups.map((g) => {
-          const isOpen = openGroups[g.id] !== false;
+          const isOpen = focusGroupId === g.id ? true : openGroups[g.id] !== false;
           const sess = sessionsByGroup.get(g.id) || [];
           return (
             <div key={g.id} className="card" style={{ marginBottom: 10 }}>
@@ -408,10 +434,10 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
                 <div style={{ marginTop: 10 }}>
                   {sess.length === 0 ? <p>Keine Sitzungen in diesem Bereich.</p> : null}
                   {sess.map((s) => {
-                    const sOpen = openSessions[s.id] !== false;
+                    const sOpen = focusSessionId === s.id ? true : openSessions[s.id] !== false;
                     const sRows = rowsBySession.get(s.id) || [];
                     return (
-                      <div key={s.id} className="card" style={{ marginBottom: 10 }}>
+                      <div id={`protocol-session-${s.id}`} key={s.id} className="card" style={{ marginBottom: 10 }}>
                         <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
                           <div className="row" style={{ alignItems: "center" }}>
                             <button type="button" className="secondary" onClick={() => setOpenSessions((m) => ({ ...m, [s.id]: m[s.id] === false ? true : false }))}>
@@ -481,6 +507,9 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
                                           <span title={tasksById.get(tid)?.title || tid}>{tasksById.get(tid)?.title || tid}</span>
                                           <button type="button" className="secondary" onClick={() => jumpToTask(tid)}>
                                             Öffnen
+                                          </button>
+                                          <button type="button" className="secondary" onClick={() => patchRow(r.id, { taskIds: (r.taskIds || []).filter((x) => x !== tid) })}>
+                                            Entfernen
                                           </button>
                                         </div>
                                       ))}
@@ -554,6 +583,48 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
                 );
               })}
             </div>
+          </div>
+        </div>
+      ) : null}
+
+      {groupModalOpen ? (
+        <div className="gantt-modal-overlay" role="dialog" aria-modal onClick={() => setGroupModalOpen(false)}>
+          <div className="gantt-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="gantt-modal__head">
+              <h3>Bereich anlegen</h3>
+              <button type="button" className="secondary" onClick={() => setGroupModalOpen(false)}>
+                Schließen
+              </button>
+            </div>
+            <input value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} placeholder="z. B. Kundentermin" />
+            <button type="button" onClick={createGroup} disabled={busy}>
+              + Bereich
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {sessionModalOpen ? (
+        <div className="gantt-modal-overlay" role="dialog" aria-modal onClick={() => setSessionModalOpen(false)}>
+          <div className="gantt-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="gantt-modal__head">
+              <h3>Sitzung anlegen</h3>
+              <button type="button" className="secondary" onClick={() => setSessionModalOpen(false)}>
+                Schließen
+              </button>
+            </div>
+            <select value={newSessionGroupId} onChange={(e) => setNewSessionGroupId(e.target.value)}>
+              <option value="">Bereich wählen…</option>
+              {filteredGroups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+            <input type="date" value={newSessionDate} onChange={(e) => setNewSessionDate(e.target.value)} />
+            <button type="button" onClick={createSession} disabled={busy}>
+              + Sitzung
+            </button>
           </div>
         </div>
       ) : null}

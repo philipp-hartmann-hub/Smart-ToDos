@@ -37,9 +37,20 @@ type Task = {
   swimlaneId: string;
   dependsOnTaskIds?: string[] | null;
   assigneeIds?: string[] | null;
+  attachments?: Array<{ id: string; name: string; size: number; type: string; dataUrl: string }> | null;
+  links?: Array<{ id: string; url: string; label: string }> | null;
+  history?: Array<{ id: string; entryDate: string; participantId: string | null; text: string; createdAt: string }> | null;
 };
 
-type Props = { projectId: string; initialTasks: Task[] };
+type Props = {
+  projectId: string;
+  initialTasks: Task[];
+  initialOpenTaskId?: string | null;
+  initialProtocolLinksByTaskId: Record<
+    string,
+    Array<{ rowId: string; sessionId: string; sessionDate: string; groupId: string; groupName: string }>
+  >;
+};
 
 type Scale = "day" | "month" | "year";
 
@@ -76,28 +87,66 @@ function toFlatFields(t: Task): FlatGanttFields {
   };
 }
 
-export default function ProjectGantt({ projectId, initialTasks }: Props) {
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(String(fr.result || ""));
+    fr.onerror = () => reject(fr.error);
+    fr.readAsDataURL(file);
+  });
+}
+
+export default function ProjectGantt({
+  projectId,
+  initialTasks,
+  initialOpenTaskId,
+  initialProtocolLinksByTaskId,
+}: Props) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [protocolLinksByTaskId, setProtocolLinksByTaskId] = useState<
+    Record<string, Array<{ rowId: string; sessionId: string; sessionDate: string; groupId: string; groupName: string }>>
+  >(initialProtocolLinksByTaskId);
   const [scale, setScale] = useState<Scale>("month");
   const [openMap, setOpenMap] = useState<Record<string, boolean>>({});
   const [newTitle, setNewTitle] = useState("");
-  const [modalId, setModalId] = useState<string | null>(null);
+  const [modalId, setModalId] = useState<string | null>(initialOpenTaskId || null);
   const [depSearch, setDepSearch] = useState("");
   const [modalError, setModalError] = useState<string | null>(null);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkLabel, setLinkLabel] = useState("");
+  const [historyDate, setHistoryDate] = useState("");
+  const [historyText, setHistoryText] = useState("");
 
   const active = useMemo(() => tasks.filter((t) => !t.archived), [tasks]);
 
   function openGanttModal(id: string) {
     setDepSearch("");
     setModalError(null);
+    setLinkUrl("");
+    setLinkLabel("");
+    setHistoryDate("");
+    setHistoryText("");
     setModalId(id);
   }
 
   const refresh = useCallback(async () => {
-    const res = await fetch(`/api/projects/${projectId}/tasks`, { cache: "no-store" });
-    if (!res.ok) return;
-    const data = (await res.json()) as { tasks: Task[] };
-    setTasks(data.tasks);
+    const [resTasks, resLinks] = await Promise.all([
+      fetch(`/api/projects/${projectId}/tasks`, { cache: "no-store" }),
+      fetch(`/api/projects/${projectId}/task-protocol-links`, { cache: "no-store" }),
+    ]);
+    if (resTasks.ok) {
+      const data = (await resTasks.json()) as { tasks: Task[] };
+      setTasks(data.tasks);
+    }
+    if (resLinks.ok) {
+      const d = (await resLinks.json()) as {
+        linksByTaskId: Record<
+          string,
+          Array<{ rowId: string; sessionId: string; sessionDate: string; groupId: string; groupName: string }>
+        >;
+      };
+      setProtocolLinksByTaskId(d.linksByTaskId || {});
+    }
   }, [projectId]);
 
   const tree = useMemo(() => {
@@ -163,7 +212,7 @@ export default function ProjectGantt({ projectId, initialTasks }: Props) {
     return map;
   }, [rows, minDay, dayCount, laneWidth]);
 
-  const modalTask = modalId ? active.find((t) => t.id === modalId) : null;
+  const modalTask = modalId ? tasks.find((t) => t.id === modalId) : null;
 
   const depBlockList = useMemo(() => {
     if (!modalTask) return [];
@@ -201,6 +250,50 @@ export default function ProjectGantt({ projectId, initialTasks }: Props) {
     const cur = Array.isArray(modalTask.dependsOnTaskIds) ? modalTask.dependsOnTaskIds : [];
     const next = cur.includes(depId) ? cur.filter((x) => x !== depId) : [...cur, depId];
     void patchTask(modalTask.id, { dependsOnTaskIds: next });
+  }
+
+  async function addModalAttachment(fileList: FileList | null) {
+    if (!modalTask || !fileList || fileList.length === 0) return;
+    const current = modalTask.attachments || [];
+    const next = [...current];
+    for (const file of Array.from(fileList)) {
+      if (file.size > 5 * 1024 * 1024) continue;
+      const dataUrl = await readFileAsDataUrl(file);
+      next.push({
+        id: crypto.randomUUID(),
+        name: file.name,
+        size: file.size,
+        type: file.type || "application/octet-stream",
+        dataUrl,
+      });
+    }
+    await patchTask(modalTask.id, { attachments: next });
+  }
+
+  async function addModalLink() {
+    if (!modalTask) return;
+    const url = linkUrl.trim();
+    if (!url || !/^https?:\/\//i.test(url)) return;
+    const links = modalTask.links || [];
+    const next = [...links, { id: crypto.randomUUID(), url, label: linkLabel.trim() || url }];
+    await patchTask(modalTask.id, { links: next });
+    setLinkUrl("");
+    setLinkLabel("");
+  }
+
+  async function addModalHistoryEntry() {
+    if (!modalTask) return;
+    const text = historyText.trim();
+    if (!text) return;
+    const entryDate = historyDate || new Date().toISOString().slice(0, 10);
+    const history = modalTask.history || [];
+    const next = [
+      ...history,
+      { id: crypto.randomUUID(), entryDate, participantId: null, text, createdAt: new Date().toISOString() },
+    ];
+    await patchTask(modalTask.id, { history: next });
+    setHistoryDate("");
+    setHistoryText("");
   }
 
   const headerH = 34 + (scale === "day" ? 28 : 0);
@@ -469,6 +562,118 @@ export default function ProjectGantt({ projectId, initialTasks }: Props) {
                   </label>
                 );
               })}
+            </div>
+            <label className="gantt-modal-label">In Sitzungen verwendet</label>
+            <div className="gantt-dep-list">
+              {(protocolLinksByTaskId[modalTask.id] || []).length === 0 ? (
+                <div className="gantt-dep-item">Keine Protokollzuordnung.</div>
+              ) : (
+                (protocolLinksByTaskId[modalTask.id] || []).map((pl) => (
+                  <div key={`${pl.rowId}-${pl.sessionId}`} className="task-rich__row">
+                    <span>
+                      {pl.groupName} · {pl.sessionDate}
+                    </span>
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() =>
+                        window.location.assign(
+                          `/projects/${projectId}?view=protocols&focusGroupId=${encodeURIComponent(pl.groupId)}&focusSessionId=${encodeURIComponent(pl.sessionId)}`,
+                        )
+                      }
+                    >
+                      Zur Sitzung
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+            <label className="gantt-modal-label">Anhänge</label>
+            <input type="file" multiple onChange={(e) => void addModalAttachment(e.target.files)} />
+            <div className="gantt-dep-list">
+              {(modalTask.attachments || []).length === 0 ? (
+                <div className="gantt-dep-item">Keine Anhänge.</div>
+              ) : (
+                (modalTask.attachments || []).map((a) => (
+                  <div key={a.id} className="task-rich__row">
+                    <a href={a.dataUrl} download={a.name}>
+                      {a.name}
+                    </a>
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() =>
+                        patchTask(modalTask.id, {
+                          attachments: (modalTask.attachments || []).filter((x) => x.id !== a.id),
+                        })
+                      }
+                    >
+                      Entfernen
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+            <label className="gantt-modal-label">Links</label>
+            <div className="row">
+              <input placeholder="https://..." value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} />
+              <input placeholder="Bezeichnung (optional)" value={linkLabel} onChange={(e) => setLinkLabel(e.target.value)} />
+              <button type="button" onClick={() => void addModalLink()}>
+                + Link
+              </button>
+            </div>
+            <div className="gantt-dep-list">
+              {(modalTask.links || []).length === 0 ? (
+                <div className="gantt-dep-item">Keine Links.</div>
+              ) : (
+                (modalTask.links || []).map((l) => (
+                  <div key={l.id} className="task-rich__row">
+                    <a href={l.url} target="_blank" rel="noreferrer">
+                      {l.label || l.url}
+                    </a>
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() => patchTask(modalTask.id, { links: (modalTask.links || []).filter((x) => x.id !== l.id) })}
+                    >
+                      Entfernen
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+            <label className="gantt-modal-label">Historie</label>
+            <div className="row">
+              <input type="date" value={historyDate} onChange={(e) => setHistoryDate(e.target.value)} />
+              <input placeholder="Eintragtext" value={historyText} onChange={(e) => setHistoryText(e.target.value)} />
+              <button type="button" onClick={() => void addModalHistoryEntry()}>
+                + Eintrag
+              </button>
+            </div>
+            <div className="gantt-dep-list">
+              {(modalTask.history || []).length === 0 ? (
+                <div className="gantt-dep-item">Keine Einträge.</div>
+              ) : (
+                [...(modalTask.history || [])]
+                  .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+                  .map((h) => (
+                    <div key={h.id} className="task-rich__history">
+                      <div>
+                        <strong>{h.entryDate}</strong>
+                      </div>
+                      <div>{h.text}</div>
+                      <button
+                        type="button"
+                        className="secondary"
+                        onClick={() =>
+                          patchTask(modalTask.id, { history: (modalTask.history || []).filter((x) => x.id !== h.id) })
+                        }
+                      >
+                        Löschen
+                      </button>
+                    </div>
+                  ))
+              )}
             </div>
             <div className="row" style={{ marginTop: 12 }}>
               <button type="button" className="secondary" onClick={() => patchTask(modalTask.id, { done: !modalTask.done })}>

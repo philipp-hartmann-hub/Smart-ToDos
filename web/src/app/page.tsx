@@ -36,7 +36,7 @@ export default async function HomePage() {
     session.role === "admin"
       ? await db.select().from(projects)
       : await db
-          .select({ id: projects.id, title: projects.title, description: projects.description })
+          .select({ id: projects.id, title: projects.title, description: projects.description, imageUrl: projects.imageUrl })
           .from(projects)
           .innerJoin(projectMembers, eq(projectMembers.projectId, projects.id))
           .where(eq(projectMembers.userId, session.sub));
@@ -87,6 +87,15 @@ export default async function HomePage() {
         {projectRows.length === 0 ? <p>Keine zugeordneten Projekte vorhanden.</p> : null}
         {projectRows.map((p) => (
           <div key={p.id} style={{ marginBottom: "0.9rem", borderBottom: "1px solid #334155", paddingBottom: "0.7rem" }}>
+            {p.imageUrl ? (
+              <div style={{ marginBottom: "0.4rem" }}>
+                <img
+                  src={p.imageUrl}
+                  alt={`Projektbild ${p.title}`}
+                  style={{ maxWidth: "220px", maxHeight: "120px", objectFit: "cover", borderRadius: "8px" }}
+                />
+              </div>
+            ) : null}
             <strong>{p.title}</strong>
             {p.description ? <div>{p.description}</div> : null}
             <div style={{ marginTop: "0.45rem" }}>

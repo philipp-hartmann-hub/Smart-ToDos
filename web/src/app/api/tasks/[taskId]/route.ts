@@ -27,6 +27,21 @@ const patchSchema = z.object({
   swimlaneId: z.string().min(1).optional(),
   dependsOnTaskIds: z.array(z.string().uuid()).optional(),
   assigneeIds: z.array(z.string().uuid()).optional(),
+  attachments: z
+    .array(z.object({ id: z.string(), name: z.string(), size: z.number(), type: z.string(), dataUrl: z.string() }))
+    .optional(),
+  links: z.array(z.object({ id: z.string(), url: z.string().url(), label: z.string() })).optional(),
+  history: z
+    .array(
+      z.object({
+        id: z.string(),
+        entryDate: z.string(),
+        participantId: z.string().uuid().nullable(),
+        text: z.string(),
+        createdAt: z.string(),
+      }),
+    )
+    .optional(),
 });
 
 export async function PATCH(req: Request, context: { params: Promise<{ taskId: string }> }) {
@@ -88,6 +103,9 @@ export async function PATCH(req: Request, context: { params: Promise<{ taskId: s
       dependsOnTaskIds:
         data.dependsOnTaskIds !== undefined ? data.dependsOnTaskIds : task.dependsOnTaskIds,
       assigneeIds: data.assigneeIds !== undefined ? data.assigneeIds : task.assigneeIds,
+      attachments: data.attachments !== undefined ? data.attachments : task.attachments,
+      links: data.links !== undefined ? data.links : task.links,
+      history: data.history !== undefined ? data.history : task.history,
       updatedAt: new Date(),
     })
     .where(eq(tasks.id, taskId))

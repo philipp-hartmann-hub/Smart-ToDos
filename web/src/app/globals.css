@@ -504,6 +504,58 @@ button.secondary {
   cursor: pointer;
 }
 
+.task-rich {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.task-rich__block {
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 0.6rem;
+  background: #0b1220;
+}
+
+.task-rich__block strong {
+  display: block;
+  margin-bottom: 0.45rem;
+}
+
+.task-rich__empty {
+  opacity: 0.75;
+  font-size: 0.85rem;
+}
+
+.task-rich__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.task-rich__history {
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 0.45rem;
+  margin-top: 0.45rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.task-rich__popover summary {
+  cursor: pointer;
+  font-size: 0.86rem;
+  color: #c4b5fd;
+}
+
+.task-rich__popover-list {
+  margin-top: 0.45rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
 /* Protokolle */
 .protocol-grid-head,
 .protocol-grid-row {
@@ -561,4 +613,9 @@ button.secondary {
   margin-top: 0.25rem;
   font-size: 0.78rem;
   opacity: 0.85;
+}
+
+.protocols-groups-scroll {
+  max-height: min(68vh, 560px);
+  overflow-y: auto;
 }

@@ -24,6 +24,21 @@ const createSchema = z.object({
   kanbanColumnId: z.string().min(1).optional(),
   swimlaneId: z.string().min(1).optional(),
   assigneeIds: z.array(z.string().uuid()).optional(),
+  attachments: z
+    .array(z.object({ id: z.string(), name: z.string(), size: z.number(), type: z.string(), dataUrl: z.string() }))
+    .optional(),
+  links: z.array(z.object({ id: z.string(), url: z.string().url(), label: z.string() })).optional(),
+  history: z
+    .array(
+      z.object({
+        id: z.string(),
+        entryDate: z.string(),
+        participantId: z.string().uuid().nullable(),
+        text: z.string(),
+        createdAt: z.string(),
+      }),
+    )
+    .optional(),
 });
 
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
@@ -89,6 +104,9 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       kanbanColumnId,
       swimlaneId,
       assigneeIds,
+      attachments: parsed.data.attachments ?? [],
+      links: parsed.data.links ?? [],
+      history: parsed.data.history ?? [],
       done: false,
       archived: false,
     })

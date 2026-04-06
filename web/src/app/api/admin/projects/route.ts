@@ -7,6 +7,7 @@ import { readSessionFromCookie } from "@/lib/auth";
 const inputSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().max(5000).optional().nullable(),
+  imageUrl: z.string().max(5_000_000).optional().nullable(),
 });
 
 export async function POST(req: Request) {
@@ -25,8 +26,9 @@ export async function POST(req: Request) {
     .values({
       title: parsed.data.title.trim(),
       description: parsed.data.description?.trim() || null,
+      imageUrl: parsed.data.imageUrl || null,
     })
-    .returning({ id: projects.id, title: projects.title });
+    .returning({ id: projects.id, title: projects.title, imageUrl: projects.imageUrl });
 
   return NextResponse.json({ ok: true, project: inserted[0] });
 }

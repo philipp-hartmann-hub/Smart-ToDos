@@ -5,8 +5,9 @@ Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen L
 
 ## Was die App kann
 
-- **Projekte verwalten**: Name, optionale Beschreibung und optionales Projektbild.
+- **Projekte verwalten**: Name, optionale Beschreibung und optionales Projektbild; bestehende Projekte können umbenannt, aktualisiert oder gelöscht werden.
 - **Benutzerverwaltung**: Admin-Login, Benutzer anlegen (mit Auto-Benutzername/Passwort) und Projektzugriffe je Profil verwalten.
+- **Einklappbare Formulare**: Projektanlage, Teilnehmenden-/Benutzerverwaltung und Unteraufgaben-Formulare starten kompakt und werden per Button geöffnet.
 - **Aufgaben strukturieren**: Hauptaufgaben und beliebig tiefe Unteraufgaben.
 - **Aufgaben planen**: Priorität, Beginn, Frist, Beschreibung, Zuständigkeiten und Abhängigkeiten.
 - **Mehrere Ansichten nutzen**:
@@ -14,6 +15,8 @@ Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen L
   - `Projektplan (Gantt)` mit Zeitbalken, Monatsachse, Abhängigkeitslinien und Popup-Karte
   - `Kanban` mit konfigurierbaren Spalten, Swimlanes und Drag-and-Drop
 - **Protokolle** pro Projekt: Bereiche → Sitzungen → Zeilen inkl. Aufgaben-Zuordnung und Filter.
+- **Protokolle** pro Projekt: Bereiche → Sitzungen → Zeilen inkl. Aufgaben-Zuordnung und Filter, mit Popup-Dialogen für Bereich/Sitzung, Zeitfilter-Modus (Datum/Monat/Jahr) und Entfernen einzelner Aufgaben-Zuordnungen.
+- Protokollfilter reagieren direkt bei Eingabe/Änderung (ohne extra „Aktualisieren“); Sitzungsverweise in Aufgaben werden kompakt per aufklappbarer Liste dargestellt.
 - **Daten zentral speichern**: Projekte/Aufgaben/Protokolle liegen in der Datenbank (Neon) und sind für berechtigte Nutzer gemeinsam nutzbar.
 
 ## Schnellstart
@@ -49,11 +52,13 @@ Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen L
 
 ### 1) Aufgabenliste
 - Kompakte Standardansicht: Titel, Zuständigkeit und Frist
+- Hauptaufgaben-Form ist standardmäßig eingeklappt und per Button einblendbar
 - Such- und Filterleiste für Titel/Beschreibung, Verantwortliche, Priorität, Fristfenster und Kanban-Spalte
+- Unteraufgaben pro Karte mit Zähler ein-/ausblendbar
 - Weitere Felder per „Details anzeigen“ aufklappbar
 - Kompakter Bereich „In Sitzungen verwendet“ in der Aufgabenkarte (Popup-Liste), mit Direktsprung zur verknüpften Protokoll-Sitzung
 - Abschließen archiviert Aufgaben; aktive Liste zeigt nur nicht archivierte Karten
-- Archivbereich mit Öffnen, Wiederherstellen und Endgültig löschen
+- Archivbereich ein-/ausblendbar, mit Öffnen, Wiederherstellen und Endgültig löschen
 - Kanban-Spaltenstatus in der Standardansicht als Label sichtbar; Umstellung im aufgeklappten Detailbereich
 - Gut für schnellen Überblick und fokussierte Bearbeitung
 
@@ -106,6 +111,7 @@ Erster technischer Start liegt jetzt in `web/`:
 - Drizzle-Schema für `users`, `projects`, `project_members`, `tasks` (inkl. `depends_on_task_ids`, `assignee_ids` für Vorgänger/Zuständige)
 - API-Basis für Login und Admin-User-Anlage
 - Admin-Oberfläche in der Cloud-App: Projekte anlegen, Benutzer anlegen und Projektzuordnungen pro Benutzer bearbeiten
+- Admin-Oberfläche erweitert: bestehende Projekte umbenennen, Beschreibung/Bild nachträglich ändern oder Projekt inkl. Aufgaben/Zuordnungen löschen
 - Projektübersicht in der Cloud-App ist klickbar; Detailroute `/projects/[id]` mit Zugriffsprüfung (Admin oder Projektzuordnung) ergänzt
 - Aufgabenkern in Cloud-Detailseite ergänzt: Aufgaben/Unteraufgaben anlegen, bearbeiten, abschließen, archivieren und wiederherstellen (serverseitig per API)
 - Kanban-Basis in Cloud ergänzt: Umschaltung Liste/Kanban, Karten pro Standardspalte, Verschieben via Spaltenauswahl und Kartenerstellung in Spalten
@@ -113,6 +119,7 @@ Erster technischer Start liegt jetzt in `web/`:
 - Aufgabenliste in Cloud ergänzt: Filter (Suche, Zuständiger, Priorität, Fristfenster, Kanban-Spalte), Zuständige pro Aufgabe als Mehrfachauswahl nur unter Projektmitgliedern; bei Admin-Entzug einer Projektzuordnung werden betroffene Zuweisungen bereinigt
 - Protokolle in Cloud ergänzt: Bereiche → Sitzungen (Datum) → Zeilen (Verantwortlicher, Erläuterung, Aufgaben, Ergebnis) inkl. Suche/Filter (Bereich, Verantwortlicher, Aufgabe, Monat/Jahr) und Aufgabensprung in den Gantt
 - Kanban in Cloud erweitert: konfigurierbare Spalten + Swimlanes pro Projekt, Drag-and-Drop zwischen Zellen, Löschen von Spalten/Lanes ordnet Aufgaben automatisch Backlog/Standard zu
+- Aufgaben-Metadaten in Cloud erweitert: Anhänge (Datei-Upload als Data-URL), Links und Historie pro Aufgabe inkl. Anlegen/Entfernen in der Aufgaben-Detailansicht
 
 Lokaler Start:
 
@@ -217,3 +224,12 @@ Der aktuelle Fokus ist die **deployte Cloud-App** im Ordner `web/`.
 | 2026-04-06 | Welle 5 gestartet: Protokolle in der Cloud ergänzt (DB-Tabellen + API + Protokoll-Ansicht im Projekt inkl. Aufgaben-Zuordnung und Filter). |
 | 2026-04-06 | Protokoll-Sprung vervollständigt: „Aufgabe öffnen“ aus Protokollen wechselt jetzt direkt in den Gantt der Zielkarte; Protokollansicht lädt Daten beim Öffnen automatisch. |
 | 2026-04-06 | Kanban-Parität ausgebaut: Spalten/Swimlanes persistent pro Projekt, Drag-and-Drop, automatische Rückzuordnung beim Löschen. |
+| 2026-04-06 | Parität vertieft: Aufgaben zeigen Protokoll-Rückverweise („In Sitzungen verwendet“) mit Direktsprung; Gantt-Modal um Anhänge, Links und Historie erweitert. |
+| 2026-04-06 | Weitere Parität: Projektbilder in Cloud-Admin/Projektlisten ergänzt (Upload + Anzeige); Archiv in der Aufgabenliste um „Endgültig löschen“ erweitert. |
+| 2026-04-06 | Aufgaben-Details erweitert: Anhänge, Links und Historie in der Cloud-Aufgabenliste ergänzt (Schema, API und UI). |
+| 2026-04-06 | Nächste Parität: Admin kann bestehende Projekte bearbeiten/löschen; Archiv-„Öffnen“ springt in den Gantt-Karten-Dialog (auch für archivierte Karten). |
+| 2026-04-06 | Form-Parität verbessert: Projektanlage, Teilnehmendenverwaltung und Unteraufgaben sind standardmäßig eingeklappt und per Button einblendbar. |
+| 2026-04-06 | Protokoll-UX weiter angeglichen: Bereich/Sitzung per Modal anlegen, Zeitfilter-Modus (Datum/Monat/Jahr) mit Wertfeld, Aufgabenchips in Protokollzeilen einzeln entfernbar, Bereichsliste scrollbar. |
+| 2026-04-06 | Aufgabenlisten-UX weiter angenähert: Hauptaufgabenformular standardmäßig eingeklappt; Archiv mit „Archiv anzeigen/ausblenden“-Toggle wie in der HTML-Referenz. |
+| 2026-04-06 | Feinschliff: Protokollfilter laden automatisch bei Änderungen; Aufgabenkarte zeigt Protokoll-Sitzungen kompakt als aufklappbare Popover-Liste. |
+| 2026-04-06 | 1:1-Feinschliff Aufgabenliste: Unteraufgaben lassen sich pro Karte mit Zähler ein-/ausblenden (analog zur HTML-Referenz). |

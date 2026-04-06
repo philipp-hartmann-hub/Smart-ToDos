@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { projectMembers, projects, tasks, users } from "@/lib/schema";
+import { projectMembers, projects, protocolGroups, protocolRows, protocolRowTasks, protocolSessions, tasks, users } from "@/lib/schema";
 import { readSessionFromCookie } from "@/lib/auth";
 import ProjectWorkspace from "@/app/components/project-workspace";
 
@@ -96,9 +96,46 @@ export default async function ProjectPage({ params }: Params) {
   for (const a of adminRows) memberMap.set(a.id, a);
   const selectableAssignees = [...memberMap.values()];
 
+  const protocolJoined = await db
+    .select({
+      taskId: protocolRowTasks.taskId,
+      rowId: protocolRows.id,
+      sessionId: protocolSessions.id,
+      sessionDate: protocolSessions.date,
+      groupId: protocolGroups.id,
+      groupName: protocolGroups.name,
+    })
+    .from(protocolRowTasks)
+    .innerJoin(protocolRows, eq(protocolRowTasks.rowId, protocolRows.id))
+    .innerJoin(protocolSessions, eq(protocolRows.sessionId, protocolSessions.id))
+    .innerJoin(protocolGroups, and(eq(protocolSessions.groupId, protocolGroups.id), eq(protocolGroups.projectId, project.id)));
+  const initialProtocolLinksByTaskId: Record<
+    string,
+    Array<{ rowId: string; sessionId: string; sessionDate: string; groupId: string; groupName: string }>
+  > = {};
+  for (const j of protocolJoined) {
+    if (!initialProtocolLinksByTaskId[j.taskId]) initialProtocolLinksByTaskId[j.taskId] = [];
+    initialProtocolLinksByTaskId[j.taskId].push({
+      rowId: j.rowId,
+      sessionId: j.sessionId,
+      sessionDate: j.sessionDate,
+      groupId: j.groupId,
+      groupName: j.groupName,
+    });
+  }
+
   return (
     <main className="container">
       <div className="card">
+        {project.imageUrl ? (
+          <div style={{ marginBottom: "0.6rem" }}>
+            <img
+              src={project.imageUrl}
+              alt={`Projektbild ${project.title}`}
+              style={{ maxWidth: "320px", maxHeight: "180px", objectFit: "cover", borderRadius: "10px" }}
+            />
+          </div>
+        ) : null}
         <h1>{project.title}</h1>
         {project.description ? <p>{project.description}</p> : <p>Keine Beschreibung hinterlegt.</p>}
         <Link href="/">
@@ -109,6 +146,7 @@ export default async function ProjectPage({ params }: Params) {
         projectId={project.id}
         initialTasks={projectTasks}
         projectMembers={selectableAssignees}
+        initialProtocolLinksByTaskId={initialProtocolLinksByTaskId}
       />
     </main>
   );

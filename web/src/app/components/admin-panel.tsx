@@ -6,6 +6,7 @@ type Project = {
   id: string;
   title: string;
   description: string | null;
+  imageUrl?: string | null;
 };
 
 type User = {
@@ -48,6 +49,7 @@ function randomPassword() {
 export default function AdminPanel({ projects, users }: Props) {
   const [projectTitle, setProjectTitle] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
+  const [projectImageUrl, setProjectImageUrl] = useState<string>("");
   const [newUserFirst, setNewUserFirst] = useState("");
   const [newUserLast, setNewUserLast] = useState("");
   const [usersState, setUsersState] = useState<User[]>(users);
@@ -68,6 +70,9 @@ export default function AdminPanel({ projects, users }: Props) {
   });
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [projectCreateOpen, setProjectCreateOpen] = useState(false);
+  const [userCreateOpen, setUserCreateOpen] = useState(false);
+  const [userManageOpen, setUserManageOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("dpm-created-credentials", JSON.stringify(createdCredentials.slice(0, 30)));
@@ -86,7 +91,7 @@ export default function AdminPanel({ projects, users }: Props) {
     const res = await fetch("/api/admin/projects", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: projectTitle, description: projectDescription }),
+      body: JSON.stringify({ title: projectTitle, description: projectDescription, imageUrl: projectImageUrl || null }),
     });
     setBusy(false);
     if (!res.ok) {
@@ -95,6 +100,15 @@ export default function AdminPanel({ projects, users }: Props) {
     }
     setMessage("Projekt angelegt.");
     window.location.reload();
+  }
+
+  function readFileAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(String(fr.result || ""));
+      fr.onerror = () => reject(fr.error);
+      fr.readAsDataURL(file);
+    });
   }
 
   async function createUser() {
@@ -153,6 +167,39 @@ export default function AdminPanel({ projects, users }: Props) {
     setSelectedProjectIds([]);
   }
 
+  async function updateProject(projectId: string, patch: { title?: string; description?: string | null; imageUrl?: string | null }) {
+    setBusy(true);
+    setMessage("");
+    const res = await fetch(`/api/admin/projects/${projectId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+    const data = await res.json().catch(() => null);
+    setBusy(false);
+    if (!res.ok) {
+      setMessage(data?.error || "Projekt konnte nicht aktualisiert werden.");
+      return;
+    }
+    setMessage("Projekt aktualisiert.");
+    window.location.reload();
+  }
+
+  async function deleteProject(projectId: string) {
+    if (!confirm("Projekt wirklich löschen? Alle Aufgaben und Zuordnungen werden entfernt.")) return;
+    setBusy(true);
+    setMessage("");
+    const res = await fetch(`/api/admin/projects/${projectId}`, { method: "DELETE" });
+    const data = await res.json().catch(() => null);
+    setBusy(false);
+    if (!res.ok) {
+      setMessage(data?.error || "Projekt konnte nicht gelöscht werden.");
+      return;
+    }
+    setMessage("Projekt gelöscht.");
+    window.location.reload();
+  }
+
   function toggleUserProject(userId: string, projectId: string) {
     setUserProjectMap((prev) => {
       const current = prev[userId] || [];
@@ -183,44 +230,148 @@ export default function AdminPanel({ projects, users }: Props) {
       {message ? <p>{message}</p> : null}
 
       <div className="card">
-        <h3>Projekt anlegen</h3>
-        <div className="row" style={{ flexDirection: "column" }}>
-          <input placeholder="Projektname" value={projectTitle} onChange={(e) => setProjectTitle(e.target.value)} />
-          <input
-            placeholder="Beschreibung (optional)"
-            value={projectDescription}
-            onChange={(e) => setProjectDescription(e.target.value)}
-          />
-          <button onClick={createProject} disabled={busy}>
-            Projekt speichern
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+          <h3 style={{ margin: 0 }}>Projekt anlegen</h3>
+          <button type="button" className="secondary" onClick={() => setProjectCreateOpen((v) => !v)}>
+            {projectCreateOpen ? "Formular schließen" : "Projekt anlegen"}
           </button>
         </div>
+        {projectCreateOpen ? (
+          <div className="row" style={{ flexDirection: "column", marginTop: 10 }}>
+            <input placeholder="Projektname" value={projectTitle} onChange={(e) => setProjectTitle(e.target.value)} />
+            <input
+              placeholder="Beschreibung (optional)"
+              value={projectDescription}
+              onChange={(e) => setProjectDescription(e.target.value)}
+            />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) {
+                  setProjectImageUrl("");
+                  return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                  setMessage("Projektbild zu groß (max. 5MB).");
+                  return;
+                }
+                const dataUrl = await readFileAsDataUrl(file);
+                setProjectImageUrl(dataUrl);
+              }}
+            />
+            {projectImageUrl ? (
+              <img src={projectImageUrl} alt="Projektvorschau" style={{ maxWidth: 260, borderRadius: 8 }} />
+            ) : null}
+            <button onClick={createProject} disabled={busy}>
+              Projekt speichern
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <div className="card">
-        <h3>Benutzer anlegen</h3>
-        <div className="row" style={{ flexDirection: "column" }}>
-          <input placeholder="Vorname" value={newUserFirst} onChange={(e) => setNewUserFirst(e.target.value)} />
-          <input placeholder="Nachname" value={newUserLast} onChange={(e) => setNewUserLast(e.target.value)} />
-          <div>
-            <strong>Projekte zuweisen</strong>
-            <div className="row" style={{ marginTop: 8 }}>
-              {projects.map((p) => (
-                <label key={p.id} style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
-                  <input
-                    type="checkbox"
-                    checked={selectedProjectIds.includes(p.id)}
-                    onChange={() => toggleSelectedProject(p.id)}
-                  />
-                  <span>{p.title}</span>
-                </label>
-              ))}
+        <h3>Projekte verwalten</h3>
+        {projects.length === 0 ? <p>Noch keine Projekte vorhanden.</p> : null}
+        {projects.map((p) => (
+          <div key={p.id} className="card" style={{ marginBottom: 12 }}>
+            <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+              <strong>{p.title}</strong>
+              <div className="row">
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={async () => {
+                    const title = prompt("Neuer Projektname:", p.title);
+                    if (!title?.trim()) return;
+                    await updateProject(p.id, { title: title.trim() });
+                  }}
+                  disabled={busy}
+                >
+                  Umbenennen
+                </button>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={async () => {
+                    const desc = prompt("Neue Beschreibung (leer = entfernen):", p.description || "");
+                    if (desc === null) return;
+                    await updateProject(p.id, { description: desc.trim() || null });
+                  }}
+                  disabled={busy}
+                >
+                  Beschreibung
+                </button>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => updateProject(p.id, { imageUrl: null })}
+                  disabled={busy}
+                >
+                  Bild entfernen
+                </button>
+                <button type="button" className="secondary" onClick={() => deleteProject(p.id)} disabled={busy}>
+                  Löschen
+                </button>
+              </div>
+            </div>
+            {p.imageUrl ? (
+              <div style={{ marginTop: 8 }}>
+                <img src={p.imageUrl} alt={`Projektbild ${p.title}`} style={{ maxWidth: 220, borderRadius: 8 }} />
+              </div>
+            ) : null}
+            <div style={{ marginTop: 8 }}>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 5 * 1024 * 1024) {
+                    setMessage("Projektbild zu groß (max. 5MB).");
+                    return;
+                  }
+                  const dataUrl = await readFileAsDataUrl(file);
+                  await updateProject(p.id, { imageUrl: dataUrl });
+                }}
+              />
             </div>
           </div>
-          <button onClick={createUser} disabled={busy}>
-            Benutzer anlegen
+        ))}
+      </div>
+
+      <div className="card">
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+          <h3 style={{ margin: 0 }}>Benutzer anlegen</h3>
+          <button type="button" className="secondary" onClick={() => setUserCreateOpen((v) => !v)}>
+            {userCreateOpen ? "Formular schließen" : "Benutzer anlegen"}
           </button>
         </div>
+        {userCreateOpen ? (
+          <div className="row" style={{ flexDirection: "column", marginTop: 10 }}>
+            <input placeholder="Vorname" value={newUserFirst} onChange={(e) => setNewUserFirst(e.target.value)} />
+            <input placeholder="Nachname" value={newUserLast} onChange={(e) => setNewUserLast(e.target.value)} />
+            <div>
+              <strong>Projekte zuweisen</strong>
+              <div className="row" style={{ marginTop: 8 }}>
+                {projects.map((p) => (
+                  <label key={p.id} style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedProjectIds.includes(p.id)}
+                      onChange={() => toggleSelectedProject(p.id)}
+                    />
+                    <span>{p.title}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <button onClick={createUser} disabled={busy}>
+              Benutzer anlegen
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <div className="card">
@@ -240,35 +391,44 @@ export default function AdminPanel({ projects, users }: Props) {
       </div>
 
       <div className="card">
-        <h3>Benutzer verwalten</h3>
-        {nonAdminUsers.length === 0 ? <p>Noch keine Benutzer vorhanden.</p> : null}
-        {nonAdminUsers.map((u) => (
-          <div key={u.id} className="card" style={{ marginBottom: 12 }}>
-            <div>
-              <strong>
-                {u.firstName} {u.lastName}
-              </strong>{" "}
-              ({u.username})
-            </div>
-            <div className="row" style={{ marginTop: 8 }}>
-              {projects.map((p) => (
-                <label key={`${u.id}-${p.id}`} style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
-                  <input
-                    type="checkbox"
-                    checked={(userProjectMap[u.id] || []).includes(p.id)}
-                    onChange={() => toggleUserProject(u.id, p.id)}
-                  />
-                  <span>{p.title}</span>
-                </label>
-              ))}
-            </div>
-            <div style={{ marginTop: 10 }}>
-              <button onClick={() => saveUserProjects(u.id)} disabled={busy}>
-                Zuordnung speichern
-              </button>
-            </div>
-          </div>
-        ))}
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+          <h3 style={{ margin: 0 }}>Teilnehmende verwalten</h3>
+          <button type="button" className="secondary" onClick={() => setUserManageOpen((v) => !v)}>
+            {userManageOpen ? "Formular schließen" : "Teilnehmende verwalten"}
+          </button>
+        </div>
+        {userManageOpen ? (
+          <>
+            {nonAdminUsers.length === 0 ? <p style={{ marginTop: 10 }}>Noch keine Benutzer vorhanden.</p> : null}
+            {nonAdminUsers.map((u) => (
+              <div key={u.id} className="card" style={{ marginBottom: 12, marginTop: 10 }}>
+                <div>
+                  <strong>
+                    {u.firstName} {u.lastName}
+                  </strong>{" "}
+                  ({u.username})
+                </div>
+                <div className="row" style={{ marginTop: 8 }}>
+                  {projects.map((p) => (
+                    <label key={`${u.id}-${p.id}`} style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+                      <input
+                        type="checkbox"
+                        checked={(userProjectMap[u.id] || []).includes(p.id)}
+                        onChange={() => toggleUserProject(u.id, p.id)}
+                      />
+                      <span>{p.title}</span>
+                    </label>
+                  ))}
+                </div>
+                <div style={{ marginTop: 10 }}>
+                  <button onClick={() => saveUserProjects(u.id)} disabled={busy}>
+                    Zuordnung speichern
+                  </button>
+                </div>
+              </div>
+            ))}
+          </>
+        ) : null}
       </div>
     </div>
   );
