@@ -1,4 +1,4 @@
-# Smartes Projektplanungstool
+# Der Projektmanager
 
 Ein leichtgewichtiges Planungstool als **eine einzige HTML-Datei**.  
 Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen Listen-, Gantt- und (späterer) Kanban-Sicht wechseln.
@@ -6,7 +6,8 @@ Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen L
 ## Was die App kann
 
 - **Projekte verwalten**: Name, optionale Beschreibung und optionales Projektbild.
-- **Protokolle auf Startseite**: Datierte Einträge anlegen, anzeigen und löschen.
+- **Benutzerverwaltung**: Admin-Login, Benutzer anlegen (mit Auto-Benutzername/Passwort) und Projektzugriffe je Profil verwalten.
+- **Cloud-Migration gestartet**: neues `web/`-Projekt (Next.js + Neon + Vercel-ready) als Mehrbenutzer-Basis mit serverseitigem Login.
 - **Aufgaben strukturieren**: Hauptaufgaben und beliebig tiefe Unteraufgaben.
 - **Aufgaben planen**: Priorität, Beginn, Frist, Beschreibung, Zuständigkeiten und Abhängigkeiten.
 - **Mehrere Ansichten nutzen**:
@@ -46,13 +47,15 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 - Zugeordnete Aufgaben erscheinen in Protokollen im **Kanban-Kartenstil**
 - Zusätzliche Schaltflächen für Bereich/Sitzung (umbenennen, löschen, speichern, + Sitzung, + Zeile)
 - Auto-Save beim Zuklappen einer Sitzung; Gruppenliste ist scrollbar (ca. 3 Bereiche gleichzeitig sichtbar)
+- Protokollbereich mit Such-/Filterleiste (Suche, Bereich, Verantwortlicher, Aufgabe, Datum/Monat/Jahr) für schnelle Eingrenzung
 
 ## Aufgabenansichten im Überblick
 
 ### 1) Aufgabenliste
 - Kompakte Standardansicht: Titel, Zuständigkeit und Frist
-- Such- und Filterleiste für Titel/Beschreibung, Verantwortliche, Priorität, Fristfenster und Status
+- Such- und Filterleiste für Titel/Beschreibung, Verantwortliche, Priorität, Fristfenster und Kanban-Spalte
 - Weitere Felder per „Details anzeigen“ aufklappbar
+- Kompakter Bereich „In Sitzungen verwendet“ in der Aufgabenkarte (Popup-Liste), mit Direktsprung zur verknüpften Protokoll-Sitzung
 - Abschließen archiviert Aufgaben; aktive Liste zeigt nur nicht archivierte Karten
 - Archivbereich mit Öffnen, Wiederherstellen und Endgültig löschen
 - Kanban-Spaltenstatus in der Standardansicht als Label sichtbar; Umstellung im aufgeklappten Detailbereich
@@ -87,18 +90,42 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 
 - Speicherort: `localStorage`, Schlüssel `smart-todo-tasks`
 - Datenmodell: Version `v:2` mit `projects[]`
+- Auth lokal in `localStorage`: Standard-Admin `admin` / `Admin123!` (beim ersten Start automatisch angelegt)
 - Ältere reine Aufgabenlisten werden in ein Projekt „Mein Projekt“ migriert
 - Alle Ansichten arbeiten auf derselben Datenquelle (Änderungen sind sofort konsistent sichtbar)
 
 ## Repository
 
-[github.com/philipp-hartmann-hub/Smart-ToDos](https://github.com/philipp-hartmann-hub/Smart-ToDos)
+[github.com/philipp-hartmann-hub/Der-Projektmanager](https://github.com/philipp-hartmann-hub/Der-Projektmanager)
 
 ```bash
-git clone https://github.com/philipp-hartmann-hub/Smart-ToDos.git
-cd Smart-ToDos
+git clone https://github.com/philipp-hartmann-hub/Der-Projektmanager.git
+cd Der-Projektmanager
 # Dann SmartToDo.html im Browser öffnen.
 ```
+
+## Cloud-Start (Neon + Vercel)
+
+Erster technischer Start liegt jetzt in `web/`:
+
+- Next.js App Router (TypeScript)
+- Neon-Anbindung über `@neondatabase/serverless`
+- Drizzle-Schema für `users`, `projects`, `project_members`, `tasks`
+- API-Basis für Login und Admin-User-Anlage
+
+Lokaler Start:
+
+```bash
+cd web
+cp .env.example .env.local
+# DATABASE_URL und AUTH_JWT_SECRET setzen
+npm install
+npm run db:push
+npm run db:seed-admin
+npm run dev
+```
+
+Danach auf Vercel deployen und dieselben Env-Variablen im Vercel-Projekt hinterlegen.
 
 ---
 
@@ -161,3 +188,15 @@ cd Smart-ToDos
 | 2026-04-06 | Protokoll-Mehrfachzuordnung robuster gemacht: neue Aufgaben werden additiv zur bestehenden Kartenliste gespeichert statt eine vorhandene Auswahl zu ersetzen. |
 | 2026-04-06 | Protokoll-Kartenöffnung korrigiert: Karten verwenden jetzt denselben Popup-Öffnungsweg wie Kanban/Gantt und sind dadurch direkt bearbeitbar. |
 | 2026-04-06 | Aufgaben-Popup erweitert: Historie ist jetzt auch im Gantt/Kanban/Protokoll-Modal sichtbar und direkt dort pflegbar. |
+| 2026-04-06 | Protokoll-Button `Aufgabe zuordnen` repariert: Auswahl-Dropdown öffnet wieder zuverlässig und erlaubt freie Kartenzuordnung ohne Abhängigkeitsfilter. |
+| 2026-04-06 | Aufgabenlisten-Filter umgestellt: statt Status (offen/erledigt) filtert die Liste jetzt nach der gewählten Kanban-Spalte des Projekts. |
+| 2026-04-06 | Kanban-Spaltenlöschung abgesichert: alle Aufgaben aus der gelöschten Spalte werden automatisch dem Backlog zugeordnet (inkl. Unteraufgaben). |
+| 2026-04-06 | Aufgabenkarte erweitert: kompakter Sitzungs-Hinweis mit Popup-Liste aller Protokollzuordnungen und Direktsprung zur jeweiligen Sitzung. |
+| 2026-04-06 | Protokoll-Zuordnung repariert: Karten-Auswahl wirkt wieder auf die richtige Zeile; Picker zeigt dort die vollständige Aufgabenliste statt kurzer Scroll-Liste. |
+| 2026-04-06 | Protokolle durchsuch- und filterbar gemacht: Suche sowie Filter nach Bereich, Verantwortlichem und Aufgabe mit Reset-Funktion ergänzt. |
+| 2026-04-06 | Protokoll-Zeitfilter erweitert: Monat und Jahr als Dropdown-Auswahl ergänzt (zusätzlich zu exaktem Datum). |
+| 2026-04-06 | Benutzerverwaltung ergänzt: Login mit Admin/Benutzerrollen, automatische Zugangsdaten für neue Nutzer und projektbezogene Zugriffssteuerung pro Profil. |
+| 2026-04-06 | Admin-Login stabilisiert: Standard-Admin wird strikt auf `admin` mit gültiger Rolle geführt; sichtbarer Admin-Hinweis aus der Login-Startseite entfernt. |
+| 2026-04-06 | Cloud-Migration begonnen: neues `web/`-Projekt mit Next.js + Neon + Drizzle + Login/API-Basis erstellt (Vercel-ready Grundgerüst). |
+| 2026-04-06 | Rebranding auf „Der Projektmanager“: App-Titel, Cloud-UI, Projektregeln und README/Repo-Links auf den neuen Namen umgestellt. |
+| 2026-04-06 | Neon-Anbindung aktiviert: Schema erfolgreich in Neon gepusht und initialer Admin-Seed (`admin`) in der Cloud-Datenbank ausgeführt. |

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smartes Projektplanungstool</title>
+    <title>Der Projektmanager</title>
     <style>
       :root {
         --text: #4b5563;
@@ -1176,6 +1176,40 @@
       .task__quick-chip--ext {
         border-style: solid;
       }
+      .task-protocol-links {
+        margin: 0.35rem 0 0.45rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--bg);
+        padding: 0.35rem 0.6rem;
+      }
+      .task-protocol-links__summary {
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.85rem;
+        list-style: none;
+        user-select: none;
+      }
+      .task-protocol-links__summary::-webkit-details-marker {
+        display: none;
+      }
+      .task-protocol-links__list {
+        margin: 0.5rem 0 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+      .task-protocol-links__btn {
+        width: 100%;
+        text-align: left;
+        justify-content: flex-start;
+      }
+      .protocol-session--target {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
       .task-links-editor {
         margin-bottom: 0.25rem;
       }
@@ -1398,6 +1432,10 @@
         background: var(--bg);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
       }
+      .assign-picker__dropdown--full {
+        width: min(44rem, calc(100vw - 3rem));
+        max-width: min(44rem, calc(100vw - 3rem));
+      }
       .assign-picker__search {
         width: 100%;
         margin-bottom: 0.4rem;
@@ -1409,6 +1447,10 @@
         padding: 0;
         max-height: 11rem;
         overflow-y: auto;
+      }
+      .assign-picker__list--full {
+        max-height: none;
+        overflow-y: visible;
       }
       .assign-picker__option {
         display: block;
@@ -1434,6 +1476,67 @@
         opacity: 0.85;
         line-height: 1.35;
       }
+      .auth-card {
+        max-width: 28rem;
+        margin: 2.5rem auto 0;
+      }
+      .auth-error {
+        color: #dc2626;
+        font-size: 0.85rem;
+        min-height: 1.1rem;
+        margin: 0.25rem 0 0;
+      }
+      .top-userbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.9rem;
+      }
+      .top-userbar__meta {
+        font-size: 0.84rem;
+        opacity: 0.9;
+      }
+      .admin-users {
+        margin-bottom: 1rem;
+      }
+      .admin-users__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+      }
+      .admin-users__item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.55rem 0.6rem;
+        background: var(--bg);
+      }
+      .admin-users__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+      .admin-users__creds {
+        font-size: 0.8rem;
+        opacity: 0.9;
+      }
+      .admin-users__projects {
+        margin-top: 0.45rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+      .admin-users__projects label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.83rem;
+      }
       @media (max-width: 520px) {
         .task__top {
           flex-direction: column;
@@ -1453,11 +1556,55 @@
     </style>
   </head>
   <body>
+    <div class="app" id="view-login">
+      <section class="form auth-card" aria-label="Anmeldung">
+        <h2>Anmeldung</h2>
+        <p class="subtitle" style="margin-top: 0">
+          Mit Benutzername und Passwort anmelden.
+        </p>
+        <div>
+          <label for="login-username" class="form__legend">Benutzername</label>
+          <input id="login-username" class="form__input" type="text" autocomplete="username" />
+        </div>
+        <div>
+          <label for="login-password" class="form__legend">Passwort</label>
+          <input id="login-password" class="form__input" type="password" autocomplete="current-password" />
+        </div>
+        <button type="button" class="form__submit" id="btn-login">Anmelden</button>
+        <p id="login-error" class="auth-error" role="status" aria-live="polite"></p>
+      </section>
+    </div>
     <div class="app" id="view-projects">
       <header>
-        <h1>Smartes Projektplanungstool</h1>
+        <h1>Der Projektmanager</h1>
         <p class="subtitle">Projekte anlegen, öffnen und Aufgaben mit Priorität, Beginn, Frist und Unteraufgaben verwalten — lokal gespeichert.</p>
       </header>
+      <div class="top-userbar">
+        <div id="current-user-meta" class="top-userbar__meta"></div>
+        <button type="button" class="task__btn" id="btn-logout">Abmelden</button>
+      </div>
+
+      <section id="admin-users-panel" class="form admin-users" hidden aria-label="Benutzerverwaltung">
+        <h3 class="participants-panel__title">Benutzerverwaltung (Admin)</h3>
+        <form id="user-create-form" class="participant-form__form">
+          <div class="form__row--split">
+            <div style="flex: 1; min-width: 8rem">
+              <label for="user-first" class="form__legend">Vorname</label>
+              <input id="user-first" class="form__input" type="text" maxlength="120" />
+            </div>
+            <div style="flex: 1; min-width: 8rem">
+              <label for="user-last" class="form__legend">Nachname</label>
+              <input id="user-last" class="form__input" type="text" maxlength="120" />
+            </div>
+          </div>
+          <div>
+            <span class="form__legend">Projektzuordnung</span>
+            <div id="user-create-projects" class="admin-users__projects"></div>
+          </div>
+          <button type="submit" class="form__submit form__submit--small">Benutzer anlegen</button>
+        </form>
+        <ul id="admin-users-list" class="admin-users__list"></ul>
+      </section>
 
       <div class="task-add-toolbar">
         <button
@@ -1566,6 +1713,62 @@
         <div class="protocols-toolbar">
           <button type="button" class="task__btn" id="btn-protocol-open-add-group">+ Bereich anlegen</button>
           <button type="button" class="task__btn" id="btn-protocol-open-add-session">+ Sitzung anlegen</button>
+        </div>
+        <div class="task-filters" aria-label="Protokolle durchsuchen und filtern">
+          <div class="task-filters__field">
+            <label for="protocol-filter-search" class="form__legend">Suche</label>
+            <input id="protocol-filter-search" class="form__input" type="text" placeholder="Text, Aufgabe, Datum …" />
+          </div>
+          <div class="task-filters__field">
+            <label for="protocol-filter-group" class="form__legend">Bereich</label>
+            <select id="protocol-filter-group" class="form__input">
+              <option value="">Alle Bereiche</option>
+            </select>
+          </div>
+          <div class="task-filters__field">
+            <label for="protocol-filter-participant" class="form__legend">Verantwortlich</label>
+            <select id="protocol-filter-participant" class="form__input">
+              <option value="">Alle Verantwortlichen</option>
+            </select>
+          </div>
+          <div class="task-filters__field">
+            <label for="protocol-filter-task" class="form__legend">Aufgabe</label>
+            <select id="protocol-filter-task" class="form__input">
+              <option value="">Alle Aufgaben</option>
+            </select>
+          </div>
+          <div class="task-filters__field">
+            <label for="protocol-filter-date-mode" class="form__legend">Zeitfilter</label>
+            <select id="protocol-filter-date-mode" class="form__input">
+              <option value="">Alle Zeiträume</option>
+              <option value="date">Datum</option>
+              <option value="month">Monat</option>
+              <option value="year">Jahr</option>
+            </select>
+          </div>
+          <div class="task-filters__field">
+            <label for="protocol-filter-date-value" class="form__legend">Wert</label>
+            <input id="protocol-filter-date-value" class="form__input form__input--date" type="date" />
+            <select id="protocol-filter-month-value" class="form__input" hidden>
+              <option value="">Monat wählen</option>
+              <option value="01">Januar</option>
+              <option value="02">Februar</option>
+              <option value="03">März</option>
+              <option value="04">April</option>
+              <option value="05">Mai</option>
+              <option value="06">Juni</option>
+              <option value="07">Juli</option>
+              <option value="08">August</option>
+              <option value="09">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Dezember</option>
+            </select>
+            <select id="protocol-filter-year-value" class="form__input" hidden>
+              <option value="">Jahr wählen</option>
+            </select>
+          </div>
+          <button type="button" class="task__btn" id="btn-protocol-filter-reset">Filter zurücksetzen</button>
         </div>
         <ul id="protocol-list" class="protocols-list protocols-list--groups"></ul>
       </section>
@@ -1734,11 +1937,9 @@
               </select>
             </div>
             <div class="task-filters__field">
-              <label for="task-filter-status" class="form__legend">Status</label>
-              <select id="task-filter-status" class="form__input">
-                <option value="">Alle Status</option>
-                <option value="open">Offen</option>
-                <option value="done">Erledigt</option>
+              <label for="task-filter-kanban-column" class="form__legend">Kanban-Spalte</label>
+              <select id="task-filter-kanban-column" class="form__input">
+                <option value="">Alle Spalten</option>
               </select>
             </div>
             <button type="button" class="task__btn" id="btn-task-filter-reset">Filter zurücksetzen</button>
@@ -1849,8 +2050,158 @@
           return [{ id: PROTOCOL_DEFAULT_GROUP_ID, name: 'Allgemein', sessions: [] }]
         }
 
-        var state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {} }
+        function defaultAdminUser() {
+          return {
+            id: 'admin-user',
+            firstName: 'System',
+            lastName: 'Admin',
+            username: 'admin',
+            password: 'Admin123!',
+            isAdmin: true,
+            projectIds: [],
+          }
+        }
+
+        var state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {}, users: [], currentUserId: null }
         var taskRootRef = null
+
+        function normalizeUser(raw) {
+          if (!raw || typeof raw !== 'object') return null
+          if (typeof raw.id !== 'string' || !raw.id) return null
+          if (typeof raw.username !== 'string' || !raw.username.trim()) return null
+          if (typeof raw.password !== 'string' || !raw.password) return null
+          var first = typeof raw.firstName === 'string' ? raw.firstName.trim().slice(0, MAX_NAME) : ''
+          var last = typeof raw.lastName === 'string' ? raw.lastName.trim().slice(0, MAX_NAME) : ''
+          var projectIds = []
+          if (Array.isArray(raw.projectIds)) {
+            for (var i = 0; i < raw.projectIds.length; i++) {
+              if (typeof raw.projectIds[i] === 'string' && raw.projectIds[i]) projectIds.push(raw.projectIds[i])
+            }
+          }
+          return {
+            id: raw.id,
+            firstName: first || 'Nutzer',
+            lastName: last || '',
+            username: raw.username.trim().toLowerCase(),
+            password: raw.password,
+            isAdmin: !!raw.isAdmin,
+            projectIds: projectIds,
+          }
+        }
+
+        function ensureAuthData() {
+          if (!Array.isArray(state.users)) state.users = []
+          var out = []
+          for (var i = 0; i < state.users.length; i++) {
+            var u = normalizeUser(state.users[i])
+            if (u) out.push(u)
+          }
+          var adminTemplate = defaultAdminUser()
+          var adminIdx = -1
+          for (var j = 0; j < out.length; j++) {
+            if (out[j].id === adminTemplate.id) {
+              adminIdx = j
+              break
+            }
+          }
+          if (adminIdx >= 0) {
+            out[adminIdx].firstName = adminTemplate.firstName
+            out[adminIdx].lastName = adminTemplate.lastName
+            out[adminIdx].username = adminTemplate.username
+            out[adminIdx].password = adminTemplate.password
+            out[adminIdx].isAdmin = true
+          } else {
+            out.unshift(adminTemplate)
+          }
+          // Falls es einen normalen Nutzer mit Username "admin" gibt, eindeutig umbenennen.
+          var usedNames = {}
+          usedNames[adminTemplate.username] = true
+          for (var k = 0; k < out.length; k++) {
+            if (out[k].id === adminTemplate.id) continue
+            var base = out[k].username || 'user'
+            var cand = base
+            var n = 1
+            while (usedNames[cand]) {
+              n++
+              cand = base + n
+            }
+            out[k].username = cand
+            usedNames[cand] = true
+          }
+          state.users = out
+          if (typeof state.currentUserId !== 'string') state.currentUserId = null
+          var hasCurrent = false
+          if (state.currentUserId) {
+            for (var cx = 0; cx < state.users.length; cx++) {
+              if (state.users[cx].id === state.currentUserId) {
+                hasCurrent = true
+                break
+              }
+            }
+          }
+          if (!hasCurrent) state.currentUserId = null
+        }
+
+        function getCurrentUser() {
+          if (!state.currentUserId || !Array.isArray(state.users)) return null
+          for (var i = 0; i < state.users.length; i++) {
+            if (state.users[i].id === state.currentUserId) return state.users[i]
+          }
+          return null
+        }
+
+        function isAdminUser() {
+          var u = getCurrentUser()
+          return !!(u && u.isAdmin)
+        }
+
+        function userCanAccessProject(projectId) {
+          if (!projectId) return false
+          var u = getCurrentUser()
+          if (!u) return false
+          if (u.isAdmin) return true
+          return (u.projectIds || []).indexOf(projectId) >= 0
+        }
+
+        function getVisibleProjects() {
+          if (isAdminUser()) return state.projects
+          var u = getCurrentUser()
+          if (!u) return []
+          var allowed = {}
+          for (var i = 0; i < (u.projectIds || []).length; i++) allowed[u.projectIds[i]] = true
+          return state.projects.filter(function (p) {
+            return !!allowed[p.id]
+          })
+        }
+
+        function simpleSlug(s) {
+          return (s || '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '.')
+            .replace(/^\.+|\.+$/g, '')
+        }
+
+        function generateUniqueUsername(firstName, lastName) {
+          var base = simpleSlug(firstName) || 'user'
+          var last = simpleSlug(lastName)
+          if (last) base = base + '.' + last
+          var candidate = base
+          var counter = 1
+          var used = {}
+          for (var i = 0; i < state.users.length; i++) used[state.users[i].username] = true
+          while (used[candidate]) {
+            counter++
+            candidate = base + counter
+          }
+          return candidate
+        }
+
+        function generatePassword() {
+          var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%'
+          var out = ''
+          for (var i = 0; i < 10; i++) out += chars[Math.floor(Math.random() * chars.length)]
+          return out
+        }
 
         function sanitizeDescription(s) {
           if (typeof s !== 'string') return ''
@@ -2535,6 +2886,8 @@
                 projects: [],
                 openProjectId: null,
                 collapsedSubtasks: {},
+                users: [defaultAdminUser()],
+                currentUserId: null,
               }
               return
             }
@@ -2557,6 +2910,8 @@
                 openProjectId:
                   typeof parsed.openProjectId === 'string' ? parsed.openProjectId : null,
                 collapsedSubtasks: collapsed,
+                users: Array.isArray(parsed.users) ? parsed.users : [],
+                currentUserId: typeof parsed.currentUserId === 'string' ? parsed.currentUserId : null,
               }
               if (Array.isArray(parsed.protocols) && projects.length) {
                 if (!Array.isArray(projects[0].protocols)) projects[0].protocols = []
@@ -2568,6 +2923,7 @@
                 projects[0].protocolGroups = parseProtocolGroupsRaw(parsed.protocolGroups)
               }
               for (var pidx = 0; pidx < projects.length; pidx++) ensureProtocolDataConsistencyForProject(projects[pidx])
+              ensureAuthData()
               return
             }
             if (Array.isArray(parsed)) {
@@ -2588,6 +2944,8 @@
                 ],
                 openProjectId: null,
                 collapsedSubtasks: {},
+                users: [defaultAdminUser()],
+                currentUserId: null,
               }
               ensureProtocolDataConsistencyForProject(state.projects[0])
               saveState()
@@ -2599,10 +2957,13 @@
             projects: [],
             openProjectId: null,
             collapsedSubtasks: {},
+            users: [defaultAdminUser()],
+            currentUserId: null,
           }
         }
 
         function saveState() {
+          ensureAuthData()
           localStorage.setItem(
             STORAGE_KEY,
             JSON.stringify({
@@ -2610,6 +2971,8 @@
               projects: state.projects,
               openProjectId: state.openProjectId,
               collapsedSubtasks: state.collapsedSubtasks || {},
+              users: state.users || [],
+              currentUserId: state.currentUserId || null,
             }),
           )
         }
@@ -2641,6 +3004,131 @@
             if (state.projects[i].id === state.openProjectId) return state.projects[i]
           }
           return null
+        }
+
+        function renderAuthHeaderAndControls() {
+          var u = getCurrentUser()
+          if (currentUserMeta) {
+            if (!u) currentUserMeta.textContent = ''
+            else currentUserMeta.textContent = 'Angemeldet als: ' + (u.username || '') + (u.isAdmin ? ' (Admin)' : '')
+          }
+          if (adminUsersPanel) adminUsersPanel.hidden = !isAdminUser()
+          if (btnToggleProjectForm) btnToggleProjectForm.hidden = !isAdminUser()
+          if (!isAdminUser() && projectForm && !projectForm.hidden) closeProjectForm()
+        }
+
+        function showLoginView() {
+          if (viewLogin) viewLogin.hidden = false
+          if (viewProjects) viewProjects.hidden = true
+          if (viewTasks) viewTasks.hidden = true
+          if (loginError) loginError.textContent = ''
+          if (loginPassword) loginPassword.value = ''
+          if (loginUsername) loginUsername.focus()
+        }
+
+        function logoutCurrentUser() {
+          state.currentUserId = null
+          state.openProjectId = null
+          taskRootRef = null
+          saveState()
+          showLoginView()
+        }
+
+        function tryLogin(username, password) {
+          var un = (username || '').trim().toLowerCase()
+          var pw = password || ''
+          if (!un || !pw) return false
+          for (var i = 0; i < state.users.length; i++) {
+            var u = state.users[i]
+            if (u.username === un && u.password === pw) {
+              state.currentUserId = u.id
+              state.openProjectId = null
+              saveState()
+              return true
+            }
+          }
+          return false
+        }
+
+        function renderUserCreateProjectsSelector() {
+          if (!userCreateProjects) return
+          userCreateProjects.innerHTML = ''
+          if (!state.projects.length) {
+            var p = document.createElement('p')
+            p.className = 'subtitle'
+            p.style.margin = '0'
+            p.textContent = 'Keine Projekte vorhanden.'
+            userCreateProjects.appendChild(p)
+            return
+          }
+          for (var i = 0; i < state.projects.length; i++) {
+            var project = state.projects[i]
+            var label = document.createElement('label')
+            var cb = document.createElement('input')
+            cb.type = 'checkbox'
+            cb.value = project.id
+            label.appendChild(cb)
+            label.appendChild(document.createTextNode(' ' + project.title))
+            userCreateProjects.appendChild(label)
+          }
+        }
+
+        function selectedProjectIdsFromContainer(container) {
+          var ids = []
+          if (!container) return ids
+          var checks = container.querySelectorAll('input[type="checkbox"]')
+          for (var i = 0; i < checks.length; i++) {
+            if (checks[i].checked && checks[i].value) ids.push(checks[i].value)
+          }
+          return ids
+        }
+
+        function renderAdminUsersPanel() {
+          if (!adminUsersList || !isAdminUser()) return
+          adminUsersList.innerHTML = ''
+          for (var i = 0; i < state.users.length; i++) {
+            var u = state.users[i]
+            var li = document.createElement('li')
+            li.className = 'admin-users__item'
+            var head = document.createElement('div')
+            head.className = 'admin-users__head'
+            var title = document.createElement('strong')
+            title.textContent = (u.firstName + ' ' + u.lastName).trim() + (u.isAdmin ? ' (Admin)' : '')
+            var creds = document.createElement('div')
+            creds.className = 'admin-users__creds'
+            creds.textContent = 'Benutzername: ' + u.username + ' | Passwort: ' + u.password
+            head.appendChild(title)
+            head.appendChild(creds)
+            li.appendChild(head)
+            if (!u.isAdmin) {
+              var proWrap = document.createElement('div')
+              proWrap.className = 'admin-users__projects'
+              for (var p = 0; p < state.projects.length; p++) {
+                var lbl = document.createElement('label')
+                var cb = document.createElement('input')
+                cb.type = 'checkbox'
+                cb.value = state.projects[p].id
+                cb.checked = (u.projectIds || []).indexOf(state.projects[p].id) >= 0
+                lbl.appendChild(cb)
+                lbl.appendChild(document.createTextNode(' ' + state.projects[p].title))
+                proWrap.appendChild(lbl)
+              }
+              var saveBtn = document.createElement('button')
+              saveBtn.type = 'button'
+              saveBtn.className = 'task__btn'
+              saveBtn.textContent = 'Projektzugriff speichern'
+              ;(function (userRef, wrapRef) {
+                saveBtn.addEventListener('click', function () {
+                  userRef.projectIds = selectedProjectIdsFromContainer(wrapRef)
+                  saveState()
+                  renderProjectList()
+                })
+              })(u, proWrap)
+              li.appendChild(proWrap)
+              li.appendChild(saveBtn)
+            }
+            adminUsersList.appendChild(li)
+          }
         }
 
         function ensureKanbanProjectConfig(project) {
@@ -2823,6 +3311,16 @@
             if (setKanbanPlacementById(nodes[i].children, id, columnId, swimlaneId)) return true
           }
           return false
+        }
+
+        function reassignKanbanColumnToBacklog(nodes, removedColumnId) {
+          if (!Array.isArray(nodes) || !removedColumnId) return
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].kanbanColumnId === removedColumnId) {
+              nodes[i].kanbanColumnId = KANBAN_BACKLOG_ID
+            }
+            reassignKanbanColumnToBacklog(nodes[i].children || [], removedColumnId)
+          }
         }
 
         function addAttachmentsToNodeById(nodes, nodeId, items) {
@@ -3103,6 +3601,97 @@
           if (s.length <= max) return s
           var h = Math.floor((max - 1) / 2)
           return s.slice(0, h) + '…' + s.slice(s.length - h)
+        }
+
+        function protocolSessionDomId(groupId, sessionId) {
+          return 'protocol-session-' + String(groupId || '') + '-' + String(sessionId || '')
+        }
+
+        function collectProtocolSessionsForTask(project, taskId) {
+          var out = []
+          if (!project || !Array.isArray(project.protocolGroups) || !taskId) return out
+          for (var gi = 0; gi < project.protocolGroups.length; gi++) {
+            var g = project.protocolGroups[gi]
+            var sessions = Array.isArray(g.sessions) ? g.sessions : []
+            for (var si = 0; si < sessions.length; si++) {
+              var s = sessions[si]
+              var rows = Array.isArray(s.rows) ? s.rows : []
+              var hits = 0
+              for (var ri = 0; ri < rows.length; ri++) {
+                var taskIds = Array.isArray(rows[ri].taskIds) ? rows[ri].taskIds : []
+                if (taskIds.indexOf(taskId) >= 0) hits++
+              }
+              if (hits > 0) {
+                out.push({
+                  groupId: g.id,
+                  groupName: g.name || 'Bereich',
+                  sessionId: s.id,
+                  sessionDate: isValidYmd(s.date) ? s.date : null,
+                  hitCount: hits,
+                })
+              }
+            }
+          }
+          return out
+        }
+
+        function jumpToProtocolSession(groupId, sessionId) {
+          var p = getCurrentProject()
+          if (!p || !groupId || !sessionId) return
+          ensureProtocolDataConsistencyForProject(p)
+          protocolGroupOpenMap[groupId] = true
+          protocolSessionOpenMap[groupId + '::' + sessionId] = true
+          if (ganttModalTaskId) closeGanttTaskModal()
+          if (viewTasks.hidden) {
+            showTasksView()
+          } else {
+            renderProtocols()
+          }
+          var targetId = protocolSessionDomId(groupId, sessionId)
+          setTimeout(function () {
+            var el = document.getElementById(targetId)
+            if (!el) return
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            el.classList.add('protocol-session--target')
+            setTimeout(function () {
+              el.classList.remove('protocol-session--target')
+            }, 1600)
+            var head = el.querySelector('.protocol-session__head')
+            if (head && typeof head.focus === 'function') head.focus()
+          }, 30)
+        }
+
+        function appendProtocolSessionLinks(row, node) {
+          var p = getCurrentProject()
+          if (!p || !node || !node.id) return
+          var refs = collectProtocolSessionsForTask(p, node.id)
+          if (!refs.length) return
+          var details = document.createElement('details')
+          details.className = 'task-protocol-links'
+          var sum = document.createElement('summary')
+          sum.className = 'task-protocol-links__summary'
+          sum.textContent = 'In Sitzungen verwendet (' + refs.length + ')'
+          details.appendChild(sum)
+          var list = document.createElement('ul')
+          list.className = 'task-protocol-links__list'
+          for (var i = 0; i < refs.length; i++) {
+            var li = document.createElement('li')
+            var btn = document.createElement('button')
+            btn.type = 'button'
+            btn.className = 'task__btn task-protocol-links__btn'
+            var dateLabel = refs[i].sessionDate ? formatDueDe(refs[i].sessionDate) : 'ohne Datum'
+            var suffix = refs[i].hitCount > 1 ? ' · ' + refs[i].hitCount + ' Zeilen' : ''
+            btn.textContent = refs[i].groupName + ' · ' + dateLabel + suffix
+            ;(function (gId, sId) {
+              btn.addEventListener('click', function () {
+                jumpToProtocolSession(gId, sId)
+              })
+            })(refs[i].groupId, refs[i].sessionId)
+            li.appendChild(btn)
+            list.appendChild(li)
+          }
+          details.appendChild(list)
+          row.appendChild(details)
         }
 
         function appendTaskCardQuickStrip(row, node) {
@@ -3597,8 +4186,21 @@
           reader.readAsDataURL(file)
         }
 
+        var viewLogin = document.getElementById('view-login')
         var viewProjects = document.getElementById('view-projects')
         var viewTasks = document.getElementById('view-tasks')
+        var loginUsername = document.getElementById('login-username')
+        var loginPassword = document.getElementById('login-password')
+        var btnLogin = document.getElementById('btn-login')
+        var loginError = document.getElementById('login-error')
+        var btnLogout = document.getElementById('btn-logout')
+        var currentUserMeta = document.getElementById('current-user-meta')
+        var adminUsersPanel = document.getElementById('admin-users-panel')
+        var userCreateForm = document.getElementById('user-create-form')
+        var userFirst = document.getElementById('user-first')
+        var userLast = document.getElementById('user-last')
+        var userCreateProjects = document.getElementById('user-create-projects')
+        var adminUsersList = document.getElementById('admin-users-list')
         var projectForm = document.getElementById('project-form')
         var btnToggleProjectForm = document.getElementById('btn-toggle-project-form')
         var projectTitle = document.getElementById('project-title')
@@ -3618,6 +4220,15 @@
         var btnProtocolGroupModalClose = document.getElementById('btn-protocol-group-modal-close')
         var btnProtocolSessionModalClose = document.getElementById('btn-protocol-session-modal-close')
         var protocolList = document.getElementById('protocol-list')
+        var protocolFilterSearch = document.getElementById('protocol-filter-search')
+        var protocolFilterGroup = document.getElementById('protocol-filter-group')
+        var protocolFilterParticipant = document.getElementById('protocol-filter-participant')
+        var protocolFilterTask = document.getElementById('protocol-filter-task')
+        var protocolFilterDateMode = document.getElementById('protocol-filter-date-mode')
+        var protocolFilterDateValue = document.getElementById('protocol-filter-date-value')
+        var protocolFilterMonthValue = document.getElementById('protocol-filter-month-value')
+        var protocolFilterYearValue = document.getElementById('protocol-filter-year-value')
+        var btnProtocolFilterReset = document.getElementById('btn-protocol-filter-reset')
         var btnBack = document.getElementById('btn-back-projects')
         var taskViewTitle = document.getElementById('task-view-title')
         var taskViewSub = document.getElementById('task-view-sub')
@@ -3638,7 +4249,7 @@
         var taskFilterAssignee = document.getElementById('task-filter-assignee')
         var taskFilterPriority = document.getElementById('task-filter-priority')
         var taskFilterDue = document.getElementById('task-filter-due')
-        var taskFilterStatus = document.getElementById('task-filter-status')
+        var taskFilterKanbanColumn = document.getElementById('task-filter-kanban-column')
         var btnTaskFilterReset = document.getElementById('btn-task-filter-reset')
         var taskPanelList = document.getElementById('task-panel-list')
         var taskPanelGantt = document.getElementById('task-panel-gantt')
@@ -3690,7 +4301,17 @@
           assigneeId: '',
           priority: '',
           dueMode: '',
-          status: '',
+          kanbanColumnId: '',
+        }
+        var protocolFilterState = {
+          search: '',
+          groupId: '',
+          participantId: '',
+          taskId: '',
+          dateMode: '',
+          dateValue: '',
+          dateMonth: '',
+          dateYear: '',
         }
         var ganttModalTaskId = null
         var ganttModalAssigneePicker = null
@@ -4018,7 +4639,7 @@
 
         /**
          * @param {HTMLElement} mountEl
-         * @param {{ initialIds?: string[], taskNodeId?: string, currentNode?: object|null, onChange?: function(string[]): void, toggleLabel?: string, dialogLabel?: string }} options
+         * @param {{ initialIds?: string[], taskNodeId?: string, currentNode?: object|null, onChange?: function(string[]): void, toggleLabel?: string, dialogLabel?: string, allowAnyTask?: boolean, showFullList?: boolean }} options
          */
         function mountDependencyPicker(mountEl, options) {
           options = options || {}
@@ -4026,6 +4647,8 @@
           var taskNodeId = options.taskNodeId
           var currentNode = options.currentNode != null ? options.currentNode : null
           var onExternalChange = options.onChange
+          var allowAnyTask = !!options.allowAnyTask
+          var showFullList = !!options.showFullList
 
           var uid = ++depPickerUid
           var ddId = 'dep-picker-dd-' + uid
@@ -4048,6 +4671,7 @@
           var dropdown = document.createElement('div')
           dropdown.id = ddId
           dropdown.className = 'assign-picker__dropdown'
+          if (showFullList) dropdown.classList.add('assign-picker__dropdown--full')
           dropdown.hidden = true
           dropdown.setAttribute('role', 'dialog')
           dropdown.setAttribute('aria-label', options.dialogLabel || 'Vorgänger-Aufgaben auswählen')
@@ -4062,6 +4686,7 @@
 
           var listUl = document.createElement('ul')
           listUl.className = 'assign-picker__list'
+          if (showFullList) listUl.classList.add('assign-picker__list--full')
           listUl.setAttribute('role', 'listbox')
 
           var emptyMsg = document.createElement('p')
@@ -4120,7 +4745,7 @@
             for (var i = 0; i < flat.length; i++) {
               var item = flat[i]
               if (ids.indexOf(item.id) !== -1) continue
-              if (!isValidDependencyPredecessor(taskRootRef, taskNodeId, currentNode, item.id)) continue
+              if (!allowAnyTask && !isValidDependencyPredecessor(taskRootRef, taskNodeId, currentNode, item.id)) continue
               if (q && item.pathLabel.toLowerCase().indexOf(q) === -1) continue
               var li = document.createElement('li')
               li.setAttribute('role', 'none')
@@ -4201,7 +4826,7 @@
             for (var fi = 0; fi < flat.length; fi++) {
               var item = flat[fi]
               if (ids.indexOf(item.id) !== -1) continue
-              if (isValidDependencyPredecessor(taskRootRef, taskNodeId, currentNode, item.id)) {
+              if (allowAnyTask || isValidDependencyPredecessor(taskRootRef, taskNodeId, currentNode, item.id)) {
                 hasCandidate = true
                 break
               }
@@ -4365,10 +4990,17 @@
         function showTasksView() {
           var p = getCurrentProject()
           if (!p) return
+          if (!userCanAccessProject(p.id)) {
+            state.openProjectId = null
+            saveState()
+            showProjectsView()
+            return
+          }
           ensureKanbanProjectConfig(p)
           ensureProtocolDataConsistencyForProject(p)
           state.openProjectId = p.id
           saveState()
+          if (viewLogin) viewLogin.hidden = true
           viewProjects.hidden = true
           viewTasks.hidden = false
           taskViewTitle.textContent = p.title
@@ -4381,28 +5013,42 @@
           renderParticipantList()
           renderNewTaskAssignees()
           renderTaskFilterAssigneeOptions()
+          renderTaskFilterKanbanColumnOptions()
+          renderProtocolFilterOptions()
           syncTaskFilterControlsFromState()
+          syncProtocolFilterControlsFromState()
           renderProtocolGroupSelect()
           renderProtocols()
           render()
         }
 
         function showProjectsView() {
+          if (!getCurrentUser()) {
+            showLoginView()
+            return
+          }
           state.openProjectId = null
           taskRootRef = null
           saveState()
+          if (viewLogin) viewLogin.hidden = true
           viewTasks.hidden = true
           viewProjects.hidden = false
           closeProjectForm()
+          renderAuthHeaderAndControls()
+          renderUserCreateProjectsSelector()
+          renderAdminUsersPanel()
           renderProjectList()
         }
 
         function renderProjectList() {
-          var list = state.projects
+          var list = getVisibleProjects()
           if (list.length === 0) {
             projectsEmpty.hidden = false
             projectListEl.hidden = true
             projectListEl.innerHTML = ''
+            projectsEmpty.textContent = getCurrentUser()
+              ? 'Keine zugeordneten Projekte vorhanden.'
+              : 'Noch keine Projekte — „Neues Projekt“ nutzen.'
             return
           }
           projectsEmpty.hidden = true
@@ -4428,13 +5074,78 @@
           var participants = project.participants || []
           var tasksFlat = flattenTasksWithPath(project.tasks || [])
           var taskById = {}
+          var participantById = {}
           for (var tf = 0; tf < tasksFlat.length; tf++) taskById[tasksFlat[tf].id] = tasksFlat[tf]
+          for (var pp = 0; pp < participants.length; pp++) participantById[participants[pp].id] = participants[pp]
+          var q = (protocolFilterState.search || '').trim().toLowerCase()
+          var filterActive = hasActiveProtocolFilter()
+
+          function rowMatchesProtocolFilter(group, session, rowData) {
+            if (
+              protocolFilterState.dateMode === 'date' ||
+              protocolFilterState.dateMode === 'month' ||
+              protocolFilterState.dateMode === 'year'
+            ) {
+              var sDate = isValidYmd(session.date) ? session.date : ''
+              if (!sDate) return false
+              if (protocolFilterState.dateMode === 'date') {
+                if (sDate !== protocolFilterState.dateValue) return false
+              } else if (protocolFilterState.dateMode === 'month') {
+                if (!protocolFilterState.dateMonth) return false
+                if (sDate.slice(5, 7) !== protocolFilterState.dateMonth) return false
+              } else if (protocolFilterState.dateMode === 'year') {
+                if (!protocolFilterState.dateYear) return false
+                if (sDate.slice(0, 4) !== protocolFilterState.dateYear) return false
+              }
+            }
+            if (protocolFilterState.participantId) {
+              if ((rowData.participantId || '') !== protocolFilterState.participantId) return false
+            }
+            if (protocolFilterState.taskId) {
+              var ids = Array.isArray(rowData.taskIds) ? rowData.taskIds : []
+              if (ids.indexOf(protocolFilterState.taskId) < 0) return false
+            }
+            if (q) {
+              var parts = []
+              parts.push(group.name || '')
+              if (isValidYmd(session.date)) parts.push(formatDueDe(session.date))
+              parts.push(rowData.text || '')
+              parts.push(rowData.result || '')
+              if (rowData.participantId && participantById[rowData.participantId]) {
+                parts.push(participantLabel(participantById[rowData.participantId]))
+              }
+              var tIds = Array.isArray(rowData.taskIds) ? rowData.taskIds : []
+              for (var ti = 0; ti < tIds.length; ti++) {
+                if (!taskById[tIds[ti]]) continue
+                parts.push(taskById[tIds[ti]].node.title || '')
+                parts.push(taskById[tIds[ti]].pathLabel || '')
+              }
+              if (parts.join(' ').toLowerCase().indexOf(q) < 0) return false
+            }
+            return true
+          }
+
           var hasAnySession = false
           for (var g = 0; g < project.protocolGroups.length; g++) {
             var group = project.protocolGroups[g]
+            if (protocolFilterState.groupId && group.id !== protocolFilterState.groupId) continue
             var groupKey = group.id
             var groupOpen = protocolGroupOpenMap[groupKey] !== false
             var sessions = group.sessions || []
+            var groupHasVisibleSession = false
+            if (filterActive) {
+              for (var vsi = 0; vsi < sessions.length; vsi++) {
+                var vRows = Array.isArray(sessions[vsi].rows) ? sessions[vsi].rows : []
+                for (var vri = 0; vri < vRows.length; vri++) {
+                  if (rowMatchesProtocolFilter(group, sessions[vsi], vRows[vri])) {
+                    groupHasVisibleSession = true
+                    break
+                  }
+                }
+                if (groupHasVisibleSession) break
+              }
+              if (!groupHasVisibleSession) continue
+            }
             var groupLi = document.createElement('li')
             groupLi.className = 'protocols-group'
             var gHead = document.createElement('div')
@@ -4507,12 +5218,22 @@
             groupLi.appendChild(gHead)
             if (groupOpen) {
               for (var si = 0; si < sessions.length; si++) {
+                var session = sessions[si]
+                var rows = session.rows || []
+                var filteredRows = rows
+                if (filterActive) {
+                  filteredRows = []
+                  for (var fri = 0; fri < rows.length; fri++) {
+                    if (rowMatchesProtocolFilter(group, session, rows[fri])) filteredRows.push(rows[fri])
+                  }
+                  if (!filteredRows.length) continue
+                }
                 hasAnySession = true
-              var session = sessions[si]
               var sessionKey = group.id + '::' + session.id
               var sessionOpen = !!protocolSessionOpenMap[sessionKey]
               var sessionWrap = document.createElement('div')
               sessionWrap.className = 'protocol-session'
+              sessionWrap.id = protocolSessionDomId(group.id, session.id)
               var head = document.createElement('button')
               head.type = 'button'
               head.className = 'protocol-session__head'
@@ -4565,13 +5286,12 @@
               thead.innerHTML = '<tr><th>Verantwortlicher</th><th>Erläuterung</th><th>Aufgabenkarte</th><th>Ergebnis</th></tr>'
               tbl.appendChild(thead)
               var tbody = document.createElement('tbody')
-              var rows = session.rows || []
               if (!rows.length) {
                 rows.push({ id: crypto.randomUUID(), participantId: null, taskIds: [], text: '', result: '' })
                 session.rows = rows
               }
-              for (var ri = 0; ri < rows.length; ri++) {
-                var rowData = rows[ri]
+              for (var ri = 0; ri < filteredRows.length; ri++) {
+                var rowData = filteredRows[ri]
                 var tr = document.createElement('tr')
                 var tdResp = document.createElement('td')
                 var selResp = document.createElement('select')
@@ -4612,20 +5332,24 @@
                 if (!Array.isArray(rowData.taskIds)) rowData.taskIds = []
                 var taskPickMount = document.createElement('div')
                 taskPickMount.className = 'assign-picker-mount'
-                mountDependencyPicker(taskPickMount, {
-                  initialIds: rowData.taskIds,
-                  onChange: function (ids) {
-                    var merged = (rowData.taskIds || []).slice()
-                    for (var mi = 0; mi < ids.length; mi++) {
-                      if (merged.indexOf(ids[mi]) < 0) merged.push(ids[mi])
-                    }
-                    rowData.taskIds = merged
-                    saveState()
-                    renderProtocols()
-                  },
-                  toggleLabel: 'Aufgabe zuordnen',
-                  dialogLabel: 'Aufgaben für Protokollzeile auswählen',
-                })
+                ;(function (rowRef) {
+                  mountDependencyPicker(taskPickMount, {
+                    initialIds: rowRef.taskIds,
+                    onChange: function (ids) {
+                      var merged = (rowRef.taskIds || []).slice()
+                      for (var mi = 0; mi < ids.length; mi++) {
+                        if (merged.indexOf(ids[mi]) < 0) merged.push(ids[mi])
+                      }
+                      rowRef.taskIds = merged
+                      saveState()
+                      renderProtocols()
+                    },
+                    toggleLabel: 'Aufgabe zuordnen',
+                    dialogLabel: 'Aufgaben für Protokollzeile auswählen',
+                    allowAnyTask: true,
+                    showFullList: true,
+                  })
+                })(rowData)
                 tdTask.appendChild(taskPickMount)
                 for (var tci = 0; tci < rowData.taskIds.length; tci++) {
                   var assignedId = rowData.taskIds[tci]
@@ -4733,7 +5457,9 @@
           if (!hasAnySession) {
             var liEmpty2 = document.createElement('li')
             liEmpty2.className = 'list__empty'
-            liEmpty2.textContent = 'Noch keine Sitzung vorhanden. Bereich aufklappen und + Sitzung nutzen.'
+            liEmpty2.textContent = hasActiveProtocolFilter()
+              ? 'Keine Protokolltreffer für die aktuellen Filter.'
+              : 'Noch keine Sitzung vorhanden. Bereich aufklappen und + Sitzung nutzen.'
             protocolList.appendChild(liEmpty2)
           }
         }
@@ -4809,12 +5535,21 @@
               if (state.projects[j].id !== p.id) next.push(state.projects[j])
             }
             state.projects = next
+            for (var ui = 0; ui < state.users.length; ui++) {
+              if (!state.users[ui].isAdmin) {
+                state.users[ui].projectIds = (state.users[ui].projectIds || []).filter(function (pid) {
+                  return pid !== p.id
+                })
+              }
+            }
             if (state.openProjectId === p.id) state.openProjectId = null
             saveState()
+            renderUserCreateProjectsSelector()
+            renderAdminUsersPanel()
             renderProjectList()
           })
           actions.appendChild(openBtn)
-          actions.appendChild(delBtn)
+          if (isAdminUser()) actions.appendChild(delBtn)
           body.appendChild(actions)
           card.appendChild(body)
           return card
@@ -5095,6 +5830,7 @@
           depWrap.appendChild(depMount)
           ganttModalBody.appendChild(depWrap)
 
+          appendProtocolSessionLinks(ganttModalBody, node)
           appendHistorySection(ganttModalBody, node)
         }
 
@@ -5366,13 +6102,11 @@
                 delCol.addEventListener('click', function () {
                   var proj = getCurrentProject()
                   if (!proj || !proj.kanbanColumns) return
+                  reassignKanbanColumnToBacklog(taskRootRef || [], colId)
                   var nextCols = proj.kanbanColumns.filter(function (x) {
                     return x.id !== colId
                   })
                   proj.kanbanColumns = nextCols
-                  for (var f = 0; f < flat.length; f++) {
-                    if (flat[f].node.kanbanColumnId === colId) flat[f].node.kanbanColumnId = KANBAN_BACKLOG_ID
-                  }
                   render()
                 })
               })(col.id)
@@ -5575,7 +6309,7 @@
             listFilterState.assigneeId ||
             listFilterState.priority ||
             listFilterState.dueMode ||
-            listFilterState.status
+            listFilterState.kanbanColumnId
           )
         }
 
@@ -5609,8 +6343,9 @@
             if (ids.indexOf(listFilterState.assigneeId) < 0) return false
           }
           if (listFilterState.priority && node.priority !== listFilterState.priority) return false
-          if (listFilterState.status === 'open' && node.done) return false
-          if (listFilterState.status === 'done' && !node.done) return false
+          if (listFilterState.kanbanColumnId && node.kanbanColumnId !== listFilterState.kanbanColumnId) {
+            return false
+          }
           if (!passesDueFilter(node, listFilterState.dueMode)) return false
           return true
         }
@@ -5654,12 +6389,185 @@
           }
         }
 
+        function hasActiveProtocolFilter() {
+          var hasDate = false
+          if (protocolFilterState.dateMode === 'date') hasDate = !!protocolFilterState.dateValue
+          else if (protocolFilterState.dateMode === 'month') hasDate = !!protocolFilterState.dateMonth
+          else if (protocolFilterState.dateMode === 'year') hasDate = !!protocolFilterState.dateYear
+          return !!(
+            (protocolFilterState.search && protocolFilterState.search.trim()) ||
+            protocolFilterState.groupId ||
+            protocolFilterState.participantId ||
+            protocolFilterState.taskId ||
+            (protocolFilterState.dateMode && hasDate)
+          )
+        }
+
+        function syncProtocolDateFilterInputType() {
+          if (!protocolFilterDateValue || !protocolFilterMonthValue || !protocolFilterYearValue) return
+          var mode = protocolFilterState.dateMode || ''
+          protocolFilterDateValue.hidden = mode !== 'date'
+          protocolFilterMonthValue.hidden = mode !== 'month'
+          protocolFilterYearValue.hidden = mode !== 'year'
+          protocolFilterDateValue.disabled = mode !== 'date'
+          protocolFilterMonthValue.disabled = mode !== 'month'
+          protocolFilterYearValue.disabled = mode !== 'year'
+        }
+
+        function renderProtocolFilterOptions() {
+          var p = getCurrentProject()
+          if (!p) return
+          ensureProtocolDataConsistencyForProject(p)
+          if (
+            protocolFilterState.dateMode !== '' &&
+            protocolFilterState.dateMode !== 'date' &&
+            protocolFilterState.dateMode !== 'month' &&
+            protocolFilterState.dateMode !== 'year'
+          ) {
+            protocolFilterState.dateMode = ''
+            protocolFilterState.dateValue = ''
+            protocolFilterState.dateMonth = ''
+            protocolFilterState.dateYear = ''
+          }
+          if (protocolFilterYearValue) {
+            var years = {}
+            var currentYear = Number(todayYmd().slice(0, 4))
+            for (var yi = currentYear - 5; yi <= currentYear + 5; yi++) years[String(yi)] = true
+            for (var gi2 = 0; gi2 < p.protocolGroups.length; gi2++) {
+              var sessions = Array.isArray(p.protocolGroups[gi2].sessions) ? p.protocolGroups[gi2].sessions : []
+              for (var si2 = 0; si2 < sessions.length; si2++) {
+                var sd = isValidYmd(sessions[si2].date) ? sessions[si2].date.slice(0, 4) : ''
+                if (sd) years[sd] = true
+              }
+            }
+            var prevYear = protocolFilterState.dateYear || ''
+            var sortedYears = Object.keys(years).sort()
+            protocolFilterYearValue.innerHTML = ''
+            var optYearAll = document.createElement('option')
+            optYearAll.value = ''
+            optYearAll.textContent = 'Jahr wählen'
+            protocolFilterYearValue.appendChild(optYearAll)
+            for (var yy = 0; yy < sortedYears.length; yy++) {
+              var oy = document.createElement('option')
+              oy.value = sortedYears[yy]
+              oy.textContent = sortedYears[yy]
+              protocolFilterYearValue.appendChild(oy)
+            }
+            if (prevYear && protocolFilterYearValue.querySelector('option[value="' + prevYear + '"]')) {
+              protocolFilterYearValue.value = prevYear
+            } else {
+              protocolFilterState.dateYear = ''
+              protocolFilterYearValue.value = ''
+            }
+          }
+          if (protocolFilterGroup) {
+            var prevGroup = protocolFilterState.groupId || ''
+            protocolFilterGroup.innerHTML = ''
+            var optAllG = document.createElement('option')
+            optAllG.value = ''
+            optAllG.textContent = 'Alle Bereiche'
+            protocolFilterGroup.appendChild(optAllG)
+            for (var gi = 0; gi < p.protocolGroups.length; gi++) {
+              var og = document.createElement('option')
+              og.value = p.protocolGroups[gi].id
+              og.textContent = p.protocolGroups[gi].name || 'Bereich'
+              protocolFilterGroup.appendChild(og)
+            }
+            if (prevGroup && protocolFilterGroup.querySelector('option[value="' + prevGroup + '"]')) {
+              protocolFilterGroup.value = prevGroup
+            } else {
+              protocolFilterState.groupId = ''
+              protocolFilterGroup.value = ''
+            }
+          }
+          if (protocolFilterParticipant) {
+            var prevPid = protocolFilterState.participantId || ''
+            var participants = Array.isArray(p.participants) ? p.participants : []
+            protocolFilterParticipant.innerHTML = ''
+            var optAllP = document.createElement('option')
+            optAllP.value = ''
+            optAllP.textContent = 'Alle Verantwortlichen'
+            protocolFilterParticipant.appendChild(optAllP)
+            for (var pi = 0; pi < participants.length; pi++) {
+              var op = document.createElement('option')
+              op.value = participants[pi].id
+              op.textContent = participantLabel(participants[pi])
+              protocolFilterParticipant.appendChild(op)
+            }
+            if (prevPid && protocolFilterParticipant.querySelector('option[value="' + prevPid + '"]')) {
+              protocolFilterParticipant.value = prevPid
+            } else {
+              protocolFilterState.participantId = ''
+              protocolFilterParticipant.value = ''
+            }
+          }
+          if (protocolFilterTask) {
+            var prevTask = protocolFilterState.taskId || ''
+            var flat = flattenTasksWithPath(p.tasks || [], [])
+            protocolFilterTask.innerHTML = ''
+            var optAllT = document.createElement('option')
+            optAllT.value = ''
+            optAllT.textContent = 'Alle Aufgaben'
+            protocolFilterTask.appendChild(optAllT)
+            for (var ti = 0; ti < flat.length; ti++) {
+              var ot = document.createElement('option')
+              ot.value = flat[ti].id
+              ot.textContent = flat[ti].pathLabel
+              protocolFilterTask.appendChild(ot)
+            }
+            if (prevTask && protocolFilterTask.querySelector('option[value="' + prevTask + '"]')) {
+              protocolFilterTask.value = prevTask
+            } else {
+              protocolFilterState.taskId = ''
+              protocolFilterTask.value = ''
+            }
+          }
+        }
+
+        function syncProtocolFilterControlsFromState() {
+          if (protocolFilterSearch) protocolFilterSearch.value = protocolFilterState.search || ''
+          if (protocolFilterGroup) protocolFilterGroup.value = protocolFilterState.groupId || ''
+          if (protocolFilterParticipant) protocolFilterParticipant.value = protocolFilterState.participantId || ''
+          if (protocolFilterTask) protocolFilterTask.value = protocolFilterState.taskId || ''
+          if (protocolFilterDateMode) protocolFilterDateMode.value = protocolFilterState.dateMode || ''
+          syncProtocolDateFilterInputType()
+          if (protocolFilterDateValue) protocolFilterDateValue.value = protocolFilterState.dateValue || ''
+          if (protocolFilterMonthValue) protocolFilterMonthValue.value = protocolFilterState.dateMonth || ''
+          if (protocolFilterYearValue) protocolFilterYearValue.value = protocolFilterState.dateYear || ''
+        }
+
+        function renderTaskFilterKanbanColumnOptions() {
+          if (!taskFilterKanbanColumn) return
+          var p = getCurrentProject()
+          ensureKanbanProjectConfig(p)
+          var cols = p && Array.isArray(p.kanbanColumns) ? p.kanbanColumns : []
+          var prev = listFilterState.kanbanColumnId || ''
+          taskFilterKanbanColumn.innerHTML = ''
+          var optAll = document.createElement('option')
+          optAll.value = ''
+          optAll.textContent = 'Alle Spalten'
+          taskFilterKanbanColumn.appendChild(optAll)
+          for (var i = 0; i < cols.length; i++) {
+            var opt = document.createElement('option')
+            opt.value = cols[i].id
+            opt.textContent = cols[i].name || 'Spalte'
+            taskFilterKanbanColumn.appendChild(opt)
+          }
+          if (prev && taskFilterKanbanColumn.querySelector('option[value="' + prev + '"]')) {
+            taskFilterKanbanColumn.value = prev
+          } else {
+            listFilterState.kanbanColumnId = ''
+            taskFilterKanbanColumn.value = ''
+          }
+        }
+
         function syncTaskFilterControlsFromState() {
           if (taskFilterSearch) taskFilterSearch.value = listFilterState.search || ''
           if (taskFilterAssignee) taskFilterAssignee.value = listFilterState.assigneeId || ''
           if (taskFilterPriority) taskFilterPriority.value = listFilterState.priority || ''
           if (taskFilterDue) taskFilterDue.value = listFilterState.dueMode || ''
-          if (taskFilterStatus) taskFilterStatus.value = listFilterState.status || ''
+          if (taskFilterKanbanColumn)
+            taskFilterKanbanColumn.value = listFilterState.kanbanColumnId || ''
         }
 
         function render() {
@@ -5675,6 +6583,9 @@
             normalizeTaskKanbanPlacement(taskRootRef, cSet, lSet, projForRender.kanbanSwimlanes[0].id)
           }
           renderTaskFilterAssigneeOptions()
+          renderTaskFilterKanbanColumnOptions()
+          renderProtocolFilterOptions()
+          syncProtocolFilterControlsFromState()
           saveState()
           var activeTopLevel = taskRootRef.filter(function (n) {
             return !n.archived
@@ -5929,6 +6840,7 @@
           detailKanbanWrap.appendChild(detailKanbanSel)
           detailsWrap.appendChild(detailKanbanWrap)
 
+          appendProtocolSessionLinks(detailsWrap, node)
           appendTaskCardQuickStrip(detailsWrap, node)
 
           var datesWrap = document.createElement('div')
@@ -6349,6 +7261,7 @@
 
         if (btnToggleProjectForm) {
           btnToggleProjectForm.addEventListener('click', function () {
+            if (!isAdminUser()) return
             if (!projectForm) return
             if (projectForm.hidden) {
               setProjectFormOpen(true)
@@ -6360,6 +7273,7 @@
 
         projectForm.addEventListener('submit', function (e) {
           e.preventDefault()
+          if (!isAdminUser()) return
           var title = projectTitle.value.trim()
           if (!title) return
           var pendingImage = null
@@ -6379,6 +7293,8 @@
             state.projects.push(proj)
             state.openProjectId = proj.id
             saveState()
+            renderUserCreateProjectsSelector()
+            renderAdminUsersPanel()
             closeProjectForm()
             showTasksView()
             renderProjectList()
@@ -6533,9 +7449,9 @@
             render()
           })
         }
-        if (taskFilterStatus) {
-          taskFilterStatus.addEventListener('change', function () {
-            listFilterState.status = taskFilterStatus.value || ''
+        if (taskFilterKanbanColumn) {
+          taskFilterKanbanColumn.addEventListener('change', function () {
+            listFilterState.kanbanColumnId = taskFilterKanbanColumn.value || ''
             render()
           })
         }
@@ -6545,13 +7461,133 @@
             listFilterState.assigneeId = ''
             listFilterState.priority = ''
             listFilterState.dueMode = ''
-            listFilterState.status = ''
+            listFilterState.kanbanColumnId = ''
             if (taskFilterSearch) taskFilterSearch.value = ''
             if (taskFilterAssignee) taskFilterAssignee.value = ''
             if (taskFilterPriority) taskFilterPriority.value = ''
             if (taskFilterDue) taskFilterDue.value = ''
-            if (taskFilterStatus) taskFilterStatus.value = ''
+            if (taskFilterKanbanColumn) taskFilterKanbanColumn.value = ''
             render()
+          })
+        }
+        if (protocolFilterSearch) {
+          protocolFilterSearch.addEventListener('input', function () {
+            protocolFilterState.search = protocolFilterSearch.value || ''
+            renderProtocols()
+          })
+        }
+        if (protocolFilterGroup) {
+          protocolFilterGroup.addEventListener('change', function () {
+            protocolFilterState.groupId = protocolFilterGroup.value || ''
+            renderProtocols()
+          })
+        }
+        if (protocolFilterParticipant) {
+          protocolFilterParticipant.addEventListener('change', function () {
+            protocolFilterState.participantId = protocolFilterParticipant.value || ''
+            renderProtocols()
+          })
+        }
+        if (protocolFilterTask) {
+          protocolFilterTask.addEventListener('change', function () {
+            protocolFilterState.taskId = protocolFilterTask.value || ''
+            renderProtocols()
+          })
+        }
+        if (protocolFilterDateMode) {
+          protocolFilterDateMode.addEventListener('change', function () {
+            protocolFilterState.dateMode = protocolFilterDateMode.value || ''
+            protocolFilterState.dateValue = ''
+            protocolFilterState.dateMonth = ''
+            protocolFilterState.dateYear = ''
+            syncProtocolFilterControlsFromState()
+            renderProtocols()
+          })
+        }
+        if (protocolFilterDateValue) {
+          protocolFilterDateValue.addEventListener('change', function () {
+            protocolFilterState.dateValue = (protocolFilterDateValue.value || '').trim()
+            renderProtocols()
+          })
+        }
+        if (protocolFilterMonthValue) {
+          protocolFilterMonthValue.addEventListener('change', function () {
+            protocolFilterState.dateMonth = protocolFilterMonthValue.value || ''
+            renderProtocols()
+          })
+        }
+        if (protocolFilterYearValue) {
+          protocolFilterYearValue.addEventListener('change', function () {
+            protocolFilterState.dateYear = protocolFilterYearValue.value || ''
+            renderProtocols()
+          })
+        }
+        if (btnProtocolFilterReset) {
+          btnProtocolFilterReset.addEventListener('click', function () {
+            protocolFilterState.search = ''
+            protocolFilterState.groupId = ''
+            protocolFilterState.participantId = ''
+            protocolFilterState.taskId = ''
+            protocolFilterState.dateMode = ''
+            protocolFilterState.dateValue = ''
+            protocolFilterState.dateMonth = ''
+            protocolFilterState.dateYear = ''
+            syncProtocolFilterControlsFromState()
+            renderProtocols()
+          })
+        }
+        if (btnLogin) {
+          btnLogin.addEventListener('click', function () {
+            var ok = tryLogin(loginUsername ? loginUsername.value : '', loginPassword ? loginPassword.value : '')
+            if (!ok) {
+              if (loginError) loginError.textContent = 'Anmeldung fehlgeschlagen. Bitte Daten prüfen.'
+              return
+            }
+            if (loginError) loginError.textContent = ''
+            showProjectsView()
+          })
+        }
+        if (loginPassword) {
+          loginPassword.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && btnLogin) btnLogin.click()
+          })
+        }
+        if (loginUsername) {
+          loginUsername.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && btnLogin) btnLogin.click()
+          })
+        }
+        if (btnLogout) {
+          btnLogout.addEventListener('click', function () {
+            logoutCurrentUser()
+          })
+        }
+        if (userCreateForm) {
+          userCreateForm.addEventListener('submit', function (e) {
+            e.preventDefault()
+            if (!isAdminUser()) return
+            var first = (userFirst ? userFirst.value : '').trim()
+            var last = (userLast ? userLast.value : '').trim()
+            if (!first || !last) {
+              alert('Bitte Vor- und Nachname eingeben.')
+              return
+            }
+            var user = {
+              id: crypto.randomUUID(),
+              firstName: first.slice(0, MAX_NAME),
+              lastName: last.slice(0, MAX_NAME),
+              username: generateUniqueUsername(first, last),
+              password: generatePassword(),
+              isAdmin: false,
+              projectIds: selectedProjectIdsFromContainer(userCreateProjects),
+            }
+            state.users.push(user)
+            saveState()
+            if (userFirst) userFirst.value = ''
+            if (userLast) userLast.value = ''
+            var checks = userCreateProjects ? userCreateProjects.querySelectorAll('input[type="checkbox"]') : []
+            for (var ci = 0; ci < checks.length; ci++) checks[ci].checked = false
+            renderAdminUsersPanel()
           })
         }
 
@@ -6743,7 +7779,10 @@
         )
 
         loadState()
-        if (state.openProjectId && getCurrentProject()) {
+        ensureAuthData()
+        if (!getCurrentUser()) {
+          showLoginView()
+        } else if (state.openProjectId && getCurrentProject() && userCanAccessProject(state.openProjectId)) {
           showTasksView()
         } else {
           state.openProjectId = null
