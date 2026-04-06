@@ -143,3 +143,4 @@ cd Smart-ToDos
 | 2026-04-06 | Protokoll-UI in Projektansicht verlagert: kein übergreifender Startseiten-Bereich mehr, Anzeige/Bearbeitung nur im jeweils geöffneten Projekt. |
 | 2026-04-06 | Aufgabenliste durchsuch- und filterbar gemacht: Suche plus Filter nach Verantwortlichen, Priorität, Fristfenster und Status mit Reset. |
 | 2026-04-06 | Protokollstruktur geschärft: Sitzungen werden je Bereich angelegt (ohne Pflichttext), Sitzungszeilen nutzen feste 4-Feld-Struktur inkl. Aufgabenkarten-Zuordnung mit Popup. |
+| 2026-04-06 | Filter-Beschriftung in der Aufgabenliste präzisiert: eindeutige Feldtitel und spezifische „Alle …“-Optionen für bessere Zuordenbarkeit. |

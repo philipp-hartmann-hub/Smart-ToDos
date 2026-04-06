@@ -207,6 +207,13 @@
       .task-filters__field--search {
         flex: 2 1 16rem;
       }
+      .task-filters .form__legend {
+        display: block;
+        font-size: 0.76rem;
+        font-weight: 700;
+        opacity: 0.92;
+        margin-bottom: 0.25rem;
+      }
       .project-card {
         display: flex;
         gap: 0.85rem;
@@ -1598,13 +1605,13 @@
             <div class="task-filters__field">
               <label for="task-filter-assignee" class="form__legend">Verantwortlich</label>
               <select id="task-filter-assignee" class="form__input">
-                <option value="">Alle</option>
+                <option value="">Alle Verantwortlichen</option>
               </select>
             </div>
             <div class="task-filters__field">
               <label for="task-filter-priority" class="form__legend">Priorität</label>
               <select id="task-filter-priority" class="form__input">
-                <option value="">Alle</option>
+                <option value="">Alle Prioritäten</option>
                 <option value="high">Hoch</option>
                 <option value="medium">Mittel</option>
                 <option value="low">Niedrig</option>
@@ -1613,7 +1620,7 @@
             <div class="task-filters__field">
               <label for="task-filter-due" class="form__legend">Frist</label>
               <select id="task-filter-due" class="form__input">
-                <option value="">Alle</option>
+                <option value="">Alle Fristen</option>
                 <option value="overdue">Überfällig</option>
                 <option value="today">Heute</option>
                 <option value="next7">Nächste 7 Tage</option>
@@ -1623,12 +1630,12 @@
             <div class="task-filters__field">
               <label for="task-filter-status" class="form__legend">Status</label>
               <select id="task-filter-status" class="form__input">
-                <option value="">Alle</option>
+                <option value="">Alle Status</option>
                 <option value="open">Offen</option>
                 <option value="done">Erledigt</option>
               </select>
             </div>
-            <button type="button" class="task__btn" id="btn-task-filter-reset">Zurücksetzen</button>
+            <button type="button" class="task__btn" id="btn-task-filter-reset">Filter zurücksetzen</button>
           </div>
           <p class="list__empty" id="empty-msg">Noch keine Aufgaben — „Aufgabe hinzufügen“ nutzen.</p>
           <ul class="task-tree" id="task-list" hidden></ul>
@@ -5355,7 +5362,7 @@
           taskFilterAssignee.innerHTML = ''
           var optAll = document.createElement('option')
           optAll.value = ''
-          optAll.textContent = 'Alle'
+          optAll.textContent = 'Alle Verantwortlichen'
           taskFilterAssignee.appendChild(optAll)
           for (var i = 0; i < parts.length; i++) {
             var opt = document.createElement('option')
