@@ -120,6 +120,36 @@
         flex-direction: column;
         gap: 0.75rem;
       }
+      .protocols-panel {
+        margin-top: 1.1rem;
+      }
+      .protocols-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+      }
+      .protocols-item {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.6rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.5rem 0.6rem;
+        background: var(--surface);
+      }
+      .protocols-item__text {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .protocols-item__meta {
+        font-size: 0.78rem;
+        opacity: 0.85;
+      }
       .project-card {
         display: flex;
         gap: 0.85rem;
@@ -1327,6 +1357,30 @@
         <p class="list__empty" id="projects-empty">Noch keine Projekte — „Neues Projekt“ nutzen.</p>
         <div class="project-list" id="project-list" hidden></div>
       </section>
+      <section class="form protocols-panel" aria-label="Protokolle">
+        <h3 class="participants-panel__title">Protokolle</h3>
+        <form id="protocol-form" class="participant-form__form">
+          <div class="form__row--split">
+            <div style="flex: 0 0 11rem; min-width: 10rem">
+              <label for="protocol-date" class="form__legend">Datum</label>
+              <input id="protocol-date" class="form__input form__input--date" type="date" required />
+            </div>
+            <div style="flex: 1 1 20rem; min-width: 0">
+              <label for="protocol-text" class="form__legend">Eintrag</label>
+              <textarea
+                id="protocol-text"
+                class="form__input form__textarea"
+                rows="2"
+                maxlength="2000"
+                placeholder="Kurzprotokoll …"
+                required
+              ></textarea>
+            </div>
+          </div>
+          <button type="submit" class="form__submit form__submit--small">Eintrag speichern</button>
+        </form>
+        <ul id="protocol-list" class="protocols-list"></ul>
+      </section>
     </div>
 
     <div class="app" id="view-tasks" hidden>
@@ -1553,6 +1607,7 @@
         var MAX_LINK_LABEL = 200
         var MAX_HISTORY_ENTRIES = 80
         var MAX_HISTORY_TEXT = 4000
+        var MAX_PROTOCOL_TEXT = 2000
         var MAX_NAME = 120
         var MAX_DEPENDS_PER_TASK = 40
         var ROLE_LABELS = {
@@ -1577,7 +1632,7 @@
           return [{ id: KANBAN_DEFAULT_LANE_ID, name: 'Standard' }]
         }
 
-        var state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {} }
+        var state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {}, protocols: [] }
         var taskRootRef = null
 
         function sanitizeDescription(s) {
@@ -1689,6 +1744,29 @@
               text: txt,
             })
           }
+          return out
+        }
+
+        function parseProtocolEntriesRaw(rawList) {
+          var out = []
+          if (!Array.isArray(rawList)) return out
+          for (var i = 0; i < rawList.length; i++) {
+            var p = rawList[i]
+            if (!p || typeof p !== 'object') continue
+            if (typeof p.id !== 'string' || typeof p.createdAt !== 'string') continue
+            var entryDate = isValidYmd(p.entryDate) ? p.entryDate : null
+            if (!entryDate) continue
+            var text =
+              typeof p.text === 'string'
+                ? p.text.replace(/\r\n/g, '\n').trim().slice(0, MAX_PROTOCOL_TEXT)
+                : ''
+            if (!text) continue
+            out.push({ id: p.id, createdAt: p.createdAt, entryDate: entryDate, text: text })
+          }
+          out.sort(function (a, b) {
+            if (a.entryDate !== b.entryDate) return a.entryDate > b.entryDate ? -1 : 1
+            return a.createdAt > b.createdAt ? -1 : 1
+          })
           return out
         }
 
@@ -2122,7 +2200,7 @@
           try {
             var raw = localStorage.getItem(STORAGE_KEY)
             if (!raw) {
-              state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {} }
+              state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {}, protocols: [] }
               return
             }
             var parsed = JSON.parse(raw)
@@ -2144,6 +2222,7 @@
                 openProjectId:
                   typeof parsed.openProjectId === 'string' ? parsed.openProjectId : null,
                 collapsedSubtasks: collapsed,
+                protocols: parseProtocolEntriesRaw(parsed.protocols),
               }
               return
             }
@@ -2165,12 +2244,13 @@
                 ],
                 openProjectId: null,
                 collapsedSubtasks: {},
+                protocols: [],
               }
               saveState()
               return
             }
           } catch (e) {}
-          state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {} }
+          state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {}, protocols: [] }
         }
 
         function saveState() {
@@ -2181,6 +2261,7 @@
               projects: state.projects,
               openProjectId: state.openProjectId,
               collapsedSubtasks: state.collapsedSubtasks || {},
+              protocols: state.protocols || [],
             }),
           )
         }
@@ -3177,6 +3258,10 @@
         var projectImage = document.getElementById('project-image')
         var projectListEl = document.getElementById('project-list')
         var projectsEmpty = document.getElementById('projects-empty')
+        var protocolForm = document.getElementById('protocol-form')
+        var protocolDate = document.getElementById('protocol-date')
+        var protocolText = document.getElementById('protocol-text')
+        var protocolList = document.getElementById('protocol-list')
         var btnBack = document.getElementById('btn-back-projects')
         var taskViewTitle = document.getElementById('task-view-title')
         var taskViewSub = document.getElementById('task-view-sub')
@@ -3934,6 +4019,7 @@
           viewProjects.hidden = false
           closeProjectForm()
           renderProjectList()
+          renderProtocols()
         }
 
         function renderProjectList() {
@@ -3949,6 +4035,50 @@
           projectListEl.innerHTML = ''
           for (var i = 0; i < list.length; i++) {
             projectListEl.appendChild(renderProjectCard(list[i]))
+          }
+        }
+
+        function renderProtocols() {
+          if (!protocolList) return
+          protocolList.innerHTML = ''
+          var list = Array.isArray(state.protocols) ? state.protocols : []
+          if (!list.length) {
+            var liEmpty = document.createElement('li')
+            liEmpty.className = 'list__empty'
+            liEmpty.textContent = 'Noch keine Protokolleinträge.'
+            protocolList.appendChild(liEmpty)
+            return
+          }
+          for (var i = 0; i < list.length; i++) {
+            var p = list[i]
+            var li = document.createElement('li')
+            li.className = 'protocols-item'
+            var left = document.createElement('div')
+            left.style.minWidth = '0'
+            var meta = document.createElement('div')
+            meta.className = 'protocols-item__meta'
+            meta.textContent = formatDueDe(p.entryDate)
+            var txt = document.createElement('p')
+            txt.className = 'protocols-item__text'
+            txt.textContent = p.text
+            left.appendChild(meta)
+            left.appendChild(txt)
+            var rm = document.createElement('button')
+            rm.type = 'button'
+            rm.className = 'task__btn task__btn--danger'
+            rm.textContent = 'Löschen'
+            ;(function (pid) {
+              rm.addEventListener('click', function () {
+                state.protocols = (state.protocols || []).filter(function (x) {
+                  return x.id !== pid
+                })
+                saveState()
+                renderProtocols()
+              })
+            })(p.id)
+            li.appendChild(left)
+            li.appendChild(rm)
+            protocolList.appendChild(li)
           }
         }
 
@@ -5495,6 +5625,33 @@
         btnBack.addEventListener('click', function () {
           showProjectsView()
         })
+
+        if (protocolDate) protocolDate.value = todayYmd()
+        if (protocolForm) {
+          protocolForm.addEventListener('submit', function (e) {
+            e.preventDefault()
+            if (!isValidYmd(protocolDate.value)) {
+              alert('Bitte ein gültiges Datum wählen.')
+              return
+            }
+            var t = (protocolText.value || '').trim().slice(0, MAX_PROTOCOL_TEXT)
+            if (!t) {
+              alert('Bitte einen Protokolltext eingeben.')
+              return
+            }
+            if (!Array.isArray(state.protocols)) state.protocols = []
+            state.protocols.unshift({
+              id: crypto.randomUUID(),
+              createdAt: new Date().toISOString(),
+              entryDate: protocolDate.value,
+              text: t,
+            })
+            saveState()
+            protocolText.value = ''
+            protocolDate.value = todayYmd()
+            renderProtocols()
+          })
+        }
 
         participantFormEl.addEventListener('submit', function (e) {
           e.preventDefault()

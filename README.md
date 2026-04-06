@@ -6,6 +6,7 @@ Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen L
 ## Was die App kann
 
 - **Projekte verwalten**: Name, optionale Beschreibung und optionales Projektbild.
+- **Protokolle auf Startseite**: Datierte Einträge anlegen, anzeigen und löschen.
 - **Aufgaben strukturieren**: Hauptaufgaben und beliebig tiefe Unteraufgaben.
 - **Aufgaben planen**: Priorität, Beginn, Frist, Beschreibung, Zuständigkeiten und Abhängigkeiten.
 - **Mehrere Ansichten nutzen**:
@@ -33,6 +34,13 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 4. **Unteraufgaben ergänzen**
 5. **Abhängigkeiten setzen** (was zuerst erledigt sein muss)
 6. **Im Gantt prüfen**, ob Zeitplan und Reihenfolge passen
+
+## Protokolle (Startseite)
+
+- Eigener Bereich **„Protokolle“** in der Projekt-Startansicht
+- Einträge mit **Datum + Text** erfassen
+- Chronologisch anzeigen (neueste zuerst)
+- Einträge bei Bedarf löschen
 
 ## Aufgabenansichten im Überblick
 
@@ -126,3 +134,4 @@ cd Smart-ToDos
 | 2026-04-06 | Kanban-Layout verbessert: Zellen auf ca. 5 sichtbare Karten begrenzt, weitere Karten per vertikalem Scrollen innerhalb der Zelle erreichbar. |
 | 2026-04-06 | Kanban-Auswahl in den Detailbereich verlagert: in Aufgabenliste nur noch bei aufgeklappten Details, im Gantt nur im Popup (nicht in der Standardzeile). |
 | 2026-04-06 | Standardansichten bereinigt: Kanban nur noch als Label in Liste/Gantt, Umstellung ausschließlich in Detailbereich bzw. Gantt-Popup. |
+| 2026-04-06 | Startseite erweitert: neuer Bereich „Protokolle“ mit datierten Einträgen (anlegen, anzeigen, löschen), persistent in localStorage gespeichert. |
