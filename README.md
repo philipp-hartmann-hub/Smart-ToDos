@@ -1,38 +1,79 @@
 # Smartes Projektplanungstool
 
-**Projekte** mit optionalem Text und **Projektbild** (lokal); nach **Öffnen** eines Projekts: **Aufgaben** mit Priorität, Frist, Beschreibung und **beliebig tiefen Unteraufgaben** — alles in **localStorage** (überlebt Browser-Neustart).
+Ein leichtgewichtiges Planungstool als **eine einzige HTML-Datei**.  
+Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen Listen-, Gantt- und (späterer) Kanban-Sicht wechseln.
 
-**Kein Node.js, kein npm, kein Terminal nötig** — die App ist **eine einzige HTML-Datei**.
+## Was die App kann
 
-## App öffnen (direkter Link)
+- **Projekte verwalten**: Name, optionale Beschreibung und optionales Projektbild.
+- **Aufgaben strukturieren**: Hauptaufgaben und beliebig tiefe Unteraufgaben.
+- **Aufgaben planen**: Priorität, Beginn, Frist, Beschreibung, Zuständigkeiten und Abhängigkeiten.
+- **Mehrere Ansichten nutzen**:
+  - `Aufgabenliste` für Detailpflege
+  - `Projektplan (Gantt)` mit Zeitbalken, Monatsachse, Abhängigkeitslinien und Popup-Karte
+  - `Kanban` mit konfigurierbaren Spalten, Swimlanes und Drag-and-Drop
+- **Daten lokal speichern**: Alles bleibt im Browser via `localStorage` erhalten.
 
-Diese Datei im Ordner dieses Projekts:
+## Schnellstart
 
-**`SmartToDo.html`**
+Keine Installation nötig: **kein Node.js, kein npm, kein Build-Schritt**.
 
-- **Finder:** Ordner öffnen → **`SmartToDo.html`** **doppelklicken**
-- **Browser-Adresszeile** (gleicher Inhalt wie Doppelklick):
+1. Datei `SmartToDo.html` im Projektordner öffnen (Doppelklick im Finder).
+2. Oder direkt per Browser-URL:
 
 [`file:///Users/philipphartmann/Cursor%20Trainig/Smart%20ToDo/SmartToDo.html`](file:///Users/philipphartmann/Cursor%20Trainig/Smart%20ToDo/SmartToDo.html)
 
-*(Wenn du das Repo woanders ablegst, den Pfad vor `SmartToDo.html` anpassen.)*
+Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an.
 
-## Funktionen
+## Typischer Ablauf
 
-| Feature | Umsetzung |
-|---------|-----------|
-| Projekte | Anlegen mit Name, optionaler Beschreibung und Bild (Datei → verkleinert, als Data-URL gespeichert); Liste mit Öffnen/Löschen |
-| Teilnehmende | Pro Projekt: Vorname, Nachname, Funktion (QS, Projektleitung, stellvertretende Projektleitung, Projektmitarbeit); Zuordnung zu Aufgaben/Unteraufgaben (mehrere möglich) |
-| Aufgaben (im Projekt) | Erstellen / erledigen / löschen; Formular, Checkbox, Löschen (inkl. aller Unteraufgaben) |
-| 3 Prioritäten | Hoch, Mittel, Niedrig (Hauptaufgaben und Unteraufgaben) |
-| Unteraufgaben | Beliebig viele Ebenen; pro Eintrag „Unteraufgabe“ → Eingabe einblenden |
-| Aufgabenansichten | Umschaltbar zwischen **Aufgabenliste**, **Projektplan (Gantt)** und **Kanban (Dummy-Platzhalter)** |
-| Synchronität der Ansichten | Alle Ansichten arbeiten auf demselben Aufgaben-Datenmodell; Änderungen/Neuanlagen erscheinen nach jedem Rendern überall konsistent |
-| Projektplan (Gantt) | Zeitbalken aus Beginn/Frist, auf-/zuklappbare Hierarchie, Abhängigkeiten als Verbindungslinien, schnelles Anlegen von Haupt- und Unteraufgaben |
-| Gantt-Bedienung | Größere, besser lesbare Timeline; pro Zeile „Karte öffnen“ springt zur entsprechenden Aufgabenkarte in der Listenansicht |
-| Fristen | Native Datumsauswahl (`type="date"`) für Haupt- und Unteraufgaben; Anzeige/Änderung pro Zeile; überfällige offene Aufgaben hervorgehoben |
-| Beschreibung | Pro Aufgabe/Unteraufgabe: mehrzeiliges Textfeld; jederzeit änderbar, Speicher bei Eingabe (max. 5000 Zeichen) |
-| Daten bleiben | `localStorage`-Schlüssel `smart-todo-tasks` — Format `v:2` mit `projects[]`; reine Aufgabenlisten (älter) werden in ein Projekt **„Mein Projekt“** migriert |
+1. **Projekt anlegen**
+2. **Teilnehmende hinzufügen** (für spätere Zuständigkeiten)
+3. **Hauptaufgaben erstellen**
+4. **Unteraufgaben ergänzen**
+5. **Abhängigkeiten setzen** (was zuerst erledigt sein muss)
+6. **Im Gantt prüfen**, ob Zeitplan und Reihenfolge passen
+
+## Aufgabenansichten im Überblick
+
+### 1) Aufgabenliste
+- Kompakte Standardansicht: Titel, Zuständigkeit und Frist
+- Weitere Felder per „Details anzeigen“ aufklappbar
+- Abschließen archiviert Aufgaben; aktive Liste zeigt nur nicht archivierte Karten
+- Archivbereich mit Öffnen, Wiederherstellen und Endgültig löschen
+- Kanban-Spaltenlabel in der Liste ist direkt umstellbar (Dropdown), Karte wechselt sofort die Kanban-Spalte
+- Gut für schnellen Überblick und fokussierte Bearbeitung
+
+### 2) Projektplan (Gantt)
+- Zeitbalken aus Beginn/Frist
+- Auf-/zuklappbare Hierarchie
+- Abhängigkeiten als Verbindungslinien
+- Durchgehende Monatsleiste zur Orientierung
+- Umschaltbare Zeitskala: **Tag / Monat / Jahr**
+- Tagesansicht mit zwei Ebenen: oben durchgehende Monatsleiste, darunter Tagesnummern
+- Fixierte Aufgaben-Spalte links (sticky), damit Aufgaben beim horizontalen Scrollen sichtbar bleiben
+- Popup-„Aufgabenkarte“ direkt im Gantt bearbeitbar (ohne Ansichtswechsel)
+- Kanban-Spaltenstatus als Label auch in der Gantt-Zeile sichtbar
+- Kanban-Spaltenstatus im Gantt direkt als Auswahlfeld änderbar
+
+### 3) Kanban
+- Standard-Spalten: **Backlog**, **In Bearbeitung**, **Warten auf Rückmeldung**, **Abgeschlossen**
+- Spalten frei umbenennbar; neue Spalten können hinzugefügt werden
+- Backlog ist fix und nicht löschbar
+- Swimlanes beliebig anlegbar, umbenennbar und (bei mehr als einer) löschbar
+- Karten per Drag-and-Drop zwischen Spalten/Swimlanes verschiebbar
+- Neue Aufgaben aus Liste/Gantt landen automatisch im Backlog
+- Neue Karten direkt in jeder Spalte/Swimlane anlegbar (`+ Karte`)
+- Unteraufgaben direkt an jeder Kanban-Karte anlegbar (`+ Unteraufgabe`)
+- Karten direkt aus Kanban abschließbar (wandern ins Archiv)
+- Aufgabenkarte als Popup direkt aus Kanban öffnbar (`Karte öffnen`) wie im Gantt
+
+## Technische Hinweise
+
+- Speicherort: `localStorage`, Schlüssel `smart-todo-tasks`
+- Datenmodell: Version `v:2` mit `projects[]`
+- Ältere reine Aufgabenlisten werden in ein Projekt „Mein Projekt“ migriert
+- Alle Ansichten arbeiten auf derselben Datenquelle (Änderungen sind sofort konsistent sichtbar)
 
 ## Repository
 
@@ -41,7 +82,7 @@ Diese Datei im Ordner dieses Projekts:
 ```bash
 git clone https://github.com/philipp-hartmann-hub/Smart-ToDos.git
 cd Smart-ToDos
-# Nur SmartToDo.html im Browser öffnen — fertig.
+# Dann SmartToDo.html im Browser öffnen.
 ```
 
 ---
@@ -66,3 +107,18 @@ cd Smart-ToDos
 | 2026-04-06 | Aufgabenansichten erweitert: Umschalter für Aufgabenliste, Projektplan (Gantt mit Hierarchie + Abhängigkeitslinien) und Kanban-Dummy; Anlegen von Aufgaben auch in der Projektplan-Ansicht. |
 | 2026-04-06 | Ansichts-Synchronität geschärft: View-Wechsel triggert zentrales Re-Rendern, damit Listen-, Gantt- und Kanban-Panel denselben Aufgabenstand zeigen. |
 | 2026-04-06 | Gantt verbessert: größere, übersichtlichere Darstellung; pro Gantt-Zeile „Karte öffnen“ mit Sprung und Highlight zur Aufgabenkarte in der Listenansicht. |
+| 2026-04-06 | Gantt erweitert: noch breitere Timeline, durchgehende Monatsachse und bearbeitbare Aufgabenkarte als Popup direkt in der Gantt-Ansicht (ohne Wechsel zur Liste). |
+| 2026-04-06 | README redaktionell überarbeitet: klarerer Einstieg, strukturierte Funktionsbeschreibung, praxisnaher Ablauf und verständlichere technische Hinweise. |
+| 2026-04-06 | Layout angepasst: Aufgabenbereich (`view-tasks`) deutlich verbreitert, damit Gantt auf großen Displays merklich mehr nutzbare Breite erhält. |
+| 2026-04-06 | Projektplan verbessert: linke Aufgabenliste im Gantt als sticky Spalte fixiert, damit die Aufgaben beim Scrollen entlang der Zeitachse sichtbar bleiben. |
+| 2026-04-06 | Gantt-Fix: auf separate linke Aufgaben-Spalte + rechte Scroll-Timeline umgestellt, damit Aufgabenliste beim horizontalen Scrollen dauerhaft sichtbar bleibt und Balken/Linien nicht mehr unter der Liste durchlaufen. |
+| 2026-04-06 | Aufgabenliste auf kompakte Erstansicht umgestellt (Titel, Zuständig, Frist); zusätzliche Felder und Aktionen sind pro Aufgabe per Details-Toggle aufklappbar. |
+| 2026-04-06 | Projektplan erweitert: Zeitskala im Gantt auf Tag-, Monats- oder Jahresbasis umschaltbar. |
+| 2026-04-06 | Kanban vollständig umgesetzt: konfigurierbare Spalten (Backlog fix), frei benennbare Swimlanes, Drag-and-Drop, Aufgaben aus anderen Ansichten starten im Backlog. |
+| 2026-04-06 | Gantt-Tagesansicht verbessert: zweizeilige Kopfzeile mit durchgehender Monatsleiste plus separaten Tagesnummern für bessere Lesbarkeit. |
+| 2026-04-06 | Kanban-Erstellung ergänzt: neue Karten pro Spalte/Swimlane sowie Unteraufgaben direkt aus jeder Kanban-Karte anlegbar; Änderungen bleiben mit Liste und Gantt synchron. |
+| 2026-04-06 | Abschließen/Archiv ergänzt: abgeschlossene Karten werden archiviert (aus aktiver Liste entfernt), im Archiv verwaltbar; Kanban-Spaltenlabel zusätzlich in Liste und Gantt sichtbar. |
+| 2026-04-06 | Kanban-Popup ergänzt: Aufgabenkarten lassen sich wie im Gantt als editierbares Modal direkt aus Kanban öffnen. |
+| 2026-04-06 | Abschluss-UI deutlicher gemacht: sichtbarer „Abschließen“-Button direkt in der kompakten Aufgabenlisten-Kopfzeile; Kanban-Button klarer als „Abschließen (Archiv)“ benannt. |
+| 2026-04-06 | Kanban-Status aus Liste/Gantt steuerbar: Spaltenlabel als Dropdown umgestellt; Auswahl verschiebt die Karte sofort in die gewählte Kanban-Spalte. |
+| 2026-04-06 | Archiv erweitert: archivierte Aufgaben können nun direkt geöffnet (Popup), zusätzlich zu Wiederherstellen und Endgültig löschen. |

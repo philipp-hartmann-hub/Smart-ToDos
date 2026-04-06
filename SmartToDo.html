@@ -56,6 +56,9 @@
         margin: 0 auto;
         padding: 2rem 1.25rem 3rem;
       }
+      #view-tasks.app {
+        max-width: min(96vw, 120rem);
+      }
       h1 {
         font-size: 1.75rem;
         font-weight: 600;
@@ -297,14 +300,86 @@
         padding: 0.7rem 0.85rem;
         border-bottom: 1px solid var(--border);
       }
+      .gantt__toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+      }
+      .gantt__scale {
+        display: inline-flex;
+        gap: 0.35rem;
+        align-items: center;
+      }
+      .gantt__scale-btn {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-h);
+        border-radius: 8px;
+        padding: 0.3rem 0.55rem;
+        font: inherit;
+        font-size: 0.82rem;
+        cursor: pointer;
+      }
+      .gantt__scale-btn.is-active {
+        background: var(--accent-bg);
+        border-color: var(--accent-border);
+      }
       .gantt__grid {
         position: relative;
-        overflow-x: auto;
+        display: grid;
+        grid-template-columns: 440px 1fr;
+        align-items: start;
+        overflow: hidden;
         padding: 0.9rem 1rem 1.1rem;
+      }
+      .gantt__left {
+        border-right: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .gantt__left-spacer {
+        height: 34px;
+        border-bottom: 1px solid var(--border);
+      }
+      .gantt__left-spacer--double {
+        height: 62px;
+      }
+      .gantt__scroll {
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+      .gantt__months {
+        display: flex;
+        width: max-content;
+        min-width: 100%;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+      }
+      .gantt__days {
+        display: flex;
+        width: max-content;
+        min-width: 100%;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+      }
+      .gantt__month {
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 0.45rem 0.4rem;
+        border-right: 1px solid var(--border);
+        white-space: nowrap;
+        color: var(--text-h);
+      }
+      .gantt__day {
+        font-size: 0.74rem;
+        text-align: center;
+        padding: 0.3rem 0.15rem;
+        border-right: 1px solid var(--border);
+        color: var(--text-h);
       }
       .gantt__inner {
         position: relative;
-        min-width: 1200px;
+        min-width: 1600px;
       }
       .gantt__row {
         display: grid;
@@ -322,6 +397,7 @@
         align-items: center;
         gap: 0.5rem;
         min-width: 0;
+        padding-right: 0.6rem;
       }
       .gantt__toggle {
         width: 1.8rem;
@@ -337,6 +413,24 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+      .gantt__kanban {
+        font-size: 0.74rem;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 0.1rem 0.42rem;
+        opacity: 0.9;
+      }
+      .gantt__kanban-select {
+        max-width: 9.5rem;
+        min-height: 1.8rem;
+        padding: 0.2rem 0.35rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-h);
+        font: inherit;
+        font-size: 0.76rem;
       }
       .gantt__lane {
         position: relative;
@@ -361,11 +455,141 @@
       .task--flash {
         box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.55) !important;
       }
-      .kanban-dummy {
-        border: 1px dashed var(--border);
-        border-radius: 12px;
+      .gantt-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        background: rgba(10, 16, 30, 0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         padding: 1rem;
+      }
+      .gantt-modal[hidden] {
+        display: none !important;
+      }
+      .gantt-modal__card {
+        width: min(920px, 96vw);
+        max-height: 92vh;
+        overflow: auto;
+        border: 1px solid var(--border);
+        border-radius: 12px;
         background: var(--surface);
+        padding: 1rem;
+        box-shadow: var(--shadow-lg);
+      }
+      .gantt-modal__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.8rem;
+      }
+      .kanban {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+        overflow: hidden;
+      }
+      .kanban__toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.7rem 0.85rem;
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+      }
+      .kanban__actions {
+        display: flex;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+      }
+      .kanban__board {
+        overflow: auto;
+        padding: 0.8rem;
+      }
+      .kanban__grid {
+        display: grid;
+        grid-template-columns: 220px repeat(var(--kanban-cols, 1), minmax(240px, 1fr));
+        gap: 0.7rem;
+        min-width: max-content;
+      }
+      .kanban__cell,
+      .kanban__head,
+      .kanban__lane {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--bg);
+      }
+      .kanban__head {
+        padding: 0.55rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .kanban__head-title {
+        display: flex;
+        gap: 0.35rem;
+        align-items: center;
+      }
+      .kanban__title-input {
+        width: 100%;
+        min-width: 0;
+        font: inherit;
+        font-size: 0.85rem;
+        padding: 0.3rem 0.45rem;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-h);
+      }
+      .kanban__lane {
+        padding: 0.55rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .kanban__cell {
+        min-height: 110px;
+        padding: 0.45rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .kanban__card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 0.45rem;
+        cursor: grab;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      .kanban__card:active {
+        cursor: grabbing;
+      }
+      .kanban__card-title {
+        font-size: 0.86rem;
+        color: var(--text-h);
+        word-break: break-word;
+      }
+      .kanban__card-meta {
+        font-size: 0.76rem;
+        opacity: 0.85;
+      }
+      .kanban__card-actions {
+        display: flex;
+        gap: 0.35rem;
+        margin-top: 0.15rem;
+      }
+      .kanban__add-card {
+        align-self: flex-start;
+      }
+      .kanban__cell--drop {
+        outline: 2px dashed var(--accent);
+        outline-offset: 1px;
       }
       .form__submit:disabled {
         opacity: 0.45;
@@ -480,6 +704,70 @@
         gap: 0.35rem;
         justify-content: flex-end;
         flex-shrink: 0;
+      }
+      .task__summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        font-size: 0.84rem;
+      }
+      .task__summary-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 0.2rem 0.55rem;
+        background: var(--bg);
+      }
+      .task__details-wrap[hidden] {
+        display: none !important;
+      }
+      .task__summary-select {
+        min-height: 1.7rem;
+        max-width: 12rem;
+        padding: 0.1rem 0.35rem;
+        border-radius: 7px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-h);
+        font: inherit;
+        font-size: 0.78rem;
+      }
+      .archive-panel {
+        margin-top: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+        padding: 0.75rem;
+      }
+      .archive-panel[hidden] {
+        display: none !important;
+      }
+      .archive-panel__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.7rem;
+        margin-bottom: 0.5rem;
+      }
+      .archive-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+      }
+      .archive-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.65rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.45rem 0.55rem;
+        background: var(--bg);
       }
       .task__due {
         display: flex;
@@ -1188,24 +1476,60 @@
         <div id="task-panel-list" class="task-view-panel">
           <p class="list__empty" id="empty-msg">Noch keine Aufgaben — „Aufgabe hinzufügen“ nutzen.</p>
           <ul class="task-tree" id="task-list" hidden></ul>
+          <section id="archive-panel" class="archive-panel" hidden>
+            <div class="archive-panel__head">
+              <strong>Archivierte Aufgaben</strong>
+              <button type="button" class="task__btn" id="btn-toggle-archive" aria-expanded="false">Archiv anzeigen</button>
+            </div>
+            <ul id="archive-list" class="archive-list" hidden></ul>
+          </section>
         </div>
         <div id="task-panel-gantt" class="task-view-panel" hidden>
           <div class="gantt">
             <div class="gantt__toolbar">
-              <strong>Projektplan (Gantt)</strong>
+              <div class="gantt__toolbar-left">
+                <strong>Projektplan (Gantt)</strong>
+                <div class="gantt__scale" role="group" aria-label="Zeitskala">
+                  <button type="button" class="gantt__scale-btn" id="btn-gantt-scale-day">Tag</button>
+                  <button type="button" class="gantt__scale-btn is-active" id="btn-gantt-scale-month">Monat</button>
+                  <button type="button" class="gantt__scale-btn" id="btn-gantt-scale-year">Jahr</button>
+                </div>
+              </div>
               <button type="button" class="form__submit form__submit--small" id="btn-gantt-add-main">
                 Hauptaufgabe anlegen
               </button>
             </div>
             <div class="gantt__grid">
-              <div id="gantt-root" class="gantt__inner"></div>
+              <div id="gantt-left" class="gantt__left"></div>
+              <div id="gantt-scroll" class="gantt__scroll">
+                <div id="gantt-months" class="gantt__months"></div>
+                <div id="gantt-days" class="gantt__days" hidden></div>
+                <div id="gantt-root" class="gantt__inner"></div>
+              </div>
             </div>
           </div>
         </div>
         <div id="task-panel-kanban" class="task-view-panel" hidden>
-          <div class="kanban-dummy">
-            <strong>Kanban (Dummy)</strong>
-            <p style="margin: 0.4rem 0 0">Diese Ansicht ist vorbereitet und wird im nächsten Schritt definiert.</p>
+          <div class="kanban">
+            <div class="kanban__toolbar">
+              <strong>Kanban</strong>
+              <div class="kanban__actions">
+                <button type="button" class="task__btn" id="btn-kanban-add-column">Spalte hinzufügen</button>
+                <button type="button" class="task__btn" id="btn-kanban-add-lane">Swimlane hinzufügen</button>
+              </div>
+            </div>
+            <div class="kanban__board">
+              <div id="kanban-grid" class="kanban__grid"></div>
+            </div>
+          </div>
+        </div>
+        <div id="gantt-task-modal" class="gantt-modal" hidden>
+          <div class="gantt-modal__card">
+            <div class="gantt-modal__top">
+              <strong id="gantt-modal-title">Aufgabenkarte</strong>
+              <button type="button" class="task__btn" id="btn-close-gantt-modal">Schließen</button>
+            </div>
+            <div id="gantt-modal-body"></div>
           </div>
         </div>
       </section>
@@ -1233,6 +1557,21 @@
           projektleitung: 'Projektleitung',
           stellvertretende_projektleitung: 'Stellvertretende Projektleitung',
           projektmitarbeit: 'Projektmitarbeit',
+        }
+        var KANBAN_BACKLOG_ID = 'kanban-backlog'
+        var KANBAN_DEFAULT_LANE_ID = 'kanban-lane-default'
+
+        function defaultKanbanColumns() {
+          return [
+            { id: KANBAN_BACKLOG_ID, name: 'Backlog' },
+            { id: 'kanban-in-progress', name: 'In Bearbeitung' },
+            { id: 'kanban-waiting-feedback', name: 'Warten auf Rückmeldung' },
+            { id: 'kanban-done', name: 'Abgeschlossen' },
+          ]
+        }
+
+        function defaultKanbanSwimlanes() {
+          return [{ id: KANBAN_DEFAULT_LANE_ID, name: 'Standard' }]
         }
 
         var state = { v: 2, projects: [], openProjectId: null, collapsedSubtasks: {} }
@@ -1419,11 +1758,26 @@
           if (!nodes) return out
           for (var i = 0; i < nodes.length; i++) {
             var n = nodes[i]
+            if (n.archived) continue
             var pathParts = ancestors.concat([n.title])
             var pathLabel = pathParts.join(' › ')
-            out.push({ id: n.id, pathLabel: pathLabel })
+            out.push({ id: n.id, pathLabel: pathLabel, node: n })
             var sub = flattenTasksWithPath(n.children, pathParts)
             for (var j = 0; j < sub.length; j++) out.push(sub[j])
+          }
+          return out
+        }
+
+        function collectArchivedTasksWithPath(nodes, ancestors, out, parentArchived) {
+          out = out || []
+          ancestors = ancestors || []
+          parentArchived = !!parentArchived
+          if (!nodes) return out
+          for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i]
+            var pathParts = ancestors.concat([n.title])
+            if (n.archived && !parentArchived) out.push({ id: n.id, pathLabel: pathParts.join(' › '), node: n })
+            collectArchivedTasksWithPath(n.children, pathParts, out, parentArchived || !!n.archived)
           }
           return out
         }
@@ -1500,6 +1854,61 @@
         function filterDepsForest(nodes, validSet) {
           for (var i = 0; i < nodes.length; i++) {
             filterDepsTree(nodes[i], validSet)
+          }
+        }
+
+        function normalizeKanbanColumnsRaw(raw) {
+          var base = defaultKanbanColumns()
+          if (!raw || !Array.isArray(raw.kanbanColumns)) return base
+          var out = []
+          var seen = {}
+          var hasBacklog = false
+          for (var i = 0; i < raw.kanbanColumns.length; i++) {
+            var c = raw.kanbanColumns[i]
+            if (!c || typeof c !== 'object') continue
+            if (typeof c.id !== 'string' || !c.id || seen[c.id]) continue
+            var name = typeof c.name === 'string' ? c.name.trim().slice(0, 80) : ''
+            if (!name) continue
+            if (c.id === KANBAN_BACKLOG_ID) {
+              out.push({ id: KANBAN_BACKLOG_ID, name: 'Backlog' })
+              hasBacklog = true
+            } else {
+              out.push({ id: c.id, name: name })
+            }
+            seen[c.id] = true
+          }
+          if (!hasBacklog) out.unshift({ id: KANBAN_BACKLOG_ID, name: 'Backlog' })
+          return out
+        }
+
+        function normalizeKanbanSwimlanesRaw(raw) {
+          if (!raw || !Array.isArray(raw.kanbanSwimlanes) || raw.kanbanSwimlanes.length === 0) {
+            return defaultKanbanSwimlanes()
+          }
+          var out = []
+          var seen = {}
+          for (var i = 0; i < raw.kanbanSwimlanes.length; i++) {
+            var s = raw.kanbanSwimlanes[i]
+            if (!s || typeof s !== 'object') continue
+            if (typeof s.id !== 'string' || !s.id || seen[s.id]) continue
+            var name = typeof s.name === 'string' ? s.name.trim().slice(0, 80) : ''
+            if (!name) continue
+            out.push({ id: s.id, name: name })
+            seen[s.id] = true
+          }
+          if (!out.length) return defaultKanbanSwimlanes()
+          return out
+        }
+
+        function normalizeTaskKanbanPlacement(nodes, columnSet, laneSet, defaultLaneId) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (!nodes[i].kanbanColumnId || !columnSet[nodes[i].kanbanColumnId]) {
+              nodes[i].kanbanColumnId = KANBAN_BACKLOG_ID
+            }
+            if (!nodes[i].swimlaneId || !laneSet[nodes[i].swimlaneId]) {
+              nodes[i].swimlaneId = defaultLaneId
+            }
+            normalizeTaskKanbanPlacement(nodes[i].children, columnSet, laneSet, defaultLaneId)
           }
         }
 
@@ -1581,20 +1990,28 @@
           }
           var dueDate = isValidYmd(raw.dueDate) ? raw.dueDate : null
           var startDate = isValidYmd(raw.startDate) ? raw.startDate : null
+          var archived = typeof raw.archived === 'boolean' ? raw.archived : false
           var description = sanitizeDescription(typeof raw.description === 'string' ? raw.description : '')
           var assigneeIds = parseAssigneeIdsRaw(raw)
           var dependsOnTaskIds = parseDependsOnTaskIdsRaw(raw)
+          var kanbanColumnId =
+            typeof raw.kanbanColumnId === 'string' && raw.kanbanColumnId ? raw.kanbanColumnId : KANBAN_BACKLOG_ID
+          var swimlaneId =
+            typeof raw.swimlaneId === 'string' && raw.swimlaneId ? raw.swimlaneId : KANBAN_DEFAULT_LANE_ID
           return {
             id: raw.id,
             title: raw.title,
             priority: raw.priority,
             done: raw.done,
+            archived: archived,
             createdAt: raw.createdAt,
             startDate: startDate,
             dueDate: dueDate,
             description: description,
             assigneeIds: assigneeIds,
             dependsOnTaskIds: dependsOnTaskIds,
+            kanbanColumnId: kanbanColumnId,
+            swimlaneId: swimlaneId,
             attachments: parseAttachmentsRaw(raw),
             links: parseLinksRaw(raw),
             history: parseHistoryRaw(raw),
@@ -1609,18 +2026,24 @@
           if (typeof raw.done !== 'boolean' || typeof raw.createdAt !== 'string') return null
           var dueL = isValidYmd(raw.dueDate) ? raw.dueDate : null
           var startL = isValidYmd(raw.startDate) ? raw.startDate : null
+          var archivedL = typeof raw.archived === 'boolean' ? raw.archived : false
           var descL = sanitizeDescription(typeof raw.description === 'string' ? raw.description : '')
           return {
             id: raw.id,
             title: raw.title,
             priority: raw.priority,
             done: raw.done,
+            archived: archivedL,
             createdAt: raw.createdAt,
             startDate: startL,
             dueDate: dueL,
             description: descL,
             assigneeIds: parseAssigneeIdsRaw(raw),
             dependsOnTaskIds: parseDependsOnTaskIdsRaw(raw),
+            kanbanColumnId:
+              typeof raw.kanbanColumnId === 'string' && raw.kanbanColumnId ? raw.kanbanColumnId : KANBAN_BACKLOG_ID,
+            swimlaneId:
+              typeof raw.swimlaneId === 'string' && raw.swimlaneId ? raw.swimlaneId : KANBAN_DEFAULT_LANE_ID,
             attachments: parseAttachmentsRaw(raw),
             links: parseLinksRaw(raw),
             history: parseHistoryRaw(raw),
@@ -1670,6 +2093,13 @@
           filterAssigneesForest(tasks, validSet)
           var taskValidSet = collectAllTaskIds(tasks, {})
           filterDepsForest(tasks, taskValidSet)
+          var kanbanColumns = normalizeKanbanColumnsRaw(raw)
+          var kanbanSwimlanes = normalizeKanbanSwimlanesRaw(raw)
+          var columnSet = {}
+          var laneSet = {}
+          for (var ci = 0; ci < kanbanColumns.length; ci++) columnSet[kanbanColumns[ci].id] = true
+          for (var li = 0; li < kanbanSwimlanes.length; li++) laneSet[kanbanSwimlanes[li].id] = true
+          normalizeTaskKanbanPlacement(tasks, columnSet, laneSet, kanbanSwimlanes[0].id)
           var img = raw.image
           if (img !== null && typeof img !== 'string') img = null
           if (typeof img === 'string' && img.length > MAX_IMAGE_DATA_URL) img = null
@@ -1680,6 +2110,8 @@
             image: img,
             participants: participants,
             tasks: tasks,
+            kanbanColumns: kanbanColumns,
+            kanbanSwimlanes: kanbanSwimlanes,
           }
         }
 
@@ -1724,6 +2156,8 @@
                     image: null,
                     participants: [],
                     tasks: legacyTasks,
+                    kanbanColumns: defaultKanbanColumns(),
+                    kanbanSwimlanes: defaultKanbanSwimlanes(),
                   },
                 ],
                 openProjectId: null,
@@ -1777,6 +2211,34 @@
           return null
         }
 
+        function ensureKanbanProjectConfig(project) {
+          if (!project) return
+          if (!Array.isArray(project.kanbanColumns) || !project.kanbanColumns.length) {
+            project.kanbanColumns = defaultKanbanColumns()
+          }
+          var hasBacklog = false
+          for (var i = 0; i < project.kanbanColumns.length; i++) {
+            if (project.kanbanColumns[i].id === KANBAN_BACKLOG_ID) {
+              project.kanbanColumns[i].name = 'Backlog'
+              hasBacklog = true
+              break
+            }
+          }
+          if (!hasBacklog) {
+            project.kanbanColumns.unshift({ id: KANBAN_BACKLOG_ID, name: 'Backlog' })
+          }
+          if (!Array.isArray(project.kanbanSwimlanes) || !project.kanbanSwimlanes.length) {
+            project.kanbanSwimlanes = defaultKanbanSwimlanes()
+          }
+        }
+
+        function defaultSwimlaneIdForProject(project) {
+          ensureKanbanProjectConfig(project)
+          return project && project.kanbanSwimlanes && project.kanbanSwimlanes.length
+            ? project.kanbanSwimlanes[0].id
+            : KANBAN_DEFAULT_LANE_ID
+        }
+
         function removeById(nodes, id) {
           for (var i = 0; i < nodes.length; i++) {
             if (nodes[i].id === id) {
@@ -1799,14 +2261,65 @@
         }
 
         function setDoneById(nodes, id, done) {
+          function applyToSubtree(n, isDone) {
+            n.done = isDone
+            n.archived = !!isDone
+            for (var j = 0; j < n.children.length; j++) applyToSubtree(n.children[j], isDone)
+          }
           for (var i = 0; i < nodes.length; i++) {
             if (nodes[i].id === id) {
-              nodes[i].done = done
+              applyToSubtree(nodes[i], done)
               return true
             }
             if (setDoneById(nodes[i].children, id, done)) return true
           }
           return false
+        }
+
+        function setArchivedById(nodes, id, archived) {
+          function applyArch(n, isArch) {
+            n.archived = !!isArch
+            if (!isArch) n.done = false
+            for (var j = 0; j < n.children.length; j++) applyArch(n.children[j], isArch)
+          }
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === id) {
+              applyArch(nodes[i], archived)
+              return true
+            }
+            if (setArchivedById(nodes[i].children, id, archived)) return true
+          }
+          return false
+        }
+
+        function getKanbanColumnNameById(columnId) {
+          var p = getCurrentProject()
+          if (!p || !p.kanbanColumns) return 'Backlog'
+          for (var i = 0; i < p.kanbanColumns.length; i++) {
+            if (p.kanbanColumns[i].id === columnId) return p.kanbanColumns[i].name
+          }
+          return 'Backlog'
+        }
+
+        function buildKanbanColumnSelect(node, className, ariaLabel) {
+          var sel = document.createElement('select')
+          sel.className = className || 'form__input'
+          sel.setAttribute('aria-label', ariaLabel || 'Kanban-Spalte')
+          var p = getCurrentProject()
+          var cols = p && p.kanbanColumns ? p.kanbanColumns : defaultKanbanColumns()
+          for (var i = 0; i < cols.length; i++) {
+            var opt = document.createElement('option')
+            opt.value = cols[i].id
+            opt.textContent = cols[i].name
+            if (node.kanbanColumnId === cols[i].id) opt.selected = true
+            sel.appendChild(opt)
+          }
+          sel.addEventListener('change', function () {
+            var targetColId = sel.value || KANBAN_BACKLOG_ID
+            setKanbanPlacementById(taskRootRef, node.id, targetColId, node.swimlaneId || KANBAN_DEFAULT_LANE_ID)
+            render()
+          })
+          return sel
         }
 
         function setDueById(nodes, id, dueDate) {
@@ -1839,6 +2352,43 @@
               return true
             }
             if (setDescriptionById(nodes[i].children, id, text)) return true
+          }
+          return false
+        }
+
+        function setTitleById(nodes, id, title) {
+          var t = typeof title === 'string' ? title.trim().slice(0, 500) : ''
+          if (!t) return false
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === id) {
+              nodes[i].title = t
+              return true
+            }
+            if (setTitleById(nodes[i].children, id, title)) return true
+          }
+          return false
+        }
+
+        function setPriorityById(nodes, id, priority) {
+          if (priority !== 'low' && priority !== 'medium' && priority !== 'high') return false
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === id) {
+              nodes[i].priority = priority
+              return true
+            }
+            if (setPriorityById(nodes[i].children, id, priority)) return true
+          }
+          return false
+        }
+
+        function setKanbanPlacementById(nodes, id, columnId, swimlaneId) {
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === id) {
+              nodes[i].kanbanColumnId = columnId
+              nodes[i].swimlaneId = swimlaneId
+              return true
+            }
+            if (setKanbanPlacementById(nodes[i].children, id, columnId, swimlaneId)) return true
           }
           return false
         }
@@ -2637,6 +3187,9 @@
         var submitBtn = document.getElementById('submit-btn')
         var emptyMsg = document.getElementById('empty-msg')
         var taskList = document.getElementById('task-list')
+        var archivePanel = document.getElementById('archive-panel')
+        var archiveList = document.getElementById('archive-list')
+        var btnToggleArchive = document.getElementById('btn-toggle-archive')
         var taskPanelList = document.getElementById('task-panel-list')
         var taskPanelGantt = document.getElementById('task-panel-gantt')
         var taskPanelKanban = document.getElementById('task-panel-kanban')
@@ -2644,7 +3197,21 @@
         var btnViewGantt = document.getElementById('btn-view-gantt')
         var btnViewKanban = document.getElementById('btn-view-kanban')
         var btnGanttAddMain = document.getElementById('btn-gantt-add-main')
+        var btnKanbanAddColumn = document.getElementById('btn-kanban-add-column')
+        var btnKanbanAddLane = document.getElementById('btn-kanban-add-lane')
+        var kanbanGrid = document.getElementById('kanban-grid')
+        var btnGanttScaleDay = document.getElementById('btn-gantt-scale-day')
+        var btnGanttScaleMonth = document.getElementById('btn-gantt-scale-month')
+        var btnGanttScaleYear = document.getElementById('btn-gantt-scale-year')
+        var ganttLeft = document.getElementById('gantt-left')
+        var ganttScroll = document.getElementById('gantt-scroll')
+        var ganttMonths = document.getElementById('gantt-months')
+        var ganttDays = document.getElementById('gantt-days')
         var ganttRoot = document.getElementById('gantt-root')
+        var ganttTaskModal = document.getElementById('gantt-task-modal')
+        var btnCloseGanttModal = document.getElementById('btn-close-gantt-modal')
+        var ganttModalTitle = document.getElementById('gantt-modal-title')
+        var ganttModalBody = document.getElementById('gantt-modal-body')
         var newTaskAssigneesMount = document.getElementById('new-task-assignees')
         var participantFormEl = document.getElementById('participant-form')
         var btnToggleParticipantForm = document.getElementById('btn-toggle-participant-form')
@@ -2662,6 +3229,13 @@
         var depPickerUid = 0
         var currentTaskView = 'list'
         var ganttOpenMap = {}
+        var ganttScaleMode = 'month'
+        var taskDetailsOpenMap = {}
+        var archiveListOpen = false
+        var kanbanDraggedTaskId = null
+        var ganttModalTaskId = null
+        var ganttModalAssigneePicker = null
+        var ganttModalDependencyPicker = null
 
         function resetMainTaskFormFields() {
           titleInput.value = ''
@@ -3332,6 +3906,7 @@
         function showTasksView() {
           var p = getCurrentProject()
           if (!p) return
+          ensureKanbanProjectConfig(p)
           state.openProjectId = p.id
           saveState()
           viewProjects.hidden = true
@@ -3440,6 +4015,7 @@
           taskPanelList.hidden = mode !== 'list'
           taskPanelGantt.hidden = mode !== 'gantt'
           taskPanelKanban.hidden = mode !== 'kanban'
+          if (mode !== 'gantt' && ganttModalTaskId) closeGanttTaskModal()
           btnViewList.classList.toggle('is-active', mode === 'list')
           btnViewGantt.classList.toggle('is-active', mode === 'gantt')
           btnViewKanban.classList.toggle('is-active', mode === 'kanban')
@@ -3471,17 +4047,22 @@
           var t = prompt('Titel der Unteraufgabe:')
           if (!t || !t.trim()) return
           var td = todayYmd()
+          var kp = getCurrentProject()
+          var laneId = defaultSwimlaneIdForProject(kp)
           addChildToParent(taskRootRef, parentId, {
             id: crypto.randomUUID(),
             title: t.trim(),
             priority: 'medium',
             done: false,
+            archived: false,
             createdAt: new Date().toISOString(),
             startDate: td,
             dueDate: td,
             description: '',
             assigneeIds: [],
             dependsOnTaskIds: [],
+            kanbanColumnId: KANBAN_BACKLOG_ID,
+            swimlaneId: laneId,
             attachments: [],
             links: [],
             history: [],
@@ -3490,31 +4071,223 @@
           render()
         }
 
+        function dayIndexToDate(dayIndex) {
+          return new Date(dayIndex * 86400000)
+        }
+
+        function setGanttScaleMode(mode) {
+          if (mode !== 'day' && mode !== 'month' && mode !== 'year') return
+          ganttScaleMode = mode
+          if (btnGanttScaleDay) btnGanttScaleDay.classList.toggle('is-active', mode === 'day')
+          if (btnGanttScaleMonth) btnGanttScaleMonth.classList.toggle('is-active', mode === 'month')
+          if (btnGanttScaleYear) btnGanttScaleYear.classList.toggle('is-active', mode === 'year')
+          renderGantt()
+        }
+
+        function closeGanttTaskModal() {
+          ganttModalTaskId = null
+          if (ganttModalAssigneePicker) {
+            ganttModalAssigneePicker.destroy()
+            ganttModalAssigneePicker = null
+          }
+          if (ganttModalDependencyPicker) {
+            ganttModalDependencyPicker.destroy()
+            ganttModalDependencyPicker = null
+          }
+          if (ganttTaskModal) ganttTaskModal.hidden = true
+          if (ganttModalBody) ganttModalBody.innerHTML = ''
+        }
+
         function openTaskCardFromGantt(taskId) {
-          setTaskViewMode('list')
-          render()
-          setTimeout(function () {
-            var el = document.getElementById('task-block-' + taskId)
-            if (!el) return
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            var row = el.querySelector('.task')
-            if (row) {
-              row.classList.add('task--flash')
-              setTimeout(function () {
-                row.classList.remove('task--flash')
-              }, 1300)
+          ganttModalTaskId = taskId
+          if (ganttTaskModal) ganttTaskModal.hidden = false
+          renderGanttModalContent()
+        }
+
+        function renderGanttModalContent() {
+          if (!ganttModalTaskId || !ganttModalBody || !taskRootRef) return
+          var node = findNodeByIdInForest(taskRootRef, ganttModalTaskId)
+          if (!node) {
+            closeGanttTaskModal()
+            return
+          }
+          if (ganttModalAssigneePicker) {
+            ganttModalAssigneePicker.destroy()
+            ganttModalAssigneePicker = null
+          }
+          if (ganttModalDependencyPicker) {
+            ganttModalDependencyPicker.destroy()
+            ganttModalDependencyPicker = null
+          }
+
+          ganttModalTitle.textContent = 'Aufgabenkarte: ' + node.title
+          ganttModalBody.innerHTML = ''
+
+          var top = document.createElement('div')
+          top.className = 'form__row--split'
+          var titleWrap = document.createElement('div')
+          titleWrap.style.flex = '1 1 20rem'
+          var titleLab = document.createElement('label')
+          titleLab.className = 'form__legend'
+          titleLab.textContent = 'Titel'
+          var titleInp = document.createElement('input')
+          titleInp.className = 'form__input'
+          titleInp.value = node.title || ''
+          titleInp.addEventListener('change', function () {
+            if (!titleInp.value.trim()) {
+              titleInp.value = node.title
+              return
             }
-          }, 20)
+            setTitleById(taskRootRef, node.id, titleInp.value)
+            render()
+          })
+          titleWrap.appendChild(titleLab)
+          titleWrap.appendChild(titleInp)
+          top.appendChild(titleWrap)
+
+          var doneWrap = document.createElement('div')
+          doneWrap.style.flex = '0 0 auto'
+          var doneLab = document.createElement('label')
+          doneLab.className = 'task__check'
+          doneLab.style.marginTop = '1.55rem'
+          var doneCb = document.createElement('input')
+          doneCb.type = 'checkbox'
+          doneCb.checked = !!node.done
+          doneCb.addEventListener('change', function () {
+            setDoneById(taskRootRef, node.id, doneCb.checked)
+            render()
+          })
+          var doneTxt = document.createElement('span')
+          doneTxt.textContent = 'Abschließen (ins Archiv)'
+          doneLab.appendChild(doneCb)
+          doneLab.appendChild(doneTxt)
+          doneWrap.appendChild(doneLab)
+          top.appendChild(doneWrap)
+          ganttModalBody.appendChild(top)
+
+          var prWrap = document.createElement('div')
+          var prLab = document.createElement('label')
+          prLab.className = 'form__legend'
+          prLab.textContent = 'Priorität'
+          var prSel = document.createElement('select')
+          prSel.className = 'form__input'
+          ;['high', 'medium', 'low'].forEach(function (p) {
+            var opt = document.createElement('option')
+            opt.value = p
+            opt.textContent = LABELS[p]
+            if (node.priority === p) opt.selected = true
+            prSel.appendChild(opt)
+          })
+          prSel.addEventListener('change', function () {
+            setPriorityById(taskRootRef, node.id, prSel.value)
+            render()
+          })
+          prWrap.appendChild(prLab)
+          prWrap.appendChild(prSel)
+          ganttModalBody.appendChild(prWrap)
+
+          var dateRow = document.createElement('div')
+          dateRow.className = 'form__row--split'
+          var stCol = document.createElement('div')
+          stCol.style.flex = '1 1 12rem'
+          var stLab = document.createElement('label')
+          stLab.className = 'form__legend'
+          stLab.textContent = 'Beginn'
+          var stInp = document.createElement('input')
+          stInp.type = 'date'
+          stInp.className = 'form__input form__input--date'
+          stInp.value = isValidYmd(node.startDate) ? node.startDate : ''
+          stInp.addEventListener('change', function () {
+            setStartById(taskRootRef, node.id, stInp.value ? stInp.value : null)
+            render()
+          })
+          stCol.appendChild(stLab)
+          stCol.appendChild(stInp)
+          var duCol = document.createElement('div')
+          duCol.style.flex = '1 1 12rem'
+          var duLab = document.createElement('label')
+          duLab.className = 'form__legend'
+          duLab.textContent = 'Frist'
+          var duInp = document.createElement('input')
+          duInp.type = 'date'
+          duInp.className = 'form__input form__input--date'
+          duInp.value = isValidYmd(node.dueDate) ? node.dueDate : ''
+          duInp.addEventListener('change', function () {
+            setDueById(taskRootRef, node.id, duInp.value ? duInp.value : null)
+            render()
+          })
+          duCol.appendChild(duLab)
+          duCol.appendChild(duInp)
+          dateRow.appendChild(stCol)
+          dateRow.appendChild(duCol)
+          ganttModalBody.appendChild(dateRow)
+
+          var descWrap = document.createElement('div')
+          var descLab = document.createElement('label')
+          descLab.className = 'form__legend'
+          descLab.textContent = 'Beschreibung'
+          var descTa = document.createElement('textarea')
+          descTa.className = 'form__input form__textarea'
+          descTa.rows = 4
+          descTa.maxLength = MAX_DESC
+          descTa.value = typeof node.description === 'string' ? node.description : ''
+          descTa.addEventListener('input', function () {
+            setDescriptionById(taskRootRef, node.id, descTa.value)
+            saveState()
+          })
+          descWrap.appendChild(descLab)
+          descWrap.appendChild(descTa)
+          ganttModalBody.appendChild(descWrap)
+
+          var assWrap = document.createElement('div')
+          var assLab = document.createElement('span')
+          assLab.className = 'form__legend'
+          assLab.id = 'gantt-ass-legend-' + node.id
+          assLab.textContent = 'Zuständig'
+          var assMount = document.createElement('div')
+          assMount.className = 'assign-picker-mount'
+          assMount.setAttribute('aria-labelledby', assLab.id)
+          ganttModalAssigneePicker = mountAssigneePicker(assMount, {
+            initialIds: node.assigneeIds || [],
+            taskNodeId: node.id,
+          })
+          assWrap.appendChild(assLab)
+          assWrap.appendChild(assMount)
+          ganttModalBody.appendChild(assWrap)
+
+          var depWrap = document.createElement('div')
+          var depLab = document.createElement('span')
+          depLab.className = 'form__legend'
+          depLab.id = 'gantt-dep-legend-' + node.id
+          depLab.textContent = 'Zuerst erledigen'
+          var depMount = document.createElement('div')
+          depMount.className = 'assign-picker-mount'
+          depMount.setAttribute('aria-labelledby', depLab.id)
+          ganttModalDependencyPicker = mountDependencyPicker(depMount, {
+            initialIds: node.dependsOnTaskIds || [],
+            taskNodeId: node.id,
+            currentNode: node,
+          })
+          depWrap.appendChild(depLab)
+          depWrap.appendChild(depMount)
+          ganttModalBody.appendChild(depWrap)
         }
 
         function renderGantt() {
-          if (!ganttRoot) return
+          if (!ganttRoot || !ganttLeft || !ganttScroll) return
           ganttRoot.innerHTML = ''
+          ganttLeft.innerHTML = ''
+          if (ganttMonths) ganttMonths.innerHTML = ''
+          if (ganttDays) {
+            ganttDays.innerHTML = ''
+            ganttDays.hidden = ganttScaleMode !== 'day'
+          }
           if (!taskRootRef || taskRootRef.length === 0) {
             var empty = document.createElement('p')
             empty.className = 'list__empty'
             empty.textContent = 'Noch keine Aufgaben für den Projektplan.'
             ganttRoot.appendChild(empty)
+            ganttLeft.appendChild(empty.cloneNode(true))
             return
           }
           var rows = collectGanttRows(taskRootRef, 0, [])
@@ -3536,14 +4309,72 @@
             maxDay = today + 14
           }
           var dayCount = Math.max(1, maxDay - minDay + 1)
-          var laneWidth = Math.max(900, dayCount * 28)
+          var dayPx = ganttScaleMode === 'day' ? 36 : ganttScaleMode === 'month' ? 14 : 4
+          var laneMin = ganttScaleMode === 'day' ? 1800 : ganttScaleMode === 'month' ? 1400 : 1000
+          var laneWidth = Math.max(laneMin, dayCount * dayPx)
+          var labelWidth = 440
           var barGeomById = {}
+          if (ganttMonths) {
+            if (ganttScaleMode === 'day' || ganttScaleMode === 'month') {
+              var cursor = new Date(dayIndexToDate(minDay))
+              cursor.setDate(1)
+              while (cursor.getTime() <= dayIndexToDate(maxDay).getTime()) {
+                var monthStartDay = Math.floor(new Date(cursor.getFullYear(), cursor.getMonth(), 1, 12).getTime() / 86400000)
+                var nextMonthDay = Math.floor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1, 12).getTime() / 86400000)
+                var from = Math.max(minDay, monthStartDay)
+                var to = Math.min(maxDay + 1, nextMonthDay)
+                var widthPx = Math.max(40, ((to - from) / dayCount) * laneWidth)
+                var item = document.createElement('div')
+                item.className = 'gantt__month'
+                item.style.width = widthPx + 'px'
+                item.textContent = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' }).format(cursor)
+                ganttMonths.appendChild(item)
+                cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1)
+              }
+            } else {
+              var yearCursor = new Date(dayIndexToDate(minDay))
+              yearCursor = new Date(yearCursor.getFullYear(), 0, 1)
+              while (yearCursor.getTime() <= dayIndexToDate(maxDay).getTime()) {
+                var yearStart = Math.floor(new Date(yearCursor.getFullYear(), 0, 1, 12).getTime() / 86400000)
+                var nextYearStart = Math.floor(new Date(yearCursor.getFullYear() + 1, 0, 1, 12).getTime() / 86400000)
+                var yFrom = Math.max(minDay, yearStart)
+                var yTo = Math.min(maxDay + 1, nextYearStart)
+                var yWidth = Math.max(60, ((yTo - yFrom) / dayCount) * laneWidth)
+                var yItem = document.createElement('div')
+                yItem.className = 'gantt__month'
+                yItem.style.width = yWidth + 'px'
+                yItem.textContent = String(yearCursor.getFullYear())
+                ganttMonths.appendChild(yItem)
+                yearCursor = new Date(yearCursor.getFullYear() + 1, 0, 1)
+              }
+            }
+          }
+          if (ganttScaleMode === 'day' && ganttDays) {
+            var dayCur = minDay
+            while (dayCur <= maxDay) {
+              var dayDt = dayIndexToDate(dayCur)
+              var dayItem = document.createElement('div')
+              dayItem.className = 'gantt__day'
+              dayItem.style.width = Math.max(26, (1 / dayCount) * laneWidth) + 'px'
+              dayItem.textContent = String(dayDt.getDate())
+              dayItem.title = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' }).format(dayDt)
+              ganttDays.appendChild(dayItem)
+              dayCur++
+            }
+          }
+
+          var leftSpacer = document.createElement('div')
+          leftSpacer.className = 'gantt__left-spacer'
+          if (ganttScaleMode === 'day') leftSpacer.classList.add('gantt__left-spacer--double')
+          ganttLeft.appendChild(leftSpacer)
 
           for (var r = 0; r < rows.length; r++) {
             var row = rows[r]
             var node = row.node
-            var rowEl = document.createElement('div')
-            rowEl.className = 'gantt__row'
+
+            var leftRow = document.createElement('div')
+            leftRow.className = 'gantt__row'
+            leftRow.style.gridTemplateColumns = '1fr'
             var taskCol = document.createElement('div')
             taskCol.className = 'gantt__task'
             taskCol.style.paddingLeft = row.depth * 16 + 'px'
@@ -3564,6 +4395,8 @@
             title.className = 'gantt__title'
             title.textContent = node.title + ' (' + LABELS[node.priority] + ')'
             taskCol.appendChild(title)
+            var kbSel = buildKanbanColumnSelect(node, 'gantt__kanban-select', 'Kanban-Spalte für ' + node.title)
+            taskCol.appendChild(kbSel)
             var openBtn = document.createElement('button')
             openBtn.type = 'button'
             openBtn.className = 'task__btn'
@@ -3585,8 +4418,12 @@
               })
             })(node.id)
             taskCol.appendChild(subBtn)
-            rowEl.appendChild(taskCol)
+            leftRow.appendChild(taskCol)
+            ganttLeft.appendChild(leftRow)
 
+            var rowEl = document.createElement('div')
+            rowEl.className = 'gantt__row'
+            rowEl.style.gridTemplateColumns = '1fr'
             var lane = document.createElement('div')
             lane.className = 'gantt__lane'
             lane.style.width = laneWidth + 'px'
@@ -3611,14 +4448,14 @@
               ' – ' +
               (isValidYmd(node.dueDate) ? formatDueDe(node.dueDate) : 'ohne Frist')
             lane.appendChild(bar)
-            barGeomById[node.id] = { x1: leftPx, x2: leftPx + widthPx, y: r * 52 + 25 }
+            barGeomById[node.id] = { x1: leftPx, x2: leftPx + widthPx, y: r * 52 + 25, row: r }
             rowEl.appendChild(lane)
             ganttRoot.appendChild(rowEl)
           }
 
           var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
           svg.setAttribute('class', 'gantt__deps')
-          svg.setAttribute('width', String(440 + laneWidth + 12))
+          svg.setAttribute('width', String(laneWidth + 12))
           svg.setAttribute('height', String(rows.length * 52 + 6))
           svg.style.left = '0'
           svg.style.top = '0'
@@ -3631,9 +4468,9 @@
               var srcGeom = barGeomById[deps[di]]
               if (!srcGeom) continue
               var p = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-              var x1 = 440 + srcGeom.x2 + 2
+              var x1 = srcGeom.x2 + 2
               var y1 = srcGeom.y
-              var x2 = 440 + tgGeom.x1 - 2
+              var x2 = tgGeom.x1 - 2
               var y2 = tgGeom.y
               var cx = x1 + Math.max(10, (x2 - x1) * 0.45)
               p.setAttribute('d', 'M' + x1 + ',' + y1 + ' C' + cx + ',' + y1 + ' ' + cx + ',' + y2 + ' ' + x2 + ',' + y2)
@@ -3644,30 +4481,360 @@
             }
           }
           ganttRoot.appendChild(svg)
+          ganttRoot.style.width = laneWidth + 'px'
+          if (ganttModalTaskId) renderGanttModalContent()
+        }
+
+        function renderKanban() {
+          if (!kanbanGrid) return
+          var project = getCurrentProject()
+          ensureKanbanProjectConfig(project)
+          if (!project) {
+            kanbanGrid.innerHTML = ''
+            return
+          }
+          var columns = project.kanbanColumns || []
+          var lanes = project.kanbanSwimlanes || []
+          var flat = flattenTasksWithPath(taskRootRef || [], [])
+
+          var columnSet = {}
+          var laneSet = {}
+          for (var c = 0; c < columns.length; c++) columnSet[columns[c].id] = true
+          for (var l = 0; l < lanes.length; l++) laneSet[lanes[l].id] = true
+
+          kanbanGrid.style.setProperty('--kanban-cols', String(columns.length))
+          kanbanGrid.innerHTML = ''
+
+          var corner = document.createElement('div')
+          corner.className = 'kanban__head'
+          corner.innerHTML = '<strong>Swimlanes</strong>'
+          kanbanGrid.appendChild(corner)
+
+          for (var ci = 0; ci < columns.length; ci++) {
+            var col = columns[ci]
+            var head = document.createElement('div')
+            head.className = 'kanban__head'
+            var headTitle = document.createElement('div')
+            headTitle.className = 'kanban__head-title'
+            var titleInp = document.createElement('input')
+            titleInp.className = 'kanban__title-input'
+            titleInp.value = col.name
+            titleInp.setAttribute('data-col-id', col.id)
+            titleInp.disabled = col.id === KANBAN_BACKLOG_ID
+            titleInp.addEventListener('change', function () {
+              var proj = getCurrentProject()
+              if (!proj || !proj.kanbanColumns) return
+              var colId = this.getAttribute('data-col-id')
+              for (var i = 0; i < proj.kanbanColumns.length; i++) {
+                if (proj.kanbanColumns[i].id === colId && colId !== KANBAN_BACKLOG_ID) {
+                  proj.kanbanColumns[i].name = (this.value || '').trim().slice(0, 80) || proj.kanbanColumns[i].name
+                  break
+                }
+              }
+              render()
+            })
+            headTitle.appendChild(titleInp)
+            if (col.id !== KANBAN_BACKLOG_ID) {
+              var delCol = document.createElement('button')
+              delCol.type = 'button'
+              delCol.className = 'task__btn task__btn--danger'
+              delCol.textContent = '×'
+              ;(function (colId) {
+                delCol.addEventListener('click', function () {
+                  var proj = getCurrentProject()
+                  if (!proj || !proj.kanbanColumns) return
+                  var nextCols = proj.kanbanColumns.filter(function (x) {
+                    return x.id !== colId
+                  })
+                  proj.kanbanColumns = nextCols
+                  for (var f = 0; f < flat.length; f++) {
+                    if (flat[f].node.kanbanColumnId === colId) flat[f].node.kanbanColumnId = KANBAN_BACKLOG_ID
+                  }
+                  render()
+                })
+              })(col.id)
+              headTitle.appendChild(delCol)
+            }
+            head.appendChild(headTitle)
+            kanbanGrid.appendChild(head)
+          }
+
+          function makeDropHandlers(cell, laneId, colId) {
+            cell.addEventListener('dragover', function (e) {
+              e.preventDefault()
+              cell.classList.add('kanban__cell--drop')
+            })
+            cell.addEventListener('dragleave', function () {
+              cell.classList.remove('kanban__cell--drop')
+            })
+            cell.addEventListener('drop', function (e) {
+              e.preventDefault()
+              cell.classList.remove('kanban__cell--drop')
+              if (!kanbanDraggedTaskId) return
+              setKanbanPlacementById(taskRootRef, kanbanDraggedTaskId, colId, laneId)
+              kanbanDraggedTaskId = null
+              render()
+            })
+          }
+
+          for (var li = 0; li < lanes.length; li++) {
+            var lane = lanes[li]
+            var laneCell = document.createElement('div')
+            laneCell.className = 'kanban__lane'
+            var laneInp = document.createElement('input')
+            laneInp.className = 'kanban__title-input'
+            laneInp.value = lane.name
+            ;(function (laneId, inpRef) {
+              laneInp.addEventListener('change', function () {
+                var proj = getCurrentProject()
+                if (!proj || !proj.kanbanSwimlanes) return
+                for (var i = 0; i < proj.kanbanSwimlanes.length; i++) {
+                  if (proj.kanbanSwimlanes[i].id === laneId) {
+                    proj.kanbanSwimlanes[i].name =
+                      (inpRef.value || '').trim().slice(0, 80) || proj.kanbanSwimlanes[i].name
+                    break
+                  }
+                }
+                render()
+              })
+            })(lane.id, laneInp)
+            laneCell.appendChild(laneInp)
+            if (lanes.length > 1) {
+              var delLane = document.createElement('button')
+              delLane.type = 'button'
+              delLane.className = 'task__btn task__btn--danger'
+              delLane.textContent = '×'
+              ;(function (laneId) {
+                delLane.addEventListener('click', function () {
+                  var proj = getCurrentProject()
+                  if (!proj || !proj.kanbanSwimlanes || proj.kanbanSwimlanes.length <= 1) return
+                  var fallbackLane = proj.kanbanSwimlanes[0].id === laneId ? proj.kanbanSwimlanes[1].id : proj.kanbanSwimlanes[0].id
+                  proj.kanbanSwimlanes = proj.kanbanSwimlanes.filter(function (x) {
+                    return x.id !== laneId
+                  })
+                  for (var f = 0; f < flat.length; f++) {
+                    if (flat[f].node.swimlaneId === laneId) flat[f].node.swimlaneId = fallbackLane
+                  }
+                  render()
+                })
+              })(lane.id)
+              laneCell.appendChild(delLane)
+            }
+            kanbanGrid.appendChild(laneCell)
+
+            for (var cj = 0; cj < columns.length; cj++) {
+              var ccol = columns[cj]
+              var cell = document.createElement('div')
+              cell.className = 'kanban__cell'
+              makeDropHandlers(cell, lane.id, ccol.id)
+              var addCardBtn = document.createElement('button')
+              addCardBtn.type = 'button'
+              addCardBtn.className = 'task__btn kanban__add-card'
+              addCardBtn.textContent = '+ Karte'
+              ;(function (columnId, swimlaneId) {
+                addCardBtn.addEventListener('click', function () {
+                  var title = prompt('Titel der neuen Karte:')
+                  if (!title || !title.trim()) return
+                  var td = todayYmd()
+                  taskRootRef.push({
+                    id: crypto.randomUUID(),
+                    title: title.trim().slice(0, 500),
+                    priority: 'medium',
+                    done: false,
+                    archived: false,
+                    createdAt: new Date().toISOString(),
+                    startDate: td,
+                    dueDate: td,
+                    description: '',
+                    assigneeIds: [],
+                    dependsOnTaskIds: [],
+                    kanbanColumnId: columnId,
+                    swimlaneId: swimlaneId,
+                    attachments: [],
+                    links: [],
+                    history: [],
+                    children: [],
+                  })
+                  render()
+                })
+              })(ccol.id, lane.id)
+              cell.appendChild(addCardBtn)
+              for (var k = 0; k < flat.length; k++) {
+                var item = flat[k]
+                var node = item.node
+                if (node.kanbanColumnId !== ccol.id || node.swimlaneId !== lane.id) continue
+                var card = document.createElement('article')
+                card.className = 'kanban__card'
+                card.draggable = true
+                ;(function (taskId) {
+                  card.addEventListener('dragstart', function () {
+                    kanbanDraggedTaskId = taskId
+                  })
+                  card.addEventListener('dragend', function () {
+                    kanbanDraggedTaskId = null
+                  })
+                })(node.id)
+                var t = document.createElement('div')
+                t.className = 'kanban__card-title'
+                t.textContent = item.pathLabel
+                var m = document.createElement('div')
+                m.className = 'kanban__card-meta'
+                m.textContent = 'Frist: ' + (isValidYmd(node.dueDate) ? formatDueDe(node.dueDate) : '—')
+                var actions = document.createElement('div')
+                actions.className = 'kanban__card-actions'
+                var subBtn = document.createElement('button')
+                subBtn.type = 'button'
+                subBtn.className = 'task__btn'
+                subBtn.textContent = '+ Unteraufgabe'
+                ;(function (parentId, columnId, swimlaneId) {
+                  subBtn.addEventListener('click', function () {
+                    var title = prompt('Titel der neuen Unteraufgabe:')
+                    if (!title || !title.trim()) return
+                    var td = todayYmd()
+                    addChildToParent(taskRootRef, parentId, {
+                      id: crypto.randomUUID(),
+                      title: title.trim().slice(0, 500),
+                      priority: 'medium',
+                      done: false,
+                      archived: false,
+                      createdAt: new Date().toISOString(),
+                      startDate: td,
+                      dueDate: td,
+                      description: '',
+                      assigneeIds: [],
+                      dependsOnTaskIds: [],
+                      kanbanColumnId: columnId,
+                      swimlaneId: swimlaneId,
+                      attachments: [],
+                      links: [],
+                      history: [],
+                      children: [],
+                    })
+                    setSubtasksCollapsed(parentId, false)
+                    render()
+                  })
+                })(node.id, ccol.id, lane.id)
+                var openBtn = document.createElement('button')
+                openBtn.type = 'button'
+                openBtn.className = 'task__btn'
+                openBtn.textContent = 'Karte öffnen'
+                ;(function (taskId) {
+                  openBtn.addEventListener('click', function () {
+                    openTaskCardFromGantt(taskId)
+                  })
+                })(node.id)
+                var doneBtn = document.createElement('button')
+                doneBtn.type = 'button'
+                doneBtn.className = 'task__btn'
+                doneBtn.textContent = 'Abschließen (Archiv)'
+                ;(function (taskId) {
+                  doneBtn.addEventListener('click', function () {
+                    setDoneById(taskRootRef, taskId, true)
+                    render()
+                  })
+                })(node.id)
+                actions.appendChild(openBtn)
+                actions.appendChild(subBtn)
+                actions.appendChild(doneBtn)
+                card.appendChild(t)
+                card.appendChild(m)
+                card.appendChild(actions)
+                cell.appendChild(card)
+              }
+              kanbanGrid.appendChild(cell)
+            }
+          }
         }
 
         function render() {
           if (!taskRootRef) return
           sortSiblings(taskRootRef)
+          var projForRender = getCurrentProject()
+          ensureKanbanProjectConfig(projForRender)
+          if (projForRender) {
+            var cSet = {}
+            var lSet = {}
+            for (var ci = 0; ci < projForRender.kanbanColumns.length; ci++) cSet[projForRender.kanbanColumns[ci].id] = true
+            for (var li = 0; li < projForRender.kanbanSwimlanes.length; li++) lSet[projForRender.kanbanSwimlanes[li].id] = true
+            normalizeTaskKanbanPlacement(taskRootRef, cSet, lSet, projForRender.kanbanSwimlanes[0].id)
+          }
           saveState()
-          if (taskRootRef.length === 0) {
+          var activeTopLevel = taskRootRef.filter(function (n) {
+            return !n.archived
+          })
+          var archivedItems = collectArchivedTasksWithPath(taskRootRef, [], [])
+          if (activeTopLevel.length === 0) {
             emptyMsg.hidden = false
             taskList.hidden = true
             taskList.innerHTML = ''
             renderGantt()
+            renderKanban()
             renderNewTaskAssignees()
             renderNewTaskDependencies()
-            return
+          } else {
+            emptyMsg.hidden = true
+            taskList.hidden = false
+            taskList.innerHTML = ''
+            for (var i = 0; i < activeTopLevel.length; i++) {
+              taskList.appendChild(renderNode(activeTopLevel[i]))
+            }
+            renderGantt()
+            renderKanban()
+            renderNewTaskAssignees()
+            renderNewTaskDependencies()
           }
-          emptyMsg.hidden = true
-          taskList.hidden = false
-          taskList.innerHTML = ''
-          for (var i = 0; i < taskRootRef.length; i++) {
-            taskList.appendChild(renderNode(taskRootRef[i]))
+          if (archivePanel && archiveList && btnToggleArchive) {
+            archivePanel.hidden = archivedItems.length === 0
+            archiveList.innerHTML = ''
+            for (var ai = 0; ai < archivedItems.length; ai++) {
+              var it = archivedItems[ai]
+              var li = document.createElement('li')
+              li.className = 'archive-item'
+              var txt = document.createElement('span')
+              txt.textContent = it.pathLabel
+              var acts = document.createElement('div')
+              acts.className = 'task__actions'
+              var open = document.createElement('button')
+              open.type = 'button'
+              open.className = 'task__btn'
+              open.textContent = 'Öffnen'
+              ;(function (taskId) {
+                open.addEventListener('click', function () {
+                  openTaskCardFromGantt(taskId)
+                })
+              })(it.id)
+              var restore = document.createElement('button')
+              restore.type = 'button'
+              restore.className = 'task__btn'
+              restore.textContent = 'Wiederherstellen'
+              ;(function (taskId) {
+                restore.addEventListener('click', function () {
+                  setArchivedById(taskRootRef, taskId, false)
+                  render()
+                })
+              })(it.id)
+              var del = document.createElement('button')
+              del.type = 'button'
+              del.className = 'task__btn task__btn--danger'
+              del.textContent = 'Endgültig löschen'
+              ;(function (taskId) {
+                del.addEventListener('click', function () {
+                  stripRemovedTaskIdFromDependencies(taskRootRef, taskId)
+                  removeById(taskRootRef, taskId)
+                  render()
+                })
+              })(it.id)
+              acts.appendChild(open)
+              acts.appendChild(restore)
+              acts.appendChild(del)
+              li.appendChild(txt)
+              li.appendChild(acts)
+              archiveList.appendChild(li)
+            }
+            archiveList.hidden = !archiveListOpen
+            btnToggleArchive.textContent = archiveListOpen ? 'Archiv ausblenden' : 'Archiv anzeigen'
+            btnToggleArchive.setAttribute('aria-expanded', archiveListOpen ? 'true' : 'false')
           }
-          renderGantt()
-          renderNewTaskAssignees()
-          renderNewTaskDependencies()
         }
 
         function renderNode(node) {
@@ -3675,7 +4842,11 @@
           block.className = 'task-block'
           block.id = 'task-block-' + node.id
 
-          var subKids = Array.isArray(node.children) ? node.children : []
+          var subKids = Array.isArray(node.children)
+            ? node.children.filter(function (c) {
+                return !c.archived
+              })
+            : []
           var subCount = subKids.length
 
           var row = document.createElement('div')
@@ -3736,6 +4907,22 @@
           var actions = document.createElement('div')
           actions.className = 'task__actions'
 
+          var btnDetails = document.createElement('button')
+          btnDetails.type = 'button'
+          btnDetails.className = 'task__btn'
+          var detailsOpen = taskDetailsOpenMap[node.id] === true
+          btnDetails.textContent = detailsOpen ? 'Details ausblenden' : 'Details anzeigen'
+          btnDetails.setAttribute('aria-expanded', detailsOpen ? 'true' : 'false')
+          var btnArchive = document.createElement('button')
+          btnArchive.type = 'button'
+          btnArchive.className = 'task__btn'
+          btnArchive.textContent = 'Abschließen'
+          btnArchive.setAttribute('aria-label', 'Aufgabe abschließen und archivieren: ' + node.title)
+          btnArchive.addEventListener('click', function () {
+            setDoneById(taskRootRef, node.id, true)
+            render()
+          })
+
           var badge = document.createElement('span')
           badge.className = 'task__badge'
           badge.textContent = LABELS[node.priority]
@@ -3758,15 +4945,68 @@
             render()
           })
 
-          actions.appendChild(badge)
-          actions.appendChild(btnSub)
-          actions.appendChild(del)
+          actions.appendChild(btnDetails)
+          actions.appendChild(btnArchive)
 
           top.appendChild(label)
           top.appendChild(actions)
           row.appendChild(top)
 
-          appendTaskCardQuickStrip(row, node)
+          var summary = document.createElement('div')
+          summary.className = 'task__summary'
+          var assigneeSummary = document.createElement('span')
+          assigneeSummary.className = 'task__summary-item'
+          var projNow = getCurrentProject()
+          var partsNow = projNow && projNow.participants ? projNow.participants : []
+          var names = (node.assigneeIds || [])
+            .map(function (id) {
+              var p = findParticipantById(partsNow, id)
+              return p ? (p.firstName + ' ' + p.lastName).trim() : null
+            })
+            .filter(function (v) {
+              return !!v
+            })
+          assigneeSummary.textContent = 'Zuständig: ' + (names.length ? names.join(', ') : '—')
+          var dueSummary = document.createElement('span')
+          dueSummary.className = 'task__summary-item'
+          dueSummary.textContent = 'Frist: ' + (isValidYmd(node.dueDate) ? formatDueDe(node.dueDate) : '—')
+          var colSummary = document.createElement('span')
+          colSummary.className = 'task__summary-item'
+          var colLbl = document.createElement('span')
+          colLbl.textContent = 'Kanban:'
+          var colSel = buildKanbanColumnSelect(
+            node,
+            'task__summary-select',
+            'Kanban-Spalte für Aufgabe ' + node.title,
+          )
+          colSummary.appendChild(colLbl)
+          colSummary.appendChild(colSel)
+          summary.appendChild(assigneeSummary)
+          summary.appendChild(dueSummary)
+          summary.appendChild(colSummary)
+          row.appendChild(summary)
+
+          var detailsWrap = document.createElement('div')
+          detailsWrap.className = 'task__details-wrap'
+          detailsWrap.id = 'task-details-' + node.id
+          detailsWrap.hidden = !detailsOpen
+          btnDetails.setAttribute('aria-controls', detailsWrap.id)
+          btnDetails.addEventListener('click', function () {
+            taskDetailsOpenMap[node.id] = !detailsWrap.hidden
+            detailsWrap.hidden = !detailsWrap.hidden
+            var nowOpen = !detailsWrap.hidden
+            btnDetails.textContent = nowOpen ? 'Details ausblenden' : 'Details anzeigen'
+            btnDetails.setAttribute('aria-expanded', nowOpen ? 'true' : 'false')
+          })
+
+          var detailActions = document.createElement('div')
+          detailActions.className = 'task__actions'
+          detailActions.appendChild(badge)
+          detailActions.appendChild(btnSub)
+          detailActions.appendChild(del)
+          detailsWrap.appendChild(detailActions)
+
+          appendTaskCardQuickStrip(detailsWrap, node)
 
           var datesWrap = document.createElement('div')
           datesWrap.className = 'task__dates'
@@ -3841,7 +5081,7 @@
           datesWrap.appendChild(startField)
           datesWrap.appendChild(dueField)
           datesWrap.appendChild(datesHint)
-          row.appendChild(datesWrap)
+          detailsWrap.appendChild(datesWrap)
 
           var descWrap = document.createElement('div')
           descWrap.className = 'task__desc-wrap'
@@ -3866,7 +5106,7 @@
           })
           descWrap.appendChild(descLbl)
           descWrap.appendChild(descTa)
-          row.appendChild(descWrap)
+          detailsWrap.appendChild(descWrap)
 
           var assignWrap = document.createElement('div')
           assignWrap.className = 'task__assign-wrap'
@@ -3884,7 +5124,7 @@
           })
           assignWrap.appendChild(assignLegend)
           assignWrap.appendChild(assignMount)
-          row.appendChild(assignWrap)
+          detailsWrap.appendChild(assignWrap)
 
           var depWrap = document.createElement('div')
           depWrap.className = 'task__assign-wrap'
@@ -3903,11 +5143,11 @@
           })
           depWrap.appendChild(depLegend)
           depWrap.appendChild(depMount)
-          row.appendChild(depWrap)
+          detailsWrap.appendChild(depWrap)
 
-          appendAttachmentsEditorToRow(row, node)
-          appendLinksEditorToRow(row, node)
-          appendHistorySection(row, node)
+          appendAttachmentsEditorToRow(detailsWrap, node)
+          appendLinksEditorToRow(detailsWrap, node)
+          appendHistorySection(detailsWrap, node)
 
           var addRow = document.createElement('div')
           addRow.className = 'task-add-sub task-add-sub--hidden'
@@ -4087,17 +5327,22 @@
             var t = subInput.value.trim()
             if (!t) return
             if (!isValidYmd(subDue.value)) return
+            var kp = getCurrentProject()
+            var laneId = defaultSwimlaneIdForProject(kp)
             var child = {
               id: crypto.randomUUID(),
               title: t,
               priority: readSubPriority(),
               done: false,
+              archived: false,
               createdAt: new Date().toISOString(),
               startDate: isValidYmd(subStart.value) ? subStart.value : null,
               dueDate: subDue.value,
               description: sanitizeDescription(subDesc.value),
               assigneeIds: subAssignPicker.getIds(),
               dependsOnTaskIds: subDepPicker.getIds(),
+              kanbanColumnId: KANBAN_BACKLOG_ID,
+              swimlaneId: laneId,
               attachments: pendingSubAttachments.map(function (a) {
                 return {
                   id: a.id,
@@ -4155,6 +5400,8 @@
           addRow.appendChild(subAttachWrap)
           addRow.appendChild(subLinksWrap)
           addRow.appendChild(rowSplit)
+          detailsWrap.appendChild(addRow)
+          row.appendChild(detailsWrap)
 
           block.appendChild(row)
 
@@ -4173,8 +5420,6 @@
             }
             block.appendChild(ul)
           }
-
-          block.appendChild(addRow)
 
           return block
         }
@@ -4204,6 +5449,8 @@
               image: img,
               participants: [],
               tasks: [],
+              kanbanColumns: defaultKanbanColumns(),
+              kanbanSwimlanes: defaultKanbanSwimlanes(),
             }
             state.projects.push(proj)
             state.openProjectId = proj.id
@@ -4256,6 +5503,8 @@
         form.addEventListener('submit', function (e) {
           e.preventDefault()
           if (!taskRootRef) return
+          var kp = getCurrentProject()
+          var laneId = defaultSwimlaneIdForProject(kp)
           var title = titleInput.value.trim()
           if (!title) return
           var pr = form.querySelector('input[name="priority"]:checked')
@@ -4265,12 +5514,15 @@
             title: title,
             priority: priority,
             done: false,
+            archived: false,
             createdAt: new Date().toISOString(),
             startDate: taskStart && isValidYmd(taskStart.value) ? taskStart.value : null,
             dueDate: isValidYmd(taskDue.value) ? taskDue.value : null,
             description: sanitizeDescription(taskDesc.value),
             assigneeIds: newTaskPickerInstance ? newTaskPickerInstance.getIds() : [],
             dependsOnTaskIds: newTaskDepPickerInstance ? newTaskDepPickerInstance.getIds() : [],
+            kanbanColumnId: KANBAN_BACKLOG_ID,
+            swimlaneId: laneId,
             attachments: pendingMainAttachments.map(function (a) {
               return {
                 id: a.id,
@@ -4340,6 +5592,62 @@
             setTaskViewMode('gantt')
           })
         }
+        if (btnToggleArchive) {
+          btnToggleArchive.addEventListener('click', function () {
+            archiveListOpen = !archiveListOpen
+            render()
+          })
+        }
+        if (btnKanbanAddColumn) {
+          btnKanbanAddColumn.addEventListener('click', function () {
+            var p = getCurrentProject()
+            if (!p) return
+            ensureKanbanProjectConfig(p)
+            var name = prompt('Name der neuen Spalte:')
+            if (!name || !name.trim()) return
+            p.kanbanColumns.push({ id: crypto.randomUUID(), name: name.trim().slice(0, 80) })
+            render()
+          })
+        }
+        if (btnKanbanAddLane) {
+          btnKanbanAddLane.addEventListener('click', function () {
+            var p = getCurrentProject()
+            if (!p) return
+            ensureKanbanProjectConfig(p)
+            var name = prompt('Name der neuen Swimlane:')
+            if (!name || !name.trim()) return
+            p.kanbanSwimlanes.push({ id: crypto.randomUUID(), name: name.trim().slice(0, 80) })
+            render()
+          })
+        }
+        if (btnGanttScaleDay) {
+          btnGanttScaleDay.addEventListener('click', function () {
+            setGanttScaleMode('day')
+          })
+        }
+        if (btnGanttScaleMonth) {
+          btnGanttScaleMonth.addEventListener('click', function () {
+            setGanttScaleMode('month')
+          })
+        }
+        if (btnGanttScaleYear) {
+          btnGanttScaleYear.addEventListener('click', function () {
+            setGanttScaleMode('year')
+          })
+        }
+        if (btnCloseGanttModal) {
+          btnCloseGanttModal.addEventListener('click', function () {
+            closeGanttTaskModal()
+          })
+        }
+        if (ganttTaskModal) {
+          ganttTaskModal.addEventListener('click', function (e) {
+            if (e.target === ganttTaskModal) closeGanttTaskModal()
+          })
+        }
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && ganttModalTaskId) closeGanttTaskModal()
+        })
 
         mainTaskAttachmentsPanel = buildPendingAttachmentsUI(
           document.getElementById('main-task-attachments-wrap'),
