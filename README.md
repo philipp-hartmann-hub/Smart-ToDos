@@ -38,10 +38,11 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 ## Protokolle (Startseite)
 
 - Eigener Bereich **„Protokolle“** in der Projekt-Startansicht
-- Einträge mit **Datum + Bereich + Text** erfassen
+- **Projektgebunden**: jedes Projekt hat seinen eigenen Protokollbereich
 - Bereiche als **Obergruppen** (z. B. `JF`, `Kundentermin`) auswählbar oder direkt neu anlegbar
-- Gruppierte Anzeige nach Bereich, innerhalb eines Bereichs neueste zuerst
-- Einträge bei Bedarf löschen
+- Pro Bereich können **Sitzungen** mit Datum angelegt werden (aufklappbar)
+- In jeder Sitzung pro Zeile: Verantwortlicher, Bereich, Erläuterung, Aufgabe (inkl. Popup-Öffnen), Ergebnis
+- Zusätzliche Sitzungszeilen per `+ Zeile`; Änderungen werden direkt in `localStorage` gespeichert
 
 ## Aufgabenansichten im Überblick
 
@@ -137,3 +138,4 @@ cd Smart-ToDos
 | 2026-04-06 | Standardansichten bereinigt: Kanban-Status vollständig aus Standardzeilen entfernt; Umstellung ausschließlich in Detailbereich bzw. Gantt-Popup. |
 | 2026-04-06 | Startseite erweitert: neuer Bereich „Protokolle“ mit datierten Einträgen (anlegen, anzeigen, löschen), persistent in localStorage gespeichert. |
 | 2026-04-06 | Protokolle erweitert: Bereiche als Obergruppen eingeführt (auswählen/neu anlegen), Einträge werden gruppiert nach Bereich dargestellt. |
+| 2026-04-06 | Protokolle pro Projekt umgestellt: Bereiche enthalten Sitzungen mit aufklappbarer Tabelle (Verantwortlicher, Bereich, Erläuterung, Aufgabe mit Popup, Ergebnis). |
