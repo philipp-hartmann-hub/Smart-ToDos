@@ -4189,6 +4189,19 @@
           prWrap.appendChild(prSel)
           ganttModalBody.appendChild(prWrap)
 
+          var kbWrap = document.createElement('div')
+          var kbLab = document.createElement('label')
+          kbLab.className = 'form__legend'
+          kbLab.textContent = 'Kanban-Spalte'
+          var kbSelModal = buildKanbanColumnSelect(
+            node,
+            'form__input',
+            'Kanban-Spalte für Aufgabe ' + node.title,
+          )
+          kbWrap.appendChild(kbLab)
+          kbWrap.appendChild(kbSelModal)
+          ganttModalBody.appendChild(kbWrap)
+
           var dateRow = document.createElement('div')
           dateRow.className = 'form__row--split'
           var stCol = document.createElement('div')
@@ -4398,8 +4411,6 @@
             title.className = 'gantt__title'
             title.textContent = node.title + ' (' + LABELS[node.priority] + ')'
             taskCol.appendChild(title)
-            var kbSel = buildKanbanColumnSelect(node, 'gantt__kanban-select', 'Kanban-Spalte für ' + node.title)
-            taskCol.appendChild(kbSel)
             var openBtn = document.createElement('button')
             openBtn.type = 'button'
             openBtn.className = 'task__btn'
@@ -4975,15 +4986,7 @@
           dueSummary.textContent = 'Frist: ' + (isValidYmd(node.dueDate) ? formatDueDe(node.dueDate) : '—')
           var colSummary = document.createElement('span')
           colSummary.className = 'task__summary-item'
-          var colLbl = document.createElement('span')
-          colLbl.textContent = 'Kanban:'
-          var colSel = buildKanbanColumnSelect(
-            node,
-            'task__summary-select',
-            'Kanban-Spalte für Aufgabe ' + node.title,
-          )
-          colSummary.appendChild(colLbl)
-          colSummary.appendChild(colSel)
+          colSummary.textContent = 'Kanban: ' + getKanbanColumnNameById(node.kanbanColumnId)
           summary.appendChild(assigneeSummary)
           summary.appendChild(dueSummary)
           summary.appendChild(colSummary)
@@ -5008,6 +5011,20 @@
           detailActions.appendChild(btnSub)
           detailActions.appendChild(del)
           detailsWrap.appendChild(detailActions)
+
+          var detailKanbanWrap = document.createElement('div')
+          detailKanbanWrap.className = 'task__assign-wrap'
+          var detailKanbanLegend = document.createElement('span')
+          detailKanbanLegend.className = 'task__desc-label'
+          detailKanbanLegend.textContent = 'Kanban-Spalte'
+          var detailKanbanSel = buildKanbanColumnSelect(
+            node,
+            'form__input',
+            'Kanban-Spalte für Aufgabe ' + node.title,
+          )
+          detailKanbanWrap.appendChild(detailKanbanLegend)
+          detailKanbanWrap.appendChild(detailKanbanSel)
+          detailsWrap.appendChild(detailKanbanWrap)
 
           appendTaskCardQuickStrip(detailsWrap, node)
 

@@ -41,7 +41,7 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 - Weitere Felder per „Details anzeigen“ aufklappbar
 - Abschließen archiviert Aufgaben; aktive Liste zeigt nur nicht archivierte Karten
 - Archivbereich mit Öffnen, Wiederherstellen und Endgültig löschen
-- Kanban-Spaltenlabel in der Liste ist direkt umstellbar (Dropdown), Karte wechselt sofort die Kanban-Spalte
+- Kanban-Spaltenstatus in der Standardansicht als Label sichtbar; Umstellung im aufgeklappten Detailbereich
 - Gut für schnellen Überblick und fokussierte Bearbeitung
 
 ### 2) Projektplan (Gantt)
@@ -53,8 +53,8 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 - Tagesansicht mit zwei Ebenen: oben durchgehende Monatsleiste, darunter Tagesnummern
 - Fixierte Aufgaben-Spalte links (sticky), damit Aufgaben beim horizontalen Scrollen sichtbar bleiben
 - Popup-„Aufgabenkarte“ direkt im Gantt bearbeitbar (ohne Ansichtswechsel)
-- Kanban-Spaltenstatus als Label auch in der Gantt-Zeile sichtbar
-- Kanban-Spaltenstatus im Gantt direkt als Auswahlfeld änderbar
+- Kanban-Spaltenstatus in der Gantt-Zeile als Label sichtbar
+- Kanban-Spaltenstatus im Gantt-Popup direkt als Auswahlfeld änderbar
 
 ### 3) Kanban
 - Standard-Spalten: **Backlog**, **In Bearbeitung**, **Warten auf Rückmeldung**, **Abgeschlossen**
@@ -124,3 +124,4 @@ cd Smart-ToDos
 | 2026-04-06 | Kanban-Status aus Liste/Gantt steuerbar: Spaltenlabel als Dropdown umgestellt; Auswahl verschiebt die Karte sofort in die gewählte Kanban-Spalte. |
 | 2026-04-06 | Archiv erweitert: archivierte Aufgaben können nun direkt geöffnet (Popup), zusätzlich zu Wiederherstellen und Endgültig löschen. |
 | 2026-04-06 | Kanban-Layout verbessert: Zellen auf ca. 5 sichtbare Karten begrenzt, weitere Karten per vertikalem Scrollen innerhalb der Zelle erreichbar. |
+| 2026-04-06 | Kanban-Auswahl in den Detailbereich verlagert: in Aufgabenliste nur noch bei aufgeklappten Details, im Gantt nur im Popup (nicht in der Standardzeile). |
