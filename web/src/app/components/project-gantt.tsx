@@ -36,6 +36,7 @@ type Task = {
   kanbanColumnId: string;
   swimlaneId: string;
   dependsOnTaskIds?: string[] | null;
+  assigneeIds?: string[] | null;
 };
 
 type Props = { projectId: string; initialTasks: Task[] };

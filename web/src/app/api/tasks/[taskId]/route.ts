@@ -6,6 +6,7 @@ import { tasks } from "@/lib/schema";
 import { readSessionFromCookie } from "@/lib/auth";
 import { canAccessProject } from "@/lib/access";
 import { validateDependsOnUpdate } from "@/lib/task-deps";
+import { assigneesAreProjectMembers } from "@/lib/project-assignees";
 
 const patchSchema = z.object({
   title: z.string().min(1).max(500).optional(),
@@ -18,6 +19,7 @@ const patchSchema = z.object({
   kanbanColumnId: z.string().min(1).optional(),
   swimlaneId: z.string().min(1).optional(),
   dependsOnTaskIds: z.array(z.string().uuid()).optional(),
+  assigneeIds: z.array(z.string().uuid()).optional(),
 });
 
 export async function PATCH(req: Request, context: { params: Promise<{ taskId: string }> }) {
@@ -47,6 +49,11 @@ export async function PATCH(req: Request, context: { params: Promise<{ taskId: s
     }
   }
 
+  if (data.assigneeIds !== undefined) {
+    const okMembers = await assigneesAreProjectMembers(db, task.projectId, data.assigneeIds);
+    if (!okMembers) return NextResponse.json({ error: "Zuständige müssen Projektmitglieder sein." }, { status: 400 });
+  }
+
   const updated = await db
     .update(tasks)
     .set({
@@ -61,6 +68,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ taskId: s
       swimlaneId: data.swimlaneId ?? task.swimlaneId,
       dependsOnTaskIds:
         data.dependsOnTaskIds !== undefined ? data.dependsOnTaskIds : task.dependsOnTaskIds,
+      assigneeIds: data.assigneeIds !== undefined ? data.assigneeIds : task.assigneeIds,
       updatedAt: new Date(),
     })
     .where(eq(tasks.id, taskId))

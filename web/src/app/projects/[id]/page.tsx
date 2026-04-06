@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { projectMembers, projects, tasks } from "@/lib/schema";
+import { projectMembers, projects, tasks, users } from "@/lib/schema";
 import { readSessionFromCookie } from "@/lib/auth";
 import ProjectWorkspace from "@/app/components/project-workspace";
 
@@ -70,6 +70,17 @@ export default async function ProjectPage({ params }: Params) {
   }
   const projectTasks = await db.select().from(tasks).where(eq(tasks.projectId, project.id));
 
+  const projectMemberRows = await db
+    .select({
+      id: users.id,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      username: users.username,
+    })
+    .from(projectMembers)
+    .innerJoin(users, eq(projectMembers.userId, users.id))
+    .where(eq(projectMembers.projectId, project.id));
+
   return (
     <main className="container">
       <div className="card">
@@ -79,7 +90,7 @@ export default async function ProjectPage({ params }: Params) {
           <button className="secondary">Zurück zur Übersicht</button>
         </Link>
       </div>
-      <ProjectWorkspace projectId={project.id} initialTasks={projectTasks} />
+      <ProjectWorkspace projectId={project.id} initialTasks={projectTasks} projectMembers={projectMemberRows} />
     </main>
   );
 }

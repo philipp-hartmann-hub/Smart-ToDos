@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { stripUserFromAssigneesInProject } from "@/lib/project-assignees";
 import { projectMembers, users } from "@/lib/schema";
 import { readSessionFromCookie } from "@/lib/auth";
 
@@ -32,6 +33,7 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
 
   for (const projectId of currentSet) {
     if (!nextSet.has(projectId)) {
+      await stripUserFromAssigneesInProject(db, projectId, userId);
       await db
         .delete(projectMembers)
         .where(and(eq(projectMembers.userId, userId), eq(projectMembers.projectId, projectId)));

@@ -52,6 +52,7 @@ export const tasks = pgTable("tasks", {
   kanbanColumnId: text("kanban_column_id").notNull().default("kanban-backlog"),
   swimlaneId: text("swimlane_id").notNull().default("kanban-lane-default"),
   dependsOnTaskIds: jsonb("depends_on_task_ids").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  assigneeIds: jsonb("assignee_ids").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

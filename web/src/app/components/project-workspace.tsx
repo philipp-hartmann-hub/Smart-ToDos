@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import ProjectTasks from "./project-tasks";
+import ProjectTasks, { type ProjectMember } from "./project-tasks";
 import ProjectKanban from "./project-kanban";
 import ProjectGantt from "./project-gantt";
 
@@ -18,9 +18,18 @@ type Task = {
   description: string | null;
   kanbanColumnId: string;
   swimlaneId: string;
+  assigneeIds?: string[] | null;
 };
 
-export default function ProjectWorkspace({ projectId, initialTasks }: { projectId: string; initialTasks: Task[] }) {
+export default function ProjectWorkspace({
+  projectId,
+  initialTasks,
+  projectMembers,
+}: {
+  projectId: string;
+  initialTasks: Task[];
+  projectMembers: ProjectMember[];
+}) {
   const [mode, setMode] = useState<"list" | "gantt" | "kanban">("list");
   return (
     <>
@@ -38,7 +47,7 @@ export default function ProjectWorkspace({ projectId, initialTasks }: { projectI
         </div>
       </div>
       {mode === "list" ? (
-        <ProjectTasks projectId={projectId} initialTasks={initialTasks} />
+        <ProjectTasks projectId={projectId} initialTasks={initialTasks} projectMembers={projectMembers} />
       ) : mode === "gantt" ? (
         <ProjectGantt projectId={projectId} initialTasks={initialTasks} />
       ) : (

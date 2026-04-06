@@ -15,6 +15,7 @@ type Task = {
   description: string | null;
   kanbanColumnId: string;
   swimlaneId: string;
+  assigneeIds?: string[] | null;
 };
 
 type Props = {

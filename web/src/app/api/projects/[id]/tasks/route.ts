@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { projects, tasks } from "@/lib/schema";
 import { readSessionFromCookie } from "@/lib/auth";
 import { canAccessProject } from "@/lib/access";
+import { assigneesAreProjectMembers } from "@/lib/project-assignees";
 
 const createSchema = z.object({
   title: z.string().min(1).max(500),
@@ -15,6 +16,7 @@ const createSchema = z.object({
   description: z.string().max(5000).nullable().optional(),
   kanbanColumnId: z.string().min(1).optional(),
   swimlaneId: z.string().min(1).optional(),
+  assigneeIds: z.array(z.string().uuid()).optional(),
 });
 
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
@@ -53,6 +55,12 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     if (!parent.length) return NextResponse.json({ error: "Elternaufgabe nicht gefunden." }, { status: 400 });
   }
 
+  const assigneeIds = parsed.data.assigneeIds ?? [];
+  if (assigneeIds.length) {
+    const okMembers = await assigneesAreProjectMembers(db, projectId, assigneeIds);
+    if (!okMembers) return NextResponse.json({ error: "Zuständige müssen Projektmitglieder sein." }, { status: 400 });
+  }
+
   const inserted = await db
     .insert(tasks)
     .values({
@@ -65,6 +73,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       description: parsed.data.description || null,
       kanbanColumnId: parsed.data.kanbanColumnId || "kanban-backlog",
       swimlaneId: parsed.data.swimlaneId || "kanban-lane-default",
+      assigneeIds,
       done: false,
       archived: false,
     })
