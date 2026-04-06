@@ -110,12 +110,13 @@ Erster technischer Start liegt jetzt in `web/`:
 
 - Next.js App Router (TypeScript)
 - Neon-Anbindung über `@neondatabase/serverless`
-- Drizzle-Schema für `users`, `projects`, `project_members`, `tasks`
+- Drizzle-Schema für `users`, `projects`, `project_members`, `tasks` (inkl. `depends_on_task_ids` JSON für Vorgänger im Gantt)
 - API-Basis für Login und Admin-User-Anlage
 - Admin-Oberfläche in der Cloud-App: Projekte anlegen, Benutzer anlegen und Projektzuordnungen pro Benutzer bearbeiten
 - Projektübersicht in der Cloud-App ist klickbar; Detailroute `/projects/[id]` mit Zugriffsprüfung (Admin oder Projektzuordnung) ergänzt
 - Aufgabenkern in Cloud-Detailseite ergänzt: Aufgaben/Unteraufgaben anlegen, bearbeiten, abschließen, archivieren und wiederherstellen (serverseitig per API)
 - Kanban-Basis in Cloud ergänzt: Umschaltung Liste/Kanban, Karten pro Standardspalte, Verschieben via Spaltenauswahl und Kartenerstellung in Spalten
+- Gantt-Basis in Cloud ergänzt: Umschaltung Liste/Projektplan/Kanban, Zeitskala Tag/Monat/Jahr, Balken aus Beginn/Frist, hierarchische Zeilen mit Auf-/Zuklappen, Abhängigkeitslinien und Bearbeiten-Modal inkl. Vorgänger-Auswahl (serverseitig validiert)
 
 Lokaler Start:
 
@@ -208,3 +209,4 @@ Danach auf Vercel deployen und dieselben Env-Variablen im Vercel-Projekt hinterl
 | 2026-04-06 | Cloud-Navigation ergänzt: Projekte in der Übersicht sind jetzt öffnbar; neue Detailseite mit serverseitiger Zugriffskontrolle hinzugefügt. |
 | 2026-04-06 | Welle 1 gestartet: Aufgaben-CRUD in Cloud-Projekten ergänzt (inkl. Unteraufgaben, Archiv/Wiederherstellen und Aufgaben-APIs). |
 | 2026-04-06 | Welle 2 gestartet: Kanban-Grundfunktion in Cloud-Projekten ergänzt (Ansichtsumschalter, Spaltenboard, Kartenverschiebung, Kartenerstellung). |
+| 2026-04-06 | Welle 3 gestartet: Gantt-Grundfunktion in Cloud-Projekten ergänzt (Spalte `depends_on_task_ids`, Projektplan-Ansicht, Skalen, Balken, Abhängigkeiten, Modal). |

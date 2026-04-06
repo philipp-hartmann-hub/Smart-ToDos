@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { tasks } from "@/lib/schema";
 import { readSessionFromCookie } from "@/lib/auth";
 import { canAccessProject } from "@/lib/access";
+import { validateDependsOnUpdate } from "@/lib/task-deps";
 
 const patchSchema = z.object({
   title: z.string().min(1).max(500).optional(),
@@ -16,6 +17,7 @@ const patchSchema = z.object({
   archived: z.boolean().optional(),
   kanbanColumnId: z.string().min(1).optional(),
   swimlaneId: z.string().min(1).optional(),
+  dependsOnTaskIds: z.array(z.string().uuid()).optional(),
 });
 
 export async function PATCH(req: Request, context: { params: Promise<{ taskId: string }> }) {
@@ -35,6 +37,16 @@ export async function PATCH(req: Request, context: { params: Promise<{ taskId: s
   if (!parsed.success) return NextResponse.json({ error: "Ungültige Eingabe." }, { status: 400 });
   const data = parsed.data;
 
+  if (data.dependsOnTaskIds !== undefined) {
+    const projectTasks = await db.select().from(tasks).where(eq(tasks.projectId, task.projectId));
+    const check = validateDependsOnUpdate(task.id, data.dependsOnTaskIds, projectTasks);
+    if (!check.ok) return NextResponse.json({ error: check.message }, { status: 400 });
+    const ids = new Set(projectTasks.map((t) => t.id));
+    for (const dep of data.dependsOnTaskIds) {
+      if (!ids.has(dep)) return NextResponse.json({ error: "Unbekannte Vorgänger-Aufgabe." }, { status: 400 });
+    }
+  }
+
   const updated = await db
     .update(tasks)
     .set({
@@ -47,6 +59,8 @@ export async function PATCH(req: Request, context: { params: Promise<{ taskId: s
       archived: data.archived ?? task.archived,
       kanbanColumnId: data.kanbanColumnId ?? task.kanbanColumnId,
       swimlaneId: data.swimlaneId ?? task.swimlaneId,
+      dependsOnTaskIds:
+        data.dependsOnTaskIds !== undefined ? data.dependsOnTaskIds : task.dependsOnTaskIds,
       updatedAt: new Date(),
     })
     .where(eq(tasks.id, taskId))
@@ -66,6 +80,19 @@ export async function DELETE(_: Request, context: { params: Promise<{ taskId: st
   const task = current[0];
   const ok = await canAccessProject(session, task.projectId);
   if (!ok) return NextResponse.json({ error: "Kein Zugriff." }, { status: 403 });
+
+  const siblings = await db.select().from(tasks).where(eq(tasks.projectId, task.projectId));
+  for (const t of siblings) {
+    const deps = t.dependsOnTaskIds || [];
+    if (!deps.includes(taskId)) continue;
+    await db
+      .update(tasks)
+      .set({
+        dependsOnTaskIds: deps.filter((x) => x !== taskId),
+        updatedAt: new Date(),
+      })
+      .where(eq(tasks.id, t.id));
+  }
 
   await db.delete(tasks).where(eq(tasks.id, taskId));
   await db.delete(tasks).where(eq(tasks.parentId, taskId));

@@ -1,4 +1,5 @@
-import { boolean, pgTable, text, timestamp, uuid, primaryKey } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { boolean, jsonb, pgTable, text, timestamp, uuid, primaryKey } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -50,6 +51,7 @@ export const tasks = pgTable("tasks", {
   description: text("description"),
   kanbanColumnId: text("kanban_column_id").notNull().default("kanban-backlog"),
   swimlaneId: text("swimlane_id").notNull().default("kanban-lane-default"),
+  dependsOnTaskIds: jsonb("depends_on_task_ids").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
