@@ -13,6 +13,8 @@ type Task = {
   startDate: string | null;
   dueDate: string | null;
   description: string | null;
+  kanbanColumnId: string;
+  swimlaneId: string;
 };
 
 type Props = {

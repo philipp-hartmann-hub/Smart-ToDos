@@ -13,6 +13,8 @@ const createSchema = z.object({
   startDate: z.string().nullable().optional(),
   dueDate: z.string().nullable().optional(),
   description: z.string().max(5000).nullable().optional(),
+  kanbanColumnId: z.string().min(1).optional(),
+  swimlaneId: z.string().min(1).optional(),
 });
 
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
@@ -61,6 +63,8 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       startDate: parsed.data.startDate || null,
       dueDate: parsed.data.dueDate || null,
       description: parsed.data.description || null,
+      kanbanColumnId: parsed.data.kanbanColumnId || "kanban-backlog",
+      swimlaneId: parsed.data.swimlaneId || "kanban-lane-default",
       done: false,
       archived: false,
     })

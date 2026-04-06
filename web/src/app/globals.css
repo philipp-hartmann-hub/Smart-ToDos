@@ -76,3 +76,51 @@ button.secondary {
   align-items: center;
   flex-wrap: wrap;
 }
+
+.kanban-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(200px, 1fr));
+  gap: 0.8rem;
+}
+
+.kanban-column {
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 0.6rem;
+  background: #0b1220;
+}
+
+.kanban-column__head {
+  margin-bottom: 0.6rem;
+}
+
+.kanban-column__add {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.kanban-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.kanban-card {
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 0.55rem;
+  background: #111827;
+}
+
+.kanban-card__title {
+  font-weight: 600;
+}
+
+.kanban-card__meta {
+  font-size: 0.82rem;
+  opacity: 0.9;
+  margin-top: 0.2rem;
+  margin-bottom: 0.45rem;
+}

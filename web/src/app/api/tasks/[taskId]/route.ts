@@ -14,6 +14,8 @@ const patchSchema = z.object({
   description: z.string().max(5000).nullable().optional(),
   done: z.boolean().optional(),
   archived: z.boolean().optional(),
+  kanbanColumnId: z.string().min(1).optional(),
+  swimlaneId: z.string().min(1).optional(),
 });
 
 export async function PATCH(req: Request, context: { params: Promise<{ taskId: string }> }) {
@@ -43,6 +45,8 @@ export async function PATCH(req: Request, context: { params: Promise<{ taskId: s
       description: data.description !== undefined ? data.description : task.description,
       done: data.done ?? task.done,
       archived: data.archived ?? task.archived,
+      kanbanColumnId: data.kanbanColumnId ?? task.kanbanColumnId,
+      swimlaneId: data.swimlaneId ?? task.swimlaneId,
       updatedAt: new Date(),
     })
     .where(eq(tasks.id, taskId))

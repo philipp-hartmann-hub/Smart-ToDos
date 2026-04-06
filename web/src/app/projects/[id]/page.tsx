@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { projectMembers, projects, tasks } from "@/lib/schema";
 import { readSessionFromCookie } from "@/lib/auth";
-import ProjectTasks from "@/app/components/project-tasks";
+import ProjectWorkspace from "@/app/components/project-workspace";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -79,7 +79,7 @@ export default async function ProjectPage({ params }: Params) {
           <button className="secondary">Zurück zur Übersicht</button>
         </Link>
       </div>
-      <ProjectTasks projectId={project.id} initialTasks={projectTasks} />
+      <ProjectWorkspace projectId={project.id} initialTasks={projectTasks} />
     </main>
   );
 }

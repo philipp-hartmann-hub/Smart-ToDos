@@ -115,6 +115,7 @@ Erster technischer Start liegt jetzt in `web/`:
 - Admin-Oberfläche in der Cloud-App: Projekte anlegen, Benutzer anlegen und Projektzuordnungen pro Benutzer bearbeiten
 - Projektübersicht in der Cloud-App ist klickbar; Detailroute `/projects/[id]` mit Zugriffsprüfung (Admin oder Projektzuordnung) ergänzt
 - Aufgabenkern in Cloud-Detailseite ergänzt: Aufgaben/Unteraufgaben anlegen, bearbeiten, abschließen, archivieren und wiederherstellen (serverseitig per API)
+- Kanban-Basis in Cloud ergänzt: Umschaltung Liste/Kanban, Karten pro Standardspalte, Verschieben via Spaltenauswahl und Kartenerstellung in Spalten
 
 Lokaler Start:
 
@@ -206,3 +207,4 @@ Danach auf Vercel deployen und dieselben Env-Variablen im Vercel-Projekt hinterl
 | 2026-04-06 | Cloud-Admin erweitert: fehlende Admin-Aktionen ergänzt (Projekt anlegen, Benutzer anlegen, Projektzuordnung speichern) inkl. API-Routen. |
 | 2026-04-06 | Cloud-Navigation ergänzt: Projekte in der Übersicht sind jetzt öffnbar; neue Detailseite mit serverseitiger Zugriffskontrolle hinzugefügt. |
 | 2026-04-06 | Welle 1 gestartet: Aufgaben-CRUD in Cloud-Projekten ergänzt (inkl. Unteraufgaben, Archiv/Wiederherstellen und Aufgaben-APIs). |
+| 2026-04-06 | Welle 2 gestartet: Kanban-Grundfunktion in Cloud-Projekten ergänzt (Ansichtsumschalter, Spaltenboard, Kartenverschiebung, Kartenerstellung). |
