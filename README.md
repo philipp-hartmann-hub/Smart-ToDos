@@ -41,6 +41,7 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 - **Projektgebunden**: jedes Projekt hat seinen eigenen separaten Protokollbereich
 - Bereiche als **Obergruppen** (z. B. `JF`, `Kundentermin`) über eigene `+ Bereich`-Schaltfläche anlegbar
 - Bereiche sind ausklappbar; darunter liegen die Sitzungen mit Datum als aufklappbare Überschrift
+- Bereich- und Sitzungsanlage laufen über eigene **Popup-Dialoge** statt Inline-Formularen
 - In jeder Sitzung pro Zeile: Verantwortlicher, Freitext zur Erläuterung, **mehrere** Aufgabenkarten (Button `Aufgabe zuordnen` mit Suche/Filter + Kartenklick zum Öffnen/Bearbeiten), Ergebnis
 - Zugeordnete Aufgaben erscheinen in Protokollen im **Kanban-Kartenstil**
 - Zusätzliche Schaltflächen für Bereich/Sitzung (umbenennen, löschen, speichern, + Sitzung, + Zeile)
@@ -156,3 +157,4 @@ cd Smart-ToDos
 | 2026-04-06 | Protokoll-Aufgabenwahl auf echtes Mehrfach-Select umgestellt, damit mehrere Karten pro Zeile gleichzeitig ausgewählt und gespeichert werden können. |
 | 2026-04-06 | Kartenklick in Protokollen stabilisiert: Aufgabenkarten öffnen nun zuverlässig per Klick/Enter/Space im Gantt-Popup (inkl. vorherigem Render-Schritt). |
 | 2026-04-06 | Protokoll-Aufgabenzuordnung auf Button-Flow umgestellt: `Aufgabe zuordnen` öffnet Suche/Filter-Auswahl und erlaubt wiederholtes Hinzufügen mehrerer Karten pro Zeile. |
+| 2026-04-06 | Protokoll-Anlage auf zwei Buttons mit Popups umgestellt: `Bereich anlegen` und `Sitzung anlegen` öffnen eigene Dialoge statt Inline-Templates. |

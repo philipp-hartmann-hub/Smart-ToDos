@@ -201,6 +201,22 @@
         align-items: end;
         margin: 0.45rem 0 0.7rem;
       }
+      .protocol-modal[hidden] {
+        display: none !important;
+      }
+      .protocol-modal__card {
+        width: min(32rem, calc(100vw - 2rem));
+        background: rgba(17, 20, 31, 0.98);
+        border: 1px solid rgba(124, 58, 237, 0.45);
+        border-radius: 0.75rem;
+        padding: 0.8rem;
+      }
+      .protocol-modal__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.65rem;
+      }
       .protocol-task-card {
         margin-top: 0.4rem;
       }
@@ -1548,27 +1564,47 @@
       <section class="form protocols-panel" aria-label="Protokolle im Projekt">
         <h3 class="participants-panel__title">Protokolle (dieses Projekt)</h3>
         <div class="protocols-toolbar">
-          <div style="flex: 1 1 16rem; min-width: 14rem">
-            <label for="protocol-group-name" class="form__legend">Neuen Bereich anlegen</label>
-            <input id="protocol-group-name" class="form__input" type="text" maxlength="80" placeholder="z. B. JF" />
-          </div>
-          <button type="button" class="task__btn" id="btn-protocol-add-group">+ Bereich</button>
+          <button type="button" class="task__btn" id="btn-protocol-open-add-group">+ Bereich anlegen</button>
+          <button type="button" class="task__btn" id="btn-protocol-open-add-session">+ Sitzung anlegen</button>
         </div>
-        <form id="protocol-form" class="participant-form__form">
-          <div class="form__row--split">
-            <div style="flex: 0 0 11rem; min-width: 10rem">
-              <label for="protocol-date" class="form__legend">Datum</label>
-              <input id="protocol-date" class="form__input form__input--date" type="date" required />
-            </div>
-            <div style="flex: 0 0 14rem; min-width: 12rem">
-              <label for="protocol-group" class="form__legend">Bereich</label>
-              <select id="protocol-group" class="form__input"></select>
-            </div>
-          </div>
-          <button type="submit" class="form__submit form__submit--small">Sitzung anlegen</button>
-        </form>
         <ul id="protocol-list" class="protocols-list protocols-list--groups"></ul>
       </section>
+      <div id="protocol-group-modal" class="gantt-modal protocol-modal" hidden>
+        <div class="protocol-modal__card">
+          <div class="protocol-modal__head">
+            <strong>Bereich anlegen</strong>
+            <button type="button" class="task__btn" id="btn-protocol-group-modal-close">Schließen</button>
+          </div>
+          <form id="protocol-group-form" class="participant-form__form" style="margin: 0">
+            <div>
+              <label for="protocol-group-name" class="form__legend">Bereichsname</label>
+              <input id="protocol-group-name" class="form__input" type="text" maxlength="80" placeholder="z. B. JF" required />
+            </div>
+            <button type="submit" class="form__submit form__submit--small">Bereich speichern</button>
+          </form>
+        </div>
+      </div>
+      <div id="protocol-session-modal" class="gantt-modal protocol-modal" hidden>
+        <div class="protocol-modal__card">
+          <div class="protocol-modal__head">
+            <strong>Sitzung anlegen</strong>
+            <button type="button" class="task__btn" id="btn-protocol-session-modal-close">Schließen</button>
+          </div>
+          <form id="protocol-session-form" class="participant-form__form" style="margin: 0">
+            <div class="form__row--split">
+              <div style="flex: 1 1 10rem">
+                <label for="protocol-session-date" class="form__legend">Datum</label>
+                <input id="protocol-session-date" class="form__input form__input--date" type="date" required />
+              </div>
+              <div style="flex: 1 1 12rem">
+                <label for="protocol-session-group" class="form__legend">Bereich</label>
+                <select id="protocol-session-group" class="form__input"></select>
+              </div>
+            </div>
+            <button type="submit" class="form__submit form__submit--small">Sitzung speichern</button>
+          </form>
+        </div>
+      </div>
 
       <div class="task-add-toolbar">
         <button
@@ -3570,11 +3606,17 @@
         var projectImage = document.getElementById('project-image')
         var projectListEl = document.getElementById('project-list')
         var projectsEmpty = document.getElementById('projects-empty')
-        var protocolForm = document.getElementById('protocol-form')
+        var btnProtocolOpenAddGroup = document.getElementById('btn-protocol-open-add-group')
+        var btnProtocolOpenAddSession = document.getElementById('btn-protocol-open-add-session')
+        var protocolGroupForm = document.getElementById('protocol-group-form')
+        var protocolSessionForm = document.getElementById('protocol-session-form')
         var protocolGroupName = document.getElementById('protocol-group-name')
-        var btnProtocolAddGroup = document.getElementById('btn-protocol-add-group')
-        var protocolDate = document.getElementById('protocol-date')
-        var protocolGroup = document.getElementById('protocol-group')
+        var protocolSessionDate = document.getElementById('protocol-session-date')
+        var protocolSessionGroup = document.getElementById('protocol-session-group')
+        var protocolGroupModal = document.getElementById('protocol-group-modal')
+        var protocolSessionModal = document.getElementById('protocol-session-modal')
+        var btnProtocolGroupModalClose = document.getElementById('btn-protocol-group-modal-close')
+        var btnProtocolSessionModalClose = document.getElementById('btn-protocol-session-modal-close')
         var protocolList = document.getElementById('protocol-list')
         var btnBack = document.getElementById('btn-back-projects')
         var taskViewTitle = document.getElementById('task-view-title')
@@ -4693,23 +4735,24 @@
         }
 
         function renderProtocolGroupSelect() {
-          if (!protocolGroup) return
+          if (!protocolSessionGroup) return
           var p = getCurrentProject()
           if (!p) {
-            protocolGroup.innerHTML = ''
+            protocolSessionGroup.innerHTML = ''
             return
           }
           ensureProtocolDataConsistencyForProject(p)
-          var prev = protocolGroup.value
-          protocolGroup.innerHTML = ''
+          var prev = protocolSessionGroup.value
+          protocolSessionGroup.innerHTML = ''
           for (var i = 0; i < p.protocolGroups.length; i++) {
             var g = p.protocolGroups[i]
             var opt = document.createElement('option')
             opt.value = g.id
             opt.textContent = g.name
-            protocolGroup.appendChild(opt)
+            protocolSessionGroup.appendChild(opt)
           }
-          protocolGroup.value = prev && protocolGroup.querySelector('option[value="' + prev + '"]') ? prev : p.protocolGroups[0].id
+          protocolSessionGroup.value =
+            prev && protocolSessionGroup.querySelector('option[value="' + prev + '"]') ? prev : p.protocolGroups[0].id
         }
 
         function renderProjectCard(p) {
@@ -6347,11 +6390,51 @@
           showProjectsView()
         })
 
-        if (protocolDate) protocolDate.value = todayYmd()
-        if (btnProtocolAddGroup) {
-          btnProtocolAddGroup.addEventListener('click', function () {
+        if (protocolSessionDate) protocolSessionDate.value = todayYmd()
+
+        function closeProtocolModals() {
+          if (protocolGroupModal) protocolGroupModal.hidden = true
+          if (protocolSessionModal) protocolSessionModal.hidden = true
+        }
+
+        if (btnProtocolOpenAddGroup) {
+          btnProtocolOpenAddGroup.addEventListener('click', function () {
+            if (!protocolGroupModal) return
+            protocolGroupModal.hidden = false
+            if (protocolGroupName) protocolGroupName.focus()
+          })
+        }
+        if (btnProtocolOpenAddSession) {
+          btnProtocolOpenAddSession.addEventListener('click', function () {
+            if (!protocolSessionModal) return
+            renderProtocolGroupSelect()
+            if (protocolSessionDate) protocolSessionDate.value = todayYmd()
+            protocolSessionModal.hidden = false
+            if (protocolSessionDate) protocolSessionDate.focus()
+          })
+        }
+        if (btnProtocolGroupModalClose) {
+          btnProtocolGroupModalClose.addEventListener('click', closeProtocolModals)
+        }
+        if (btnProtocolSessionModalClose) {
+          btnProtocolSessionModalClose.addEventListener('click', closeProtocolModals)
+        }
+        if (protocolGroupModal) {
+          protocolGroupModal.addEventListener('click', function (e) {
+            if (e.target === protocolGroupModal) closeProtocolModals()
+          })
+        }
+        if (protocolSessionModal) {
+          protocolSessionModal.addEventListener('click', function (e) {
+            if (e.target === protocolSessionModal) closeProtocolModals()
+          })
+        }
+
+        if (protocolGroupForm) {
+          protocolGroupForm.addEventListener('submit', function (e) {
             var currentProject = getCurrentProject()
             if (!currentProject) return
+            e.preventDefault()
             ensureProtocolDataConsistencyForProject(currentProject)
             var name = protocolGroupName && protocolGroupName.value ? protocolGroupName.value.trim().slice(0, 80) : ''
             if (!name) {
@@ -6369,14 +6452,15 @@
             protocolGroupOpenMap[newId] = true
             saveState()
             if (protocolGroupName) protocolGroupName.value = ''
+            closeProtocolModals()
             renderProtocolGroupSelect()
             renderProtocols()
           })
         }
-        if (protocolForm) {
-          protocolForm.addEventListener('submit', function (e) {
+        if (protocolSessionForm) {
+          protocolSessionForm.addEventListener('submit', function (e) {
             e.preventDefault()
-            if (!isValidYmd(protocolDate.value)) {
+            if (!isValidYmd(protocolSessionDate.value)) {
               alert('Bitte ein gültiges Datum wählen.')
               return
             }
@@ -6386,7 +6470,7 @@
               return
             }
             ensureProtocolDataConsistencyForProject(currentProject)
-            var selectedGroupId = protocolGroup ? protocolGroup.value : PROTOCOL_DEFAULT_GROUP_ID
+            var selectedGroupId = protocolSessionGroup ? protocolSessionGroup.value : PROTOCOL_DEFAULT_GROUP_ID
             if (!selectedGroupId) selectedGroupId = currentProject.protocolGroups[0].id
             var selectedGroup = null
             for (var gidx = 0; gidx < currentProject.protocolGroups.length; gidx++) {
@@ -6399,7 +6483,7 @@
             if (!Array.isArray(selectedGroup.sessions)) selectedGroup.sessions = []
             selectedGroup.sessions.unshift({
               id: crypto.randomUUID(),
-              date: protocolDate.value,
+              date: protocolSessionDate.value,
               rows: [
                 {
                   id: crypto.randomUUID(),
@@ -6411,8 +6495,9 @@
               ],
             })
             saveState()
-            protocolDate.value = todayYmd()
+            if (protocolSessionDate) protocolSessionDate.value = todayYmd()
             protocolGroupOpenMap[selectedGroup.id] = true
+            closeProtocolModals()
             renderProtocolGroupSelect()
             renderProtocols()
           })
@@ -6639,6 +6724,7 @@
         }
         document.addEventListener('keydown', function (e) {
           if (e.key === 'Escape' && ganttModalTaskId) closeGanttTaskModal()
+          if (e.key === 'Escape') closeProtocolModals()
         })
 
         mainTaskAttachmentsPanel = buildPendingAttachmentsUI(
