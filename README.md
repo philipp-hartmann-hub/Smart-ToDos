@@ -1,36 +1,32 @@
 # Der Projektmanager
 
-Ein leichtgewichtiges Planungstool als **eine einzige HTML-Datei**.  
-Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen Listen-, Gantt- und (späterer) Kanban-Sicht wechseln.
+Ein Mehrbenutzer-Planungstool als **deployte Web-Anwendung** (Next.js + Neon + Vercel).  
+Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen Listen-, Gantt-, Kanban- und Protokoll-Ansicht wechseln.
 
 ## Was die App kann
 
 - **Projekte verwalten**: Name, optionale Beschreibung und optionales Projektbild.
 - **Benutzerverwaltung**: Admin-Login, Benutzer anlegen (mit Auto-Benutzername/Passwort) und Projektzugriffe je Profil verwalten.
-- **Cloud-Migration gestartet**: neues `web/`-Projekt (Next.js + Neon + Vercel-ready) als Mehrbenutzer-Basis mit serverseitigem Login.
 - **Aufgaben strukturieren**: Hauptaufgaben und beliebig tiefe Unteraufgaben.
 - **Aufgaben planen**: Priorität, Beginn, Frist, Beschreibung, Zuständigkeiten und Abhängigkeiten.
 - **Mehrere Ansichten nutzen**:
   - `Aufgabenliste` für Detailpflege
   - `Projektplan (Gantt)` mit Zeitbalken, Monatsachse, Abhängigkeitslinien und Popup-Karte
   - `Kanban` mit konfigurierbaren Spalten, Swimlanes und Drag-and-Drop
-- **Daten lokal speichern**: Alles bleibt im Browser via `localStorage` erhalten.
+- **Protokolle** pro Projekt: Bereiche → Sitzungen → Zeilen inkl. Aufgaben-Zuordnung und Filter.
+- **Daten zentral speichern**: Projekte/Aufgaben/Protokolle liegen in der Datenbank (Neon) und sind für berechtigte Nutzer gemeinsam nutzbar.
 
 ## Schnellstart
 
-Keine Installation nötig: **kein Node.js, kein npm, kein Build-Schritt**.
+Öffne die deployte App (Vercel) und melde dich an.
 
-1. Datei `SmartToDo.html` im Projektordner öffnen (Doppelklick im Finder).
-2. Oder direkt per Browser-URL:
-
-[`file:///Users/philipphartmann/Cursor%20Trainig/Smart%20ToDo/SmartToDo.html`](file:///Users/philipphartmann/Cursor%20Trainig/Smart%20ToDo/SmartToDo.html)
-
-Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an.
+- **Admin** kann Projekte anlegen, Nutzer anlegen und Projektzugriffe verwalten.
+- **Normale Nutzer** sehen nur zugeordnete Projekte.
 
 ## Typischer Ablauf
 
 1. **Projekt anlegen**
-2. **Teilnehmende hinzufügen** (für spätere Zuständigkeiten)
+2. **Benutzer zuordnen** (damit sie Zugriff auf das Projekt haben)
 3. **Hauptaufgaben erstellen**
 4. **Unteraufgaben ergänzen**
 5. **Abhängigkeiten setzen** (was zuerst erledigt sein muss)
@@ -88,11 +84,9 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 
 ## Technische Hinweise
 
-- Speicherort: `localStorage`, Schlüssel `smart-todo-tasks`
-- Datenmodell: Version `v:2` mit `projects[]`
-- Auth lokal in `localStorage`: Standard-Admin `admin` / `Admin123!` (beim ersten Start automatisch angelegt)
-- Ältere reine Aufgabenlisten werden in ein Projekt „Mein Projekt“ migriert
-- Alle Ansichten arbeiten auf derselben Datenquelle (Änderungen sind sofort konsistent sichtbar)
+- Die Cloud-App nutzt eine **Neon Postgres** Datenbank (Drizzle ORM).
+- Authentifizierung läuft über **JWT** in einem HttpOnly-Cookie (`smarttodo_session`).
+- Zugriffe werden serverseitig geprüft (Admin: alle Projekte, User: nur Mitgliedschaften in `project_members`).
 
 ## Repository
 
@@ -101,7 +95,6 @@ Wenn du das Repo an einem anderen Ort speicherst, passe den Pfad entsprechend an
 ```bash
 git clone https://github.com/philipp-hartmann-hub/Der-Projektmanager.git
 cd Der-Projektmanager
-# Dann SmartToDo.html im Browser öffnen.
 ```
 
 ## Cloud-Start (Neon + Vercel)
@@ -136,6 +129,11 @@ npm run dev
 Danach auf Vercel deployen und dieselben Env-Variablen im Vercel-Projekt hinterlegen.
 
 ---
+
+## Legacy / Referenz (SmartToDo.html)
+
+Die Datei `SmartToDo.html` ist die ursprüngliche **Single-HTML-Referenz** (lokale `localStorage`-App).  
+Der aktuelle Fokus ist die **deployte Cloud-App** im Ordner `web/`.
 
 ## Changelog / Aktualisierungsprotokoll
 
