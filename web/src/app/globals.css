@@ -16,7 +16,7 @@ a {
 }
 
 .container {
-  max-width: 980px;
+  max-width: 1500px;
   margin: 2rem auto;
   padding: 0 1rem;
 }
@@ -42,12 +42,28 @@ select {
 }
 
 input,
-select {
+select,
+textarea {
   background: #020617;
   color: #e2e8f0;
   border: 1px solid #475569;
   border-radius: 8px;
   padding: 0.55rem 0.65rem;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #e2e8f0;
+  -webkit-box-shadow: 0 0 0px 1000px #020617 inset;
+  box-shadow: 0 0 0px 1000px #020617 inset;
+  transition: background-color 9999s ease-in-out 0s;
 }
 
 button {
@@ -75,6 +91,59 @@ button.secondary {
   gap: 0.55rem;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.task-tree-toggle {
+  width: 1.9rem;
+  min-width: 1.9rem;
+  padding: 0.35rem 0;
+}
+
+.task-tree-toggle-spacer {
+  width: 1.9rem;
+  min-width: 1.9rem;
+  display: inline-block;
+}
+
+.task-tree-graph {
+  margin-top: 0.75rem;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  background: #0b1220;
+}
+
+.task-tree-graph__legend {
+  margin: 0 0 0.55rem;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.task-tree-graph__scroll {
+  overflow: auto;
+  max-height: min(70vh, 520px);
+  border-radius: 8px;
+  border: 1px solid #1e293b;
+  background: #020617;
+}
+
+.task-tree-graph__svg {
+  display: block;
+  vertical-align: top;
+}
+
+.task-tree-graph__node-rect {
+  fill: #111827;
+  stroke: #475569;
+  stroke-width: 1;
+}
+
+.task-tree-graph__node-text {
+  fill: #e2e8f0;
+  font-size: 12px;
+  font-weight: 500;
+  pointer-events: none;
 }
 
 .kanban-grid {
@@ -130,14 +199,17 @@ button.secondary {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
 }
 
 .kanban-board__head,
 .kanban-board__lane {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 220px repeat(var(--kanban-cols, 4), minmax(240px, 1fr));
   gap: 0.8rem;
   align-items: start;
+  min-width: max-content;
 }
 
 .kanban-board__corner {
@@ -162,7 +234,7 @@ button.secondary {
 }
 
 .kanban-board__lane {
-  grid-template-columns: 220px repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: 220px repeat(var(--kanban-cols, 4), minmax(240px, 1fr));
 }
 
 .kanban-cell {
@@ -187,6 +259,12 @@ button.secondary {
 .kanban-cell .kanban-cards {
   max-height: 320px;
   overflow: auto;
+}
+
+.kanban-cell__hint {
+  margin: 0 0 0.7rem;
+  font-size: 0.8rem;
+  opacity: 0.8;
 }
 
 /* Gantt */
@@ -556,13 +634,56 @@ button.secondary {
   gap: 0.35rem;
 }
 
-/* Protokolle */
+/* Protokolle – eigener Bereich (nicht nur „Aufgabenliste light“) */
+.protocol-panel {
+  border: 1px solid rgba(124, 58, 237, 0.42);
+  background: linear-gradient(165deg, rgba(30, 27, 75, 0.42) 0%, #111827 38%);
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.6) inset;
+}
+
+.protocol-panel h2 {
+  color: #e9d5ff;
+}
+
+.protocol-panel__filters {
+  background: rgba(15, 23, 42, 0.92) !important;
+  border-color: rgba(124, 58, 237, 0.28) !important;
+}
+
+.protocol-panel textarea,
+.protocol-panel input[type="date"],
+.protocol-panel select,
+.protocol-panel input:not([type="checkbox"]):not([type="radio"]) {
+  background: #0f172a !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #475569 !important;
+}
+
+.protocol-panel textarea::placeholder,
+.protocol-panel input::placeholder {
+  color: #94a3b8;
+}
+
+.protocol-panel textarea:focus,
+.protocol-panel input:focus,
+.protocol-panel select:focus {
+  outline: none;
+  border-color: #a78bfa !important;
+  box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.35);
+}
+
+.protocol-table-scroll {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
 .protocol-grid-head,
 .protocol-grid-row {
   display: grid;
-  grid-template-columns: 220px 1.2fr 1fr 1fr 88px;
-  gap: 0.6rem;
+  grid-template-columns: 200px minmax(300px, 1.45fr) minmax(260px, 1fr) minmax(300px, 1.45fr) 84px;
+  gap: 0.75rem;
   align-items: start;
+  min-width: 980px;
 }
 
 .protocol-grid-head {
@@ -586,27 +707,18 @@ button.secondary {
 .protocol-taskchips {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.55rem;
   margin-bottom: 0.35rem;
 }
 
-.protocol-taskchip {
-  display: flex;
-  gap: 0.45rem;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid #334155;
-  background: #111827;
-  padding: 0.35rem 0.45rem;
-  border-radius: 10px;
+.protocol-kanban-preview {
+  max-width: 100%;
 }
 
-.protocol-taskchip span {
-  font-size: 0.9rem;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.protocol-kanban-preview .kanban-card__title {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
 }
 
 .protocol-sub {

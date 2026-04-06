@@ -14,8 +14,7 @@ Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen L
   - `Aufgabenliste` für Detailpflege
   - `Projektplan (Gantt)` mit Zeitbalken, Monatsachse, Abhängigkeitslinien und Popup-Karte
   - `Kanban` mit konfigurierbaren Spalten, Swimlanes und Drag-and-Drop
-- **Protokolle** pro Projekt: Bereiche → Sitzungen → Zeilen inkl. Aufgaben-Zuordnung und Filter.
-- **Protokolle** pro Projekt: Bereiche → Sitzungen → Zeilen inkl. Aufgaben-Zuordnung und Filter, mit Popup-Dialogen für Bereich/Sitzung, Zeitfilter-Modus (Datum/Monat/Jahr) und Entfernen einzelner Aufgaben-Zuordnungen.
+- **Protokolle** pro Projekt: Bereiche → Sitzungen → Zeilen inkl. Filter; Popup-Dialoge für Bereich/Sitzung; Zeitfilter-Modus (Datum/Monat/Jahr); Entfernen einzelner Aufgaben-Zuordnungen.
 - Protokollfilter reagieren direkt bei Eingabe/Änderung (ohne extra „Aktualisieren“); Sitzungsverweise in Aufgaben werden kompakt per aufklappbarer Liste dargestellt.
 - **Daten zentral speichern**: Projekte/Aufgaben/Protokolle liegen in der Datenbank (Neon) und sind für berechtigte Nutzer gemeinsam nutzbar.
 
@@ -42,8 +41,8 @@ Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen L
 - Bereiche als **Obergruppen** (z. B. `JF`, `Kundentermin`) über eigene `+ Bereich`-Schaltfläche anlegbar
 - Bereiche sind ausklappbar; darunter liegen die Sitzungen mit Datum als aufklappbare Überschrift
 - Bereich- und Sitzungsanlage laufen über eigene **Popup-Dialoge** statt Inline-Formularen
-- In jeder Sitzung pro Zeile: Verantwortlicher, Freitext zur Erläuterung, **mehrere** Aufgabenkarten (Button `Aufgabe zuordnen` mit Suche/Filter + Kartenklick zum Öffnen/Bearbeiten), Ergebnis
-- Zugeordnete Aufgaben erscheinen in Protokollen im **Kanban-Kartenstil**
+- In jeder Sitzung pro Zeile: Verantwortlicher, Freitext zur Erläuterung, **mehrere** Aufgabenkarten (Button `Aufgabe zuordnen` mit Suche/Filter + `Karte öffnen` im gleichen Layout wie im Kanban), Ergebnis
+- Zugeordnete Aufgaben erscheinen in Protokollen im **Kanban-Kartenstil**; Kartenbearbeitung öffnet ein Modal **ohne Wechsel zu Projektplan/Gantt** (`view=protocols&openTaskId=…`)
 - Zusätzliche Schaltflächen für Bereich/Sitzung (umbenennen, löschen, speichern, + Sitzung, + Zeile)
 - Auto-Save beim Zuklappen einer Sitzung; Gruppenliste ist scrollbar (ca. 3 Bereiche gleichzeitig sichtbar)
 - Protokollbereich mit Such-/Filterleiste (Suche, Bereich, Verantwortlicher, Aufgabe, Datum/Monat/Jahr) für schnelle Eingrenzung
@@ -52,10 +51,13 @@ Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen L
 
 ### 1) Aufgabenliste
 - Kompakte Standardansicht: Titel, Zuständigkeit und Frist
+- Optionaler **grafischer Aufgabenbaum** (Hierarchie + Abhängigkeiten als Linien), nur per Schaltfläche „Aufgabenbaum anzeigen/ausblenden“; nutzt dieselben Filter wie die Liste
 - Hauptaufgaben-Form ist standardmäßig eingeklappt und per Button einblendbar
 - Such- und Filterleiste für Titel/Beschreibung, Verantwortliche, Priorität, Fristfenster und Kanban-Spalte
 - Unteraufgaben pro Karte mit Zähler ein-/ausblendbar
+- Linker Aufgaben-Button dient als Aus-/Einklappen der Unteraufgaben (kein unbeabsichtigtes Archivieren)
 - Weitere Felder per „Details anzeigen“ aufklappbar
+- In „Details“ lassen sich Abhängigkeiten (Vorgänger) direkt pflegen; diese wirken im Gantt inkl. Linien
 - Kompakter Bereich „In Sitzungen verwendet“ in der Aufgabenkarte (Popup-Liste), mit Direktsprung zur verknüpften Protokoll-Sitzung
 - Abschließen archiviert Aufgaben; aktive Liste zeigt nur nicht archivierte Karten
 - Archivbereich ein-/ausblendbar, mit Öffnen, Wiederherstellen und Endgültig löschen
@@ -68,6 +70,7 @@ Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen L
 - Abhängigkeiten als Verbindungslinien
 - Durchgehende Monatsleiste zur Orientierung
 - Umschaltbare Zeitskala: **Tag / Monat / Jahr**
+- Breitere Projektseite + komprimierte Timeline, damit mehr vom Zeitstrahl gleichzeitig sichtbar ist
 - Tagesansicht mit zwei Ebenen: oben durchgehende Monatsleiste, darunter Tagesnummern
 - Fixierte Aufgaben-Spalte links (sticky), damit Aufgaben beim horizontalen Scrollen sichtbar bleiben
 - Popup-„Aufgabenkarte“ direkt im Gantt bearbeitbar (ohne Ansichtswechsel)
@@ -81,7 +84,7 @@ Du kannst Projekte anlegen, Aufgaben strukturieren und je nach Bedarf zwischen L
 - Swimlanes beliebig anlegbar, umbenennbar und (bei mehr als einer) löschbar
 - Karten per Drag-and-Drop zwischen Spalten/Swimlanes verschiebbar
 - Neue Aufgaben aus Liste/Gantt landen automatisch im Backlog
-- Neue Karten direkt in jeder Spalte/Swimlane anlegbar (`+ Karte`)
+- Neue Karten im Kanban starten ebenfalls automatisch im Backlog (pro Swimlane)
 - Unteraufgaben direkt an jeder Kanban-Karte anlegbar (`+ Unteraufgabe`)
 - Karten direkt aus Kanban abschließbar (wandern ins Archiv)
 - Aufgabenkarte als Popup direkt aus Kanban öffnbar (`Karte öffnen`) wie im Gantt
@@ -195,6 +198,7 @@ Der aktuelle Fokus ist die **deployte Cloud-App** im Ordner `web/`.
 | 2026-04-06 | Protokoll-Aufgabenspalte erweitert: mehrere Karten pro Zeile möglich; Karten öffnen direkt per Klick (ohne extra Öffnen-Button) und wirken wie gewohnt auf Liste/Gantt/Kanban. |
 | 2026-04-06 | Helle „Eierschalen“-Flächen entfernt: Protokollbereich, Sitzungskörper und Filterleisten auf dunkles Kontrast-Design umgestellt. |
 | 2026-04-06 | Protokoll-Aufgabenwahl auf echtes Mehrfach-Select umgestellt, damit mehrere Karten pro Zeile gleichzeitig ausgewählt und gespeichert werden können. |
+| 2026-04-06 | Aufgabenliste: optionaler grafischer Aufgabenbaum (Hierarchie + Abhängigkeiten), nur per Button ein-/ausblendbar; nutzt die aktuellen Listenfilter. |
 | 2026-04-06 | Kartenklick in Protokollen stabilisiert: Aufgabenkarten öffnen nun zuverlässig per Klick/Enter/Space im Gantt-Popup (inkl. vorherigem Render-Schritt). |
 | 2026-04-06 | Protokoll-Aufgabenzuordnung auf Button-Flow umgestellt: `Aufgabe zuordnen` öffnet Suche/Filter-Auswahl und erlaubt wiederholtes Hinzufügen mehrerer Karten pro Zeile. |
 | 2026-04-06 | Protokoll-Anlage auf zwei Buttons mit Popups umgestellt: `Bereich anlegen` und `Sitzung anlegen` öffnen eigene Dialoge statt Inline-Templates. |
@@ -233,3 +237,7 @@ Der aktuelle Fokus ist die **deployte Cloud-App** im Ordner `web/`.
 | 2026-04-06 | Aufgabenlisten-UX weiter angenähert: Hauptaufgabenformular standardmäßig eingeklappt; Archiv mit „Archiv anzeigen/ausblenden“-Toggle wie in der HTML-Referenz. |
 | 2026-04-06 | Feinschliff: Protokollfilter laden automatisch bei Änderungen; Aufgabenkarte zeigt Protokoll-Sitzungen kompakt als aufklappbare Popover-Liste. |
 | 2026-04-06 | 1:1-Feinschliff Aufgabenliste: Unteraufgaben lassen sich pro Karte mit Zähler ein-/ausblenden (analog zur HTML-Referenz). |
+| 2026-04-06 | Protokoll-UI: Aufgaben aus Protokollzeilen per Modal bearbeiten ohne Wechsel zum Gantt; eigenes Panel-Design, breitere Freitext-Spalten, Kanban-Kartenlayout; gemeinsame `TaskDetailModal`-Komponente mit Gantt. |
+| 2026-04-06 | Aufgabenlisten-Fix: linker Punkt/Toggle klappt Unteraufgaben statt Archivieren; Abhängigkeiten auch in der Listen-Detailansicht pflegbar; gelbliche Eingabefarben global entfernt. |
+| 2026-04-06 | Gantt-Viewport erweitert: Containerbreite erhöht und Zeitskala komprimiert, sodass deutlich mehr Zeitstrahl ohne Scrollen sichtbar ist. |
+| 2026-04-06 | Kanban grundlegend stabilisiert: feste Spaltenmatrix je Swimlane (kein „zerfallenes“ Layout), horizontales Board-Scroll, Kartenanlage konsistent im Backlog, Spalten/Swimlanes weiter frei verwaltbar. |

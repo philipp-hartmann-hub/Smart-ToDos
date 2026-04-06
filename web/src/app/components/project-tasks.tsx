@@ -8,6 +8,7 @@ import {
   type ListFilterState,
 } from "@/lib/task-list-filters";
 import { buildTaskTree, type TaskNode } from "@/lib/task-tree";
+import TaskTreeGraph from "./task-tree-graph";
 
 const KANBAN_COLUMNS = [
   { id: "kanban-backlog", name: "Backlog" },
@@ -29,6 +30,7 @@ type Task = {
   description: string | null;
   kanbanColumnId: string;
   swimlaneId: string;
+  dependsOnTaskIds?: string[] | null;
   assigneeIds?: string[] | null;
   attachments?: Array<{ id: string; name: string; size: number; type: string; dataUrl: string }> | null;
   links?: Array<{ id: string; url: string; label: string }> | null;
@@ -65,6 +67,24 @@ function readFileAsDataUrl(file: File): Promise<string> {
   });
 }
 
+function descendantsOf(taskId: string, tasks: Task[]): Set<string> {
+  const byParent = new Map<string | null, string[]>();
+  for (const t of tasks) {
+    const p = t.parentId ?? null;
+    if (!byParent.has(p)) byParent.set(p, []);
+    byParent.get(p)!.push(t.id);
+  }
+  const out = new Set<string>();
+  const q = [...(byParent.get(taskId) || [])];
+  while (q.length) {
+    const id = q.shift()!;
+    out.add(id);
+    const kids = byParent.get(id) || [];
+    for (const k of kids) q.push(k);
+  }
+  return out;
+}
+
 export default function ProjectTasks({
   projectId,
   initialTasks,
@@ -80,6 +100,7 @@ export default function ProjectTasks({
   const [filter, setFilter] = useState<ListFilterState>(defaultListFilterState);
   const [mainTaskFormOpen, setMainTaskFormOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
+  const [treeGraphOpen, setTreeGraphOpen] = useState(false);
 
   const active = useMemo(() => tasks.filter((t) => !t.archived), [tasks]);
   const archived = useMemo(() => tasks.filter((t) => t.archived), [tasks]);
@@ -153,6 +174,7 @@ export default function ProjectTasks({
     const [historyDate, setHistoryDate] = useState("");
     const [historyParticipantId, setHistoryParticipantId] = useState("");
     const [historyText, setHistoryText] = useState("");
+    const [depSearch, setDepSearch] = useState("");
     const [subtaskFormOpen, setSubtaskFormOpen] = useState(false);
     const [childrenCollapsed, setChildrenCollapsed] = useState(false);
     const colLabel = KANBAN_COLUMNS.find((c) => c.id === task.kanbanColumnId)?.name ?? task.kanbanColumnId;
@@ -161,6 +183,16 @@ export default function ProjectTasks({
     const links = task.links || [];
     const history = (task.history || []).slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     const protocolLinks = protocolLinksByTaskId[task.id] || [];
+    const depCandidates = (() => {
+      const desc = descendantsOf(task.id, active);
+      const q = depSearch.trim().toLowerCase();
+      return active.filter((t) => {
+        if (t.id === task.id) return false;
+        if (desc.has(t.id)) return false;
+        if (!q) return true;
+        return t.title.toLowerCase().includes(q);
+      });
+    })();
 
     function toggleAssignee(userId: string, checked: boolean) {
       const next = checked
@@ -226,13 +258,13 @@ export default function ProjectTasks({
     return (
       <div className="task-node" style={{ marginLeft: depth * 18 }}>
         <div className="task-row">
-          <input
-            type="checkbox"
-            checked={task.done}
-            onChange={(e) =>
-              patchTask(task.id, { done: e.target.checked, archived: e.target.checked || task.archived })
-            }
-          />
+          {node.children.length > 0 ? (
+            <button type="button" className="secondary task-tree-toggle" onClick={() => setChildrenCollapsed((v) => !v)}>
+              {childrenCollapsed ? "▶" : "▼"}
+            </button>
+          ) : (
+            <span className="task-tree-toggle-spacer" />
+          )}
           <input value={task.title} onChange={(e) => patchTask(task.id, { title: e.target.value })} />
           <select value={task.priority} onChange={(e) => patchTask(task.id, { priority: e.target.value })}>
             <option value="high">Hoch</option>
@@ -244,6 +276,13 @@ export default function ProjectTasks({
           </span>
           <button className="secondary" onClick={() => patchTask(task.id, { archived: !task.archived })}>
             {task.archived ? "Wiederherstellen" : "Archivieren"}
+          </button>
+          <button
+            className="secondary"
+            onClick={() => patchTask(task.id, { done: true, archived: true })}
+            title="Direkt ins Archiv verschieben"
+          >
+            Abschließen
           </button>
           <button className="secondary" onClick={() => deleteTask(task.id)}>
             Löschen
@@ -291,6 +330,34 @@ export default function ProjectTasks({
                 value={task.description || ""}
                 onChange={(e) => patchTask(task.id, { description: e.target.value })}
               />
+            </div>
+            <div className="task-rich__block" style={{ marginTop: 8 }}>
+              <strong>Abhängigkeiten (Vorgänger)</strong>
+              <input
+                placeholder="Vorgänger suchen…"
+                value={depSearch}
+                onChange={(e) => setDepSearch(e.target.value)}
+              />
+              <div className="gantt-dep-list" style={{ marginTop: 8 }}>
+                {depCandidates.map((cand) => {
+                  const checked = (task.dependsOnTaskIds || []).includes(cand.id);
+                  return (
+                    <label key={cand.id} className="gantt-dep-item">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) => {
+                          const cur = task.dependsOnTaskIds || [];
+                          const next = e.target.checked ? [...new Set([...cur, cand.id])] : cur.filter((x) => x !== cand.id);
+                          void patchTask(task.id, { dependsOnTaskIds: next });
+                        }}
+                      />
+                      <span>{cand.title}</span>
+                    </label>
+                  );
+                })}
+                {depCandidates.length === 0 ? <div className="gantt-dep-item">Keine passenden Aufgaben.</div> : null}
+              </div>
             </div>
             <div className="task-rich">
               <div className="task-rich__block">
@@ -543,6 +610,21 @@ export default function ProjectTasks({
           </button>
         </div>
       </div>
+
+      <div className="row" style={{ marginTop: 12 }}>
+        <button type="button" className="secondary" onClick={() => setTreeGraphOpen((v) => !v)}>
+          {treeGraphOpen ? "Aufgabenbaum ausblenden" : "Aufgabenbaum anzeigen"}
+        </button>
+      </div>
+      {treeGraphOpen ? (
+        filteredTree.length === 0 ? (
+          <p className="task-tree-graph__empty" style={{ marginTop: 8 }}>
+            {hasActiveListFilter(filter) ? "Keine Aufgaben für den Baum (Filter)." : "Noch keine Aufgaben für den Baum."}
+          </p>
+        ) : (
+          <TaskTreeGraph roots={filteredTree} />
+        )
+      ) : null}
 
       <div className="task-list-scroll">
         {filteredTree.length === 0 ? (

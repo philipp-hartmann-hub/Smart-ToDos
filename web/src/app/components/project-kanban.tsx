@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { KANBAN_BACKLOG_ID, KANBAN_DEFAULT_LANE_ID } from "@/lib/kanban-config";
 
 type Task = {
@@ -83,10 +83,11 @@ export default function ProjectKanban({ projectId, initialTasks }: Props) {
     const key = cellKey(laneId, columnId);
     const title = (newByCell[key] || "").trim();
     if (!title) return;
+    // Neue Karten starten immer im Backlog (wie in der HTML-Referenz).
     await fetch(`/api/projects/${projectId}/tasks`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, parentId: null, kanbanColumnId: columnId, swimlaneId: laneId }),
+      body: JSON.stringify({ title, parentId: null, kanbanColumnId: KANBAN_BACKLOG_ID, swimlaneId: laneId }),
     });
     setNewByCell((prev) => ({ ...prev, [key]: "" }));
     await refresh();
@@ -253,7 +254,7 @@ export default function ProjectKanban({ projectId, initialTasks }: Props) {
       {columns.length === 0 || lanes.length === 0 ? (
         <p>Kanban wird initialisiert…</p>
       ) : (
-        <div className="kanban-board">
+        <div className="kanban-board" style={{ "--kanban-cols": String(columns.length) } as CSSProperties}>
           <div className="kanban-board__head">
             <div className="kanban-board__corner" />
             {columns.map((c) => (
@@ -303,6 +304,7 @@ export default function ProjectKanban({ projectId, initialTasks }: Props) {
 
               {columns.map((col) => {
                 const key = cellKey(lane.id, col.id);
+                const isBacklogCol = col.id === KANBAN_BACKLOG_ID;
                 const cellTasks = active.filter(
                   (t) => (t.kanbanColumnId || KANBAN_BACKLOG_ID) === col.id && (t.swimlaneId || KANBAN_DEFAULT_LANE_ID) === lane.id,
                 );
@@ -321,16 +323,20 @@ export default function ProjectKanban({ projectId, initialTasks }: Props) {
                       setDragTaskId(null);
                     }}
                   >
-                    <div className="kanban-column__add">
-                      <input
-                        placeholder="+ Karte"
-                        value={newByCell[key] || ""}
-                        onChange={(e) => setNewByCell((prev) => ({ ...prev, [key]: e.target.value }))}
-                      />
-                      <button type="button" onClick={() => addCard(lane.id, col.id)} disabled={busy}>
-                        Hinzufügen
-                      </button>
-                    </div>
+                    {isBacklogCol ? (
+                      <div className="kanban-column__add">
+                        <input
+                          placeholder="+ Karte"
+                          value={newByCell[key] || ""}
+                          onChange={(e) => setNewByCell((prev) => ({ ...prev, [key]: e.target.value }))}
+                        />
+                        <button type="button" onClick={() => addCard(lane.id, col.id)} disabled={busy}>
+                          Hinzufügen
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="kanban-cell__hint">Neue Karten werden im Backlog angelegt.</p>
+                    )}
 
                     <div className="kanban-cards">
                       {cellTasks.map((task) => (

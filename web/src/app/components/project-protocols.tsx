@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import TaskDetailModal, { type TaskDetailTask } from "./task-detail-modal";
 
 type Group = { id: string; name: string };
 type Session = { id: string; groupId: string; date: string };
@@ -19,14 +20,40 @@ type TaskLite = { id: string; title: string };
 type Props = {
   projectId: string;
   projectMembers: UserLite[];
+  initialTasks: TaskDetailTask[];
+  initialProtocolLinksByTaskId: Record<
+    string,
+    Array<{ rowId: string; sessionId: string; sessionDate: string; groupId: string; groupName: string }>
+  >;
 };
 
 function userLabel(u: UserLite) {
   return `${u.firstName} ${u.lastName} (${u.username})`;
 }
 
-export default function ProjectProtocols({ projectId, projectMembers }: Props) {
+function taskPath(task: TaskDetailTask, all: TaskDetailTask[]): string {
+  const byId = new Map(all.map((t) => [t.id, t]));
+  const parts: string[] = [];
+  let cur: TaskDetailTask | undefined = task;
+  while (cur) {
+    parts.unshift(cur.title);
+    cur = cur.parentId ? byId.get(cur.parentId) : undefined;
+  }
+  return parts.join(" › ");
+}
+
+export default function ProjectProtocols({
+  projectId,
+  projectMembers,
+  initialTasks,
+  initialProtocolLinksByTaskId,
+}: Props) {
+  const router = useRouter();
   const sp = useSearchParams();
+  const openTaskIdFromUrl = sp.get("openTaskId");
+
+  const [localTasks, setLocalTasks] = useState<TaskDetailTask[]>(initialTasks);
+  const [localProtocolLinks, setLocalProtocolLinks] = useState(initialProtocolLinksByTaskId);
   const [search, setSearch] = useState("");
   const [groupId, setGroupId] = useState("");
   const [responsibleUserId, setResponsibleUserId] = useState("");
@@ -57,6 +84,34 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
   const [assignSearch, setAssignSearch] = useState("");
   const focusSessionId = sp.get("focusSessionId");
   const focusGroupId = sp.get("focusGroupId");
+
+  useEffect(() => {
+    setLocalTasks(initialTasks);
+  }, [initialTasks]);
+
+  useEffect(() => {
+    setLocalProtocolLinks(initialProtocolLinksByTaskId);
+  }, [initialProtocolLinksByTaskId]);
+
+  const refreshTasksAndLinks = useCallback(async () => {
+    const [resTasks, resLinks] = await Promise.all([
+      fetch(`/api/projects/${projectId}/tasks`, { cache: "no-store" }),
+      fetch(`/api/projects/${projectId}/task-protocol-links`, { cache: "no-store" }),
+    ]);
+    if (resTasks.ok) {
+      const data = (await resTasks.json()) as { tasks: TaskDetailTask[] };
+      setLocalTasks(data.tasks);
+    }
+    if (resLinks.ok) {
+      const d = (await resLinks.json()) as {
+        linksByTaskId: Record<
+          string,
+          Array<{ rowId: string; sessionId: string; sessionDate: string; groupId: string; groupName: string }>
+        >;
+      };
+      setLocalProtocolLinks(d.linksByTaskId || {});
+    }
+  }, [projectId]);
 
   const usersForResponsible = useMemo(() => {
     // prefer provided projectMembers (members + admins in this project page)
@@ -212,7 +267,6 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
   }
 
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
-  const groupsById = useMemo(() => new Map(groups.map((g) => [g.id, g])), [groups]);
   const sessionsByGroup = useMemo(() => {
     const m = new Map<string, Session[]>();
     for (const s of sessions) {
@@ -269,13 +323,33 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [sessions, focusSessionId]);
 
-  function jumpToTask(taskId: string) {
-    // full navigation so workspace initializes directly in Gantt mode
-    window.location.assign(`/projects/${projectId}?view=gantt&openTaskId=${encodeURIComponent(taskId)}`);
+  const modalTask = useMemo(
+    () => (openTaskIdFromUrl ? localTasks.find((t) => t.id === openTaskIdFromUrl) : null),
+    [openTaskIdFromUrl, localTasks],
+  );
+
+  useEffect(() => {
+    if (openTaskIdFromUrl && !localTasks.some((t) => t.id === openTaskIdFromUrl)) {
+      void refreshTasksAndLinks();
+    }
+  }, [openTaskIdFromUrl, localTasks, refreshTasksAndLinks]);
+
+  function closeProtocolTaskModal() {
+    const p = new URLSearchParams(sp.toString());
+    p.delete("openTaskId");
+    const qs = p.toString();
+    router.replace(qs ? `/projects/${projectId}?${qs}` : `/projects/${projectId}`);
+  }
+
+  function openProtocolTask(taskId: string) {
+    const p = new URLSearchParams(sp.toString());
+    p.set("view", "protocols");
+    p.set("openTaskId", taskId);
+    router.push(`/projects/${projectId}?${p.toString()}`);
   }
 
   return (
-    <div className="card">
+    <div className="card protocol-panel">
       <h2>Protokolle</h2>
       <div className="row" style={{ marginBottom: 8 }}>
         <button type="button" onClick={load} disabled={busy}>
@@ -284,7 +358,7 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
         {message ? <span style={{ opacity: 0.9 }}>{message}</span> : null}
       </div>
 
-      <div className="task-filters">
+      <div className="task-filters protocol-panel__filters">
         <div className="task-filters__field">
           <label>Suche</label>
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Text, Ergebnis, Aufgabe, Datum…" />
@@ -465,6 +539,7 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
 
                         {sOpen ? (
                           <div style={{ marginTop: 10 }}>
+                            <div className="protocol-table-scroll">
                             <div className="protocol-grid-head">
                               <div>Verantwortlicher</div>
                               <div>Erläuterung</div>
@@ -502,17 +577,53 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
                                   </div>
                                   <div>
                                     <div className="protocol-taskchips">
-                                      {(r.taskIds || []).map((tid) => (
-                                        <div key={tid} className="protocol-taskchip">
-                                          <span title={tasksById.get(tid)?.title || tid}>{tasksById.get(tid)?.title || tid}</span>
-                                          <button type="button" className="secondary" onClick={() => jumpToTask(tid)}>
-                                            Öffnen
-                                          </button>
-                                          <button type="button" className="secondary" onClick={() => patchRow(r.id, { taskIds: (r.taskIds || []).filter((x) => x !== tid) })}>
-                                            Entfernen
-                                          </button>
-                                        </div>
-                                      ))}
+                                      {(r.taskIds || []).map((tid) => {
+                                        const full = localTasks.find((t) => t.id === tid);
+                                        const titleFallback = tasksById.get(tid)?.title || tid;
+                                        if (!full) {
+                                          return (
+                                            <div key={tid} className="kanban-card protocol-kanban-preview">
+                                              <div className="kanban-card__title">{titleFallback}</div>
+                                              <div className="kanban-card__meta">Karte wird geladen…</div>
+                                              <div className="row">
+                                                <button type="button" className="secondary" onClick={() => openProtocolTask(tid)}>
+                                                  Karte öffnen
+                                                </button>
+                                                <button
+                                                  type="button"
+                                                  className="secondary"
+                                                  onClick={() => patchRow(r.id, { taskIds: (r.taskIds || []).filter((x) => x !== tid) })}
+                                                >
+                                                  Entfernen
+                                                </button>
+                                              </div>
+                                            </div>
+                                          );
+                                        }
+                                        return (
+                                          <div key={tid} className="kanban-card protocol-kanban-preview">
+                                            <div className="kanban-card__title" title={taskPath(full, localTasks)}>
+                                              {taskPath(full, localTasks)}
+                                            </div>
+                                            <div className="kanban-card__meta">
+                                              Priorität: {full.priority}
+                                              {full.dueDate ? ` · Frist: ${full.dueDate}` : ""}
+                                            </div>
+                                            <div className="row">
+                                              <button type="button" className="secondary" onClick={() => openProtocolTask(tid)}>
+                                                Karte öffnen
+                                              </button>
+                                              <button
+                                                type="button"
+                                                className="secondary"
+                                                onClick={() => patchRow(r.id, { taskIds: (r.taskIds || []).filter((x) => x !== tid) })}
+                                              >
+                                                Entfernen
+                                              </button>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
                                     </div>
                                     <button
                                       type="button"
@@ -542,6 +653,7 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
                                 </div>
                               );
                             })}
+                            </div>
                           </div>
                         ) : null}
                       </div>
@@ -627,6 +739,18 @@ export default function ProjectProtocols({ projectId, projectMembers }: Props) {
             </button>
           </div>
         </div>
+      ) : null}
+
+      {modalTask ? (
+        <TaskDetailModal
+          key={modalTask.id}
+          projectId={projectId}
+          task={modalTask}
+          activeTasks={localTasks.filter((t) => !t.archived)}
+          protocolLinksByTaskId={localProtocolLinks}
+          onClose={closeProtocolTaskModal}
+          onPatched={refreshTasksAndLinks}
+        />
       ) : null}
     </div>
   );

@@ -74,7 +74,12 @@ export default function ProjectWorkspace({
           initialProtocolLinksByTaskId={initialProtocolLinksByTaskId}
         />
       ) : mode === "protocols" ? (
-        <ProjectProtocols projectId={projectId} projectMembers={projectMembers} />
+        <ProjectProtocols
+          projectId={projectId}
+          projectMembers={projectMembers}
+          initialTasks={initialTasks}
+          initialProtocolLinksByTaskId={initialProtocolLinksByTaskId}
+        />
       ) : mode === "gantt" ? (
         <ProjectGantt
           projectId={projectId}
